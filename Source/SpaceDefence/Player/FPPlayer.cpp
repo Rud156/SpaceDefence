@@ -32,9 +32,10 @@ AFPPlayer::AFPPlayer()
 
 void AFPPlayer::BeginPlay()
 {
-	SetPlayerMovementState(PlayerMovementState::Walk);
-	SetDelayedMovementState(PlayerMovementState::None);
-	ResetMovementVariables();
+	_slideTimer = 0;
+
+	PushPlayerMovementState(EPlayerMovementState::Walk);
+	ApplyChangesToCharacter();
 
 	OnPlayerLanded.AddDynamic(this, &AFPPlayer::PlayerLanded);
 	Super::BeginPlay();
@@ -44,6 +45,7 @@ void AFPPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	UpdateGroundStatus();
+	UpdateCharacterSliding(DeltaTime);
 }
 
 void AFPPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -54,6 +56,8 @@ void AFPPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Pressed, this, &AFPPlayer::CharacterJump);
 	PlayerInputComponent->BindAction("Run", EInputEvent::IE_Pressed, this, &AFPPlayer::RunPressed);
 	PlayerInputComponent->BindAction("Run", EInputEvent::IE_Released, this, &AFPPlayer::RunReleased);
+	PlayerInputComponent->BindAction("Crouch", EInputEvent::IE_Pressed, this, &AFPPlayer::CrouchPressed);
+	PlayerInputComponent->BindAction("Crouch", EInputEvent::IE_Released, this, &AFPPlayer::CrouchReleased);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AFPPlayer::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AFPPlayer::MoveRight);
@@ -61,14 +65,35 @@ void AFPPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAxis("LookUp", this, &AFPPlayer::LookUp);
 }
 
+void AFPPlayer::UpdateCharacterSliding(float deltaTime)
+{
+	if (_slideTimer > 0)
+	{
+		_slideTimer -= deltaTime;
+		if (_slideTimer <= 0)
+		{
+			RemovePlayerMovementState(EPlayerMovementState::Slide);
+			ApplyChangesToCharacter();
+		}
+		else
+		{
+			AddMovementInput(GetActorForwardVector(), 1);
+		}
+	}
+}
+
 void AFPPlayer::MoveForward(float value)
 {
-	AddMovementInput(GetActorForwardVector(), value);
+	if (_movementStack.Last() == EPlayerMovementState::Walk || _movementStack.Last() == EPlayerMovementState::Run ||
+		_movementStack.Last() == EPlayerMovementState::Crouch)
+	{
+		AddMovementInput(GetActorForwardVector(), value);
+	}
 }
 
 void AFPPlayer::MoveRight(float value)
 {
-	if (_playerMovementState != PlayerMovementState::Walk && _playerMovementState != PlayerMovementState::Crouch)
+	if (_movementStack.Last() != EPlayerMovementState::Walk && _movementStack.Last() != EPlayerMovementState::Crouch)
 	{
 		return;
 	}
@@ -93,57 +118,56 @@ void AFPPlayer::CharacterJump()
 {
 	Jump();
 
-	if (_playerMovementState == PlayerMovementState::Run)
+	if (_movementStack.Last() == EPlayerMovementState::Run || _movementStack.Last() == EPlayerMovementState::Slide)
 	{
-		SetPlayerMovementState(PlayerMovementState::RunJump);
+		RemovePlayerMovementState(EPlayerMovementState::Slide);
+		PushPlayerMovementState(EPlayerMovementState::RunJump);
 	}
 	else
 	{
-		SetPlayerMovementState(PlayerMovementState::Jump);
+		PushPlayerMovementState(EPlayerMovementState::Jump);
 	}
 }
 
 void AFPPlayer::RunPressed()
 {
-	if (!_isOnGround)
-	{
-		SetDelayedMovementState(PlayerMovementState::Run);
-	}
-	else
-	{
-		SetPlayerMovementState(PlayerMovementState::Run);
-	}
-
-	ResetMovementVariables();
+	PushPlayerMovementState(EPlayerMovementState::Run);
+	ApplyChangesToCharacter();
 }
 
 void AFPPlayer::RunReleased()
 {
-	if (!_isOnGround && _delayedMovementState == PlayerMovementState::Run)
-	{
-		SetDelayedMovementState(PlayerMovementState::None);
-	}
-	else if (_isOnGround)
-	{
-		SetPlayerMovementState(PlayerMovementState::Walk);
-	}
-
-	ResetMovementVariables();
+	RemovePlayerMovementState(EPlayerMovementState::Run);
+	ApplyChangesToCharacter();
 }
 
-void AFPPlayer::SetPlayerMovementState(PlayerMovementState movementState)
+void AFPPlayer::CrouchPressed()
 {
-	if (_playerMovementState == movementState)
+	if (HasPlayerState(EPlayerMovementState::Run) || HasPlayerState(EPlayerMovementState::Jump))
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Movement: Previous State And Last State Is Same");
+		PushPlayerMovementState(EPlayerMovementState::Slide);
+		_slideTimer = SlideDuration;
+	}
+	else
+	{
+		PushPlayerMovementState(EPlayerMovementState::Crouch);
 	}
 
-	_playerMovementState = movementState;
+	ApplyChangesToCharacter();
 }
 
-void AFPPlayer::SetDelayedMovementState(PlayerMovementState delayedState)
+void AFPPlayer::CrouchReleased()
 {
-	_delayedMovementState = delayedState;
+	RemovePlayerMovementState(EPlayerMovementState::Crouch);
+	ApplyChangesToCharacter();
+}
+
+void AFPPlayer::PlayerLanded()
+{
+	RemovePlayerMovementState(EPlayerMovementState::Jump);
+	RemovePlayerMovementState(EPlayerMovementState::RunJump);
+
+	ApplyChangesToCharacter();
 }
 
 void AFPPlayer::UpdateGroundStatus()
@@ -160,39 +184,69 @@ void AFPPlayer::UpdateGroundStatus()
 	_isOnGround = hit;
 }
 
-void AFPPlayer::PlayerLanded()
+void AFPPlayer::PushPlayerMovementState(EPlayerMovementState movementState)
 {
-	if (_delayedMovementState != PlayerMovementState::None)
+	if (_movementStack.Num() > 0 && _movementStack.Last() == movementState)
 	{
-		SetPlayerMovementState(_delayedMovementState);
-		SetDelayedMovementState(PlayerMovementState::None);
+		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Movement: Previous State And Last State Is Same");
 	}
 
-	ResetMovementVariables();
+	MovementStatePushed(movementState);
+	_movementStack.Push(movementState);
 }
 
-void AFPPlayer::ResetMovementVariables()
+void AFPPlayer::RemovePlayerMovementState(EPlayerMovementState movementState)
 {
-	switch (_playerMovementState)
+	for (int i = _movementStack.Num() - 1; i >= 0; i--)
 	{
-	case PlayerMovementState::None:
+		if (_movementStack[i] == movementState)
+		{
+			_movementStack.RemoveAt(i);
+		}
+	}
+}
+
+bool AFPPlayer::HasPlayerState(EPlayerMovementState movementState)
+{
+	for (int i = 0; i < _movementStack.Num(); i++)
+	{
+		if (_movementStack[i] == movementState)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+
+void AFPPlayer::ApplyChangesToCharacter()
+{
+	switch (_movementStack.Last())
+	{
+	case EPlayerMovementState::None:
 		break;
 
-	case PlayerMovementState::Walk:
+	case EPlayerMovementState::Walk:
 		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 		break;
 
-	case PlayerMovementState::Run:
+	case EPlayerMovementState::Run:
 		GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
 		break;
 
-	case PlayerMovementState::Jump:
+	case EPlayerMovementState::Jump:
 		break;
 
-	case PlayerMovementState::RunJump:
+	case EPlayerMovementState::RunJump:
 		break;
 
-	case PlayerMovementState::Crouch:
+	case EPlayerMovementState::Crouch:
+		GetCharacterMovement()->MaxWalkSpeed = CrouchSpeed;
+		break;
+
+	case EPlayerMovementState::Slide:
+		GetCharacterMovement()->MaxWalkSpeed = SlideSpeed;
 		break;
 
 	default:

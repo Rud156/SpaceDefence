@@ -6,12 +6,13 @@
 #include "Enums.generated.h"
 
 UENUM(BlueprintType)
-enum class PlayerMovementState: uint8
+enum class EPlayerMovementState: uint8
 {
 	None,
 	Walk,
 	Run,
 	Jump,
 	RunJump,
-	Crouch
+	Crouch,
+	Slide
 };

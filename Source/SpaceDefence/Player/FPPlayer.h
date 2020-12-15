@@ -16,7 +16,7 @@ class SPACEDEFENCE_API AFPPlayer : public ACharacter
 {
 	GENERATED_BODY()
 
-	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
+		UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
 		class USkeletalMeshComponent* FpMesh;
 
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
@@ -28,16 +28,19 @@ class SPACEDEFENCE_API AFPPlayer : public ACharacter
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly)
 		class	USpringArmComponent* CameraBoom;
 
-	PlayerMovementState _playerMovementState;
-	PlayerMovementState _delayedMovementState;
-	void SetPlayerMovementState(PlayerMovementState movementState);
-	void SetDelayedMovementState(PlayerMovementState delayedState);
-	void ResetMovementVariables();
+	TArray<EPlayerMovementState> _movementStack;
+	float _slideTimer;
+	void PushPlayerMovementState(EPlayerMovementState movementState);
+	void RemovePlayerMovementState(EPlayerMovementState movementState);
+	bool HasPlayerState(EPlayerMovementState movementState);
+	void ApplyChangesToCharacter();
 
 	bool _isOnGround;
 	void UpdateGroundStatus();
 	UFUNCTION()
 		void PlayerLanded();
+
+	void UpdateCharacterSliding(float deltaTime);
 
 	void MoveForward(float value);
 	void MoveRight(float value);
@@ -46,6 +49,8 @@ class SPACEDEFENCE_API AFPPlayer : public ACharacter
 	void CharacterJump();
 	void RunPressed();
 	void RunReleased();
+	void CrouchPressed();
+	void CrouchReleased();
 
 protected:
 	virtual void BeginPlay() override;
@@ -58,6 +63,15 @@ public:
 
 	UPROPERTY(Category = "Player|Movement", EditAnywhere)
 		float RunSpeed;
+
+	UPROPERTY(Category = "Player|Movement", EditAnywhere)
+		float CrouchSpeed;
+
+	UPROPERTY(Category = "Player|Movement", EditAnywhere)
+		float SlideSpeed;
+
+	UPROPERTY(Category = "Player|Movement", EditAnywhere)
+		float SlideDuration;
 
 	UPROPERTY(Category = "Player|Movement", EditAnywhere)
 		float TurnSpeed;
@@ -78,6 +92,9 @@ public:
 		FPlayerLanded OnPlayerLanded;
 
 #pragma endregion
+
+	UFUNCTION(Category = "Debug", BlueprintImplementableEvent)
+		void MovementStatePushed(EPlayerMovementState playerMovementState);
 
 	AFPPlayer();
 	virtual void Tick(float DeltaTime) override;
