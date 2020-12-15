@@ -26,6 +26,9 @@ public:
 	//Game play Variables.
 	UPROPERTY(EditAnywhere,Category="Spawn Settings",BlueprintReadWrite)
 	TArray<TSubclassOf<ATD_PlaceablesActors>> ListOfPlaceables;
+
+	UPROPERTY(EditAnywhere, Category = "Spawn Settings", BlueprintReadWrite)
+		TMap<TSubclassOf<ATD_PlaceablesActors>,UStaticMesh* > TestListOfPlaceables;
 	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 		ATD_PlaceablesActors* Ghost=nullptr;
