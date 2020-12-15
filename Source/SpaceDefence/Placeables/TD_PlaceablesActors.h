@@ -24,6 +24,10 @@ public:
 	//Game play variables.
 	bool bCanPlace = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Place Able Settings")
+		USceneComponent* RootMeshComponent = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Place Able Settings")
+		UStaticMeshComponent* Model = nullptr;
 
 
 	//Game play functions

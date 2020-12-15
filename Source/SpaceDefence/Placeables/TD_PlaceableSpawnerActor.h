@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "TD_PlaceablesActors.h"
 #include "GameFramework/Actor.h"
+#include "SpaceDefence/Utils/Structs.h"
+
 #include "TD_PlaceableSpawnerActor.generated.h"
 
 UCLASS()
@@ -24,11 +26,36 @@ protected:
 public:	
 
 	//Game play Variables.
-	UPROPERTY(EditAnywhere,Category="Spawn Settings",BlueprintReadWrite)
-	TArray<TSubclassOf<ATD_PlaceablesActors>> ListOfPlaceables;
+
+	UPROPERTY(EditAnywhere, Category = "Spawn Settings", BlueprintReadWrite)
+		TArray<FPlaceAbleData> PlaceAbleData;
+
+	UPROPERTY(EditAnywhere, Category = "Spawn Settings", BlueprintReadWrite)
+		UMaterial* GreenColor;
+
+	UPROPERTY(EditAnywhere, Category = "Spawn Settings", BlueprintReadWrite)
+		UMaterial* RedColor;
 	
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-		ATD_PlaceablesActors* Ghost=nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		ATD_PlaceablesActors* ActorRef=nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		USceneComponent* RootMeshComponent = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		UStaticMeshComponent* Ghost = nullptr;
+
+
+	//bool
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool bIsColliding = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		bool bIsOnGround = false;
+
+
+	//float 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		float MinGroundCheckDistance = 0.001;
 	
 	
 
@@ -37,6 +64,23 @@ public:
 		void SpawnPlaceAbleGhost(FVector Location, int PlaceAbleID);
 
 	UFUNCTION(BlueprintCallable)
-		UStaticMesh* GetStaticMesh(int PlaceAbleID);
+		void SpawnActorFromGhost( int PlaceAbleID);
 
+	UFUNCTION(BlueprintCallable)
+		void RemoveGhost();
+	
+	UFUNCTION(BlueprintCallable)
+		void SetGhostPosition(FVector Location);
+
+	UFUNCTION(BlueprintCallable)
+		void ChangeColor();
+
+	UFUNCTION(BlueprintCallable)
+		UStaticMesh* GetStaticMeshFromList(int PlaceAbleID);
+
+	UFUNCTION(BlueprintCallable)
+		bool CanPlace();
+	
+	UFUNCTION(BlueprintCallable)
+		bool CheckIsOnGround();
 };
