@@ -8,6 +8,10 @@ ATD_PlaceablesActors::ATD_PlaceablesActors()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	RootMeshComponent  = CreateDefaultSubobject<USceneComponent>("Root");
+	SetRootComponent(RootMeshComponent);
+	Model = CreateDefaultSubobject<UStaticMeshComponent>("Model");
+	Model->SetupAttachment(GetRootComponent());
 
 }
 
