@@ -10,6 +10,8 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
+#include "Kismet/GameplayStatics.h"
+
 AFPPlayer::AFPPlayer()
 {
 	FpMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mesh"));
@@ -72,12 +74,22 @@ void AFPPlayer::UpdateCharacterSliding(float deltaTime)
 		_slideTimer -= deltaTime;
 		if (_slideTimer <= 0)
 		{
+			CameraBoom->bUsePawnControlRotation = true;
 			RemovePlayerMovementState(EPlayerMovementState::Slide);
+			PushPlayerMovementState(EPlayerMovementState::Crouch);
 			ApplyChangesToCharacter();
 		}
 		else
 		{
 			AddMovementInput(GetActorForwardVector(), 1);
+		}
+
+		auto velocity = GetVelocity().Size();
+		if (velocity < MinSlideSpeed)
+		{
+			StopCharacterSliding();
+			PushPlayerMovementState(EPlayerMovementState::Crouch);
+			ApplyChangesToCharacter();
 		}
 	}
 }
@@ -106,32 +118,83 @@ void AFPPlayer::MoveRight(float value)
 
 void AFPPlayer::Turn(float value)
 {
-	AddControllerYawInput(value * TurnSpeed * HSensitivityMultiplier * GetWorld()->GetDeltaSeconds());
+	float turnAmount = value * TurnSpeed * HSensitivityMultiplier * GetWorld()->GetDeltaSeconds();
+
+	if (HasPlayerState(EPlayerMovementState::Slide))
+	{
+		CameraBoom->AddRelativeRotation(FRotator(0, turnAmount, 0));
+	}
+	else
+	{
+		AddControllerYawInput(turnAmount);
+	}
 }
 
 void AFPPlayer::LookUp(float value)
 {
-	AddControllerPitchInput(value * LookUpRate * VSensitivityMultiplier * GetWorld()->GetDeltaSeconds());
+	float turnAmount = value * LookUpRate * VSensitivityMultiplier * GetWorld()->GetDeltaSeconds();
+
+	if (HasPlayerState(EPlayerMovementState::Slide))
+	{
+		CameraBoom->AddRelativeRotation(FRotator(-turnAmount, 0, 0));
+	}
+	else
+	{
+		AddControllerPitchInput(turnAmount);
+	}
 }
 
 void AFPPlayer::CharacterJump()
 {
-	Jump();
+	RemovePlayerMovementState(EPlayerMovementState::Crouch);
 
-	if (_movementStack.Last() == EPlayerMovementState::Run || _movementStack.Last() == EPlayerMovementState::Slide)
+	if (_movementStack.Last() == EPlayerMovementState::Slide)
 	{
+		StopCharacterSliding();
+
+		FRotator cameraRotation = CameraBoom->GetRelativeRotation();
+		auto playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+
+		AddControllerPitchInput(cameraRotation.Pitch / playerController->InputPitchScale);
+		AddControllerYawInput(cameraRotation.Yaw / playerController->InputYawScale);
+		CameraBoom->SetRelativeRotation(FRotator::ZeroRotator);
+
 		RemovePlayerMovementState(EPlayerMovementState::Slide);
+		PushPlayerMovementState(EPlayerMovementState::RunJump);
+	}
+	else if (_movementStack.Last() == EPlayerMovementState::Run)
+	{
 		PushPlayerMovementState(EPlayerMovementState::RunJump);
 	}
 	else
 	{
 		PushPlayerMovementState(EPlayerMovementState::Jump);
 	}
+
+	FTimerHandle unusedHandle;
+	GetWorldTimerManager().SetTimer(unusedHandle, this, &AFPPlayer::FrameDelayedJump, GetWorld()->GetDeltaSeconds(), false);
+	ApplyChangesToCharacter();
+}
+
+void AFPPlayer::FrameDelayedJump()
+{
+	FVector directionVector = GetActorForwardVector();
+	float velocity = GetVelocity().Size();
+
+	directionVector.X *= JumpVelocity.X * velocity;
+	directionVector.Y *= JumpVelocity.Y * velocity;
+	directionVector.Z = JumpVelocity.Z;
+
+	LaunchCharacter(directionVector, false, false);
 }
 
 void AFPPlayer::RunPressed()
 {
+	StopCharacterSliding();
+
+	RemovePlayerMovementState(EPlayerMovementState::Crouch);
 	PushPlayerMovementState(EPlayerMovementState::Run);
+
 	ApplyChangesToCharacter();
 }
 
@@ -143,10 +206,13 @@ void AFPPlayer::RunReleased()
 
 void AFPPlayer::CrouchPressed()
 {
+	StopCharacterSliding();
+
 	if (HasPlayerState(EPlayerMovementState::Run) || HasPlayerState(EPlayerMovementState::Jump))
 	{
 		PushPlayerMovementState(EPlayerMovementState::Slide);
 		_slideTimer = SlideDuration;
+		CameraBoom->bUsePawnControlRotation = false;
 	}
 	else
 	{
@@ -191,7 +257,6 @@ void AFPPlayer::PushPlayerMovementState(EPlayerMovementState movementState)
 		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Movement: Previous State And Last State Is Same");
 	}
 
-	MovementStatePushed(movementState);
 	_movementStack.Push(movementState);
 }
 
@@ -222,6 +287,8 @@ bool AFPPlayer::HasPlayerState(EPlayerMovementState movementState)
 
 void AFPPlayer::ApplyChangesToCharacter()
 {
+	MovementStatePushed(_movementStack.Last());
+
 	switch (_movementStack.Last())
 	{
 	case EPlayerMovementState::None:
@@ -252,4 +319,13 @@ void AFPPlayer::ApplyChangesToCharacter()
 	default:
 		break;
 	}
+}
+
+void AFPPlayer::StopCharacterSliding()
+{
+	CameraBoom->bUsePawnControlRotation = true;
+	_slideTimer = 0;
+
+	RemovePlayerMovementState(EPlayerMovementState::Slide);
+	ApplyChangesToCharacter();
 }

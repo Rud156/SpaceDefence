@@ -16,7 +16,7 @@ class SPACEDEFENCE_API AFPPlayer : public ACharacter
 {
 	GENERATED_BODY()
 
-		UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
+	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
 		class USkeletalMeshComponent* FpMesh;
 
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
@@ -35,12 +35,16 @@ class SPACEDEFENCE_API AFPPlayer : public ACharacter
 	bool HasPlayerState(EPlayerMovementState movementState);
 	void ApplyChangesToCharacter();
 
+	UFUNCTION()
+		void FrameDelayedJump();
+
 	bool _isOnGround;
 	void UpdateGroundStatus();
 	UFUNCTION()
 		void PlayerLanded();
 
 	void UpdateCharacterSliding(float deltaTime);
+	void StopCharacterSliding();
 
 	void MoveForward(float value);
 	void MoveRight(float value);
@@ -74,10 +78,16 @@ public:
 		float SlideDuration;
 
 	UPROPERTY(Category = "Player|Movement", EditAnywhere)
+		float MinSlideSpeed;
+
+	UPROPERTY(Category = "Player|Movement", EditAnywhere)
 		float TurnSpeed;
 
 	UPROPERTY(Category = "Player|Movement", EditAnywhere)
 		float LookUpRate;
+
+	UPROPERTY(Category = "Player|Movement", EditAnywhere)
+		FVector JumpVelocity;
 
 	UPROPERTY(Category = "Player|Movement", EditAnywhere)
 		float HSensitivityMultiplier;
