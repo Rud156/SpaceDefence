@@ -360,14 +360,14 @@ void AFPPlayer::ApplyChangesToCharacter()
 
 	case EPlayerMovementState::Crouch:
 		GetCharacterMovement()->MaxWalkSpeed = CrouchSpeed;
-		/*GetCapsuleComponent()->SetCapsuleHalfHeight(CrouchHalfHeight);
-		GetCapsuleComponent()->SetCapsuleRadius(CrouchRadius);*/
+		GetCapsuleComponent()->SetCapsuleHalfHeight(CrouchHalfHeight);
+		GetCapsuleComponent()->SetCapsuleRadius(CrouchRadius);
 		break;
 
 	case EPlayerMovementState::Slide:
 		GetCharacterMovement()->MaxWalkSpeed = SlideSpeed;
-		/*GetCapsuleComponent()->SetCapsuleHalfHeight(CrouchHalfHeight);
-		GetCapsuleComponent()->SetCapsuleRadius(CrouchRadius);*/
+		GetCapsuleComponent()->SetCapsuleHalfHeight(CrouchHalfHeight);
+		GetCapsuleComponent()->SetCapsuleRadius(CrouchRadius);
 		break;
 
 	default:
