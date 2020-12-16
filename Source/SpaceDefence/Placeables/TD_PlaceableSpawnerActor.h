@@ -51,11 +51,15 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		bool bIsOnGround = false;
+	
+
 
 
 	//float 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float MinGroundCheckDistance = 0.001;
+
+
 	
 	
 
@@ -70,7 +74,7 @@ public:
 		void RemoveGhost();
 	
 	UFUNCTION(BlueprintCallable)
-		void SetGhostPosition(FVector Location);
+		void SetGhostPosition(FVector Location, FRotator Rot);
 
 	UFUNCTION(BlueprintCallable)
 		void ChangeColor();

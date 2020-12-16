@@ -18,7 +18,7 @@ ATD_PlaceableSpawnerActor::ATD_PlaceableSpawnerActor()
 void ATD_PlaceableSpawnerActor::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 }
 
 void ATD_PlaceableSpawnerActor::SpawnPlaceAbleGhost(FVector Location, int PlaceAbleID)
@@ -44,7 +44,7 @@ void ATD_PlaceableSpawnerActor::SpawnActorFromGhost( int PlaceAbleID)
 		if(CanPlace())
 		{
 			
-		FRotator Rot;
+			FRotator Rot = Ghost->GetComponentRotation();
 		auto Location = Ghost->GetComponentLocation();
 		ActorRef = Cast<ATD_PlaceablesActors>(GetWorld()->SpawnActor(PlaceAbleData[PlaceAbleID].ActorRef,&Location, &Rot));
 		}
@@ -62,12 +62,15 @@ void ATD_PlaceableSpawnerActor::RemoveGhost()
 	Ghost->SetStaticMesh(nullptr);
 }
 
-void ATD_PlaceableSpawnerActor::SetGhostPosition(FVector Location)
+void ATD_PlaceableSpawnerActor::SetGhostPosition(FVector Location, FRotator Rot= FRotator(0,0,0))
 {
 	FTransform Temp;
 	Temp.SetLocation(Location);
+	//FQuat TempRot = FQuat(Rot.Quaternion().X,0, Rot.Quaternion().Z,Rot.Quaternion().W);
+	//Temp.SetRotation(Rot.Quaternion());
 	Temp.SetScale3D(FVector(1, 1, 1));
 	Ghost->SetWorldTransform(Temp);
+	Ghost->SetWorldRotation(Rot);
 	ChangeColor();
 }
 

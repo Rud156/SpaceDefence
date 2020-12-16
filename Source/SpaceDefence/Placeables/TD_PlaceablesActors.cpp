@@ -19,7 +19,12 @@ ATD_PlaceablesActors::ATD_PlaceablesActors()
 void ATD_PlaceablesActors::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	if(Model->GetStaticMesh())
+	{
+		
+		RightSnapPoint = Model->GetStaticMesh()->GetBounds().BoxExtent.Y;
+		LeftSnapPoint = RightSnapPoint * -1;
+	}
 }
 
 void ATD_PlaceablesActors::Place()

@@ -30,10 +30,14 @@ public:
 		UStaticMeshComponent* Model = nullptr;
 
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		float LeftSnapPoint;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		float RightSnapPoint;
+	
 	//Game play functions
 
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
-		UStaticMesh* Hi();
 	
 	UFUNCTION(BlueprintCallable)
 		void Place();
