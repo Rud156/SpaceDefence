@@ -113,6 +113,18 @@ public:
 	UPROPERTY(Category = "Player|Movement", EditAnywhere)
 		float GroundCheckDistance;
 
+	UPROPERTY(Category = "Player|Size", EditAnywhere)
+		float CrouchHalfHeight;
+
+	UPROPERTY(Category = "Player|Size", EditAnywhere)
+		float CrouchRadius;
+
+	UPROPERTY(Category = "Player|Size", EditAnywhere)
+		float DefaultHalfSize;
+
+	UPROPERTY(Category = "Player|Size", EditAnywhere)
+		float DefaultRadius;
+
 	UPROPERTY(Category = "Player|Delegates", BlueprintAssignable)
 		FPlayerLanded OnPlayerLanded;
 

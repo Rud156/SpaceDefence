@@ -78,7 +78,7 @@ void AFPPlayer::UpdateCharacterSliding(float deltaTime)
 		_slideTimer -= deltaTime;
 		if (_slideTimer <= 0)
 		{
-			CameraBoom->bUsePawnControlRotation = true;
+			StopCharacterSliding();
 			RemovePlayerMovementState(EPlayerMovementState::Slide);
 			PushPlayerMovementState(EPlayerMovementState::Crouch);
 			ApplyChangesToCharacter();
@@ -206,13 +206,6 @@ void AFPPlayer::CharacterJump()
 	{
 		StopCharacterSliding();
 
-		FRotator cameraRotation = CameraBoom->GetRelativeRotation();
-		auto playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-
-		AddControllerPitchInput(cameraRotation.Pitch / playerController->InputPitchScale);
-		AddControllerYawInput(cameraRotation.Yaw / playerController->InputYawScale);
-		CameraBoom->SetRelativeRotation(FRotator::ZeroRotator);
-
 		RemovePlayerMovementState(EPlayerMovementState::Slide);
 		PushPlayerMovementState(EPlayerMovementState::RunJump);
 	}
@@ -226,8 +219,8 @@ void AFPPlayer::CharacterJump()
 	}
 
 	FTimerHandle unusedHandle;
-	GetWorldTimerManager().SetTimer(unusedHandle, this, &AFPPlayer::FrameDelayedJump, GetWorld()->GetDeltaSeconds(), false);
 	ApplyChangesToCharacter();
+	GetWorldTimerManager().SetTimer(unusedHandle, this, &AFPPlayer::FrameDelayedJump, GetWorld()->GetDeltaSeconds(), false);
 }
 
 void AFPPlayer::FrameDelayedJump()
@@ -341,7 +334,10 @@ bool AFPPlayer::HasPlayerState(EPlayerMovementState movementState)
 
 void AFPPlayer::ApplyChangesToCharacter()
 {
-	MovementStatePushed(_movementStack.Last());
+	MovementStatePushed(_movementStack.Last()); // This is just an event used to display the state being applied
+
+	GetCapsuleComponent()->SetCapsuleHalfHeight(DefaultHalfSize);
+	GetCapsuleComponent()->SetCapsuleRadius(DefaultRadius);
 
 	switch (_movementStack.Last())
 	{
@@ -364,10 +360,14 @@ void AFPPlayer::ApplyChangesToCharacter()
 
 	case EPlayerMovementState::Crouch:
 		GetCharacterMovement()->MaxWalkSpeed = CrouchSpeed;
+		/*GetCapsuleComponent()->SetCapsuleHalfHeight(CrouchHalfHeight);
+		GetCapsuleComponent()->SetCapsuleRadius(CrouchRadius);*/
 		break;
 
 	case EPlayerMovementState::Slide:
 		GetCharacterMovement()->MaxWalkSpeed = SlideSpeed;
+		/*GetCapsuleComponent()->SetCapsuleHalfHeight(CrouchHalfHeight);
+		GetCapsuleComponent()->SetCapsuleRadius(CrouchRadius);*/
 		break;
 
 	default:
@@ -377,6 +377,13 @@ void AFPPlayer::ApplyChangesToCharacter()
 
 void AFPPlayer::StopCharacterSliding()
 {
+	FRotator cameraRotation = CameraBoom->GetRelativeRotation();
+	auto playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+
+	AddControllerPitchInput(cameraRotation.Pitch / playerController->InputPitchScale);
+	AddControllerYawInput(cameraRotation.Yaw / playerController->InputYawScale);
+
+	CameraBoom->SetRelativeRotation(FRotator::ZeroRotator);
 	CameraBoom->bUsePawnControlRotation = true;
 	_slideTimer = 0;
 
