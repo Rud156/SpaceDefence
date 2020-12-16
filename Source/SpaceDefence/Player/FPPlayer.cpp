@@ -18,6 +18,7 @@ AFPPlayer::AFPPlayer()
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBooom"));
 	CharacterCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("CharacterCamera"));
 	GroundCheckPoint = CreateDefaultSubobject<USceneComponent>(TEXT("GroundCheckPoint"));
+	WallCheckPoint = CreateDefaultSubobject<USceneComponent>(TEXT("WallCheckPoint"));
 
 	CameraBoom->SetupAttachment(GetCapsuleComponent());
 	CameraBoom->bUsePawnControlRotation = true;
@@ -25,6 +26,7 @@ AFPPlayer::AFPPlayer()
 	CharacterCamera->SetupAttachment(CameraBoom);
 	FpMesh->SetupAttachment(CharacterCamera);
 	GroundCheckPoint->SetupAttachment(GetCapsuleComponent());
+	WallCheckPoint->SetupAttachment(GetCapsuleComponent());
 
 	HSensitivityMultiplier = 1;
 	VSensitivityMultiplier = 1;
@@ -48,6 +50,8 @@ void AFPPlayer::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	UpdateGroundStatus();
 	UpdateCharacterSliding(DeltaTime);
+
+	WallClimbCheck();
 }
 
 void AFPPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -94,10 +98,47 @@ void AFPPlayer::UpdateCharacterSliding(float deltaTime)
 	}
 }
 
+void AFPPlayer::WallClimbCheck()
+{
+	FHitResult hitResult;
+	FCollisionQueryParams collisionParams;
+	collisionParams.AddIgnoredActor(this);
+
+	FVector startPosition = GetActorLocation();
+	FVector endPosition = WallCheckPoint->GetComponentLocation();
+
+	bool hit = GetWorld()->LineTraceSingleByChannel(hitResult, startPosition, endPosition, ECollisionChannel::ECC_Visibility, collisionParams);
+	if (hit && hitResult.GetActor() != nullptr && !hitResult.GetActor()->ActorHasTag(NotClimbableTag))
+	{
+		auto playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+		FKey key = EKeys::SpaceBar;
+
+		float duration = playerController->GetInputKeyTimeDown(key);
+		_currentClimbTime = duration;
+
+		if (_currentClimbTime != 0)
+		{
+			if (_currentClimbTime <= ClimbDuration)
+			{
+				LaunchCharacter(FVector(0, 0, ClimbVelocity), true, true);
+			}
+		}
+	}
+	else
+	{
+		_currentClimbTime = 0;
+	}
+}
+
 void AFPPlayer::MoveForward(float value)
 {
-	if (_movementStack.Last() == EPlayerMovementState::Walk || _movementStack.Last() == EPlayerMovementState::Run ||
-		_movementStack.Last() == EPlayerMovementState::Crouch)
+	if (_currentClimbTime != 0)
+	{
+		return;
+	}
+
+	auto lastState = _movementStack.Last();
+	if (lastState != EPlayerMovementState::Slide)
 	{
 		AddMovementInput(GetActorForwardVector(), value);
 	}
@@ -105,6 +146,11 @@ void AFPPlayer::MoveForward(float value)
 
 void AFPPlayer::MoveRight(float value)
 {
+	if (_currentClimbTime != 0)
+	{
+		return;
+	}
+
 	if (_movementStack.Last() != EPlayerMovementState::Walk && _movementStack.Last() != EPlayerMovementState::Crouch)
 	{
 		return;
@@ -118,8 +164,12 @@ void AFPPlayer::MoveRight(float value)
 
 void AFPPlayer::Turn(float value)
 {
-	float turnAmount = value * TurnSpeed * HSensitivityMultiplier * GetWorld()->GetDeltaSeconds();
+	if (_currentClimbTime != 0)
+	{
+		return;
+	}
 
+	float turnAmount = value * TurnSpeed * HSensitivityMultiplier * GetWorld()->GetDeltaSeconds();
 	if (HasPlayerState(EPlayerMovementState::Slide))
 	{
 		CameraBoom->AddRelativeRotation(FRotator(0, turnAmount, 0));
@@ -132,8 +182,12 @@ void AFPPlayer::Turn(float value)
 
 void AFPPlayer::LookUp(float value)
 {
-	float turnAmount = value * LookUpRate * VSensitivityMultiplier * GetWorld()->GetDeltaSeconds();
+	if (_currentClimbTime != 0)
+	{
+		return;
+	}
 
+	float turnAmount = value * LookUpRate * VSensitivityMultiplier * GetWorld()->GetDeltaSeconds();
 	if (HasPlayerState(EPlayerMovementState::Slide))
 	{
 		CameraBoom->AddRelativeRotation(FRotator(-turnAmount, 0, 0));

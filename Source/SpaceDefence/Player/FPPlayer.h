@@ -22,6 +22,9 @@ class SPACEDEFENCE_API AFPPlayer : public ACharacter
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
 		class USceneComponent* GroundCheckPoint;
 
+	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
+		class USceneComponent* WallCheckPoint;
+
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly)
 		class UCameraComponent* CharacterCamera;
 
@@ -34,6 +37,9 @@ class SPACEDEFENCE_API AFPPlayer : public ACharacter
 	void RemovePlayerMovementState(EPlayerMovementState movementState);
 	bool HasPlayerState(EPlayerMovementState movementState);
 	void ApplyChangesToCharacter();
+
+	float _currentClimbTime;
+	void WallClimbCheck();
 
 	UFUNCTION()
 		void FrameDelayedJump();
@@ -88,6 +94,15 @@ public:
 
 	UPROPERTY(Category = "Player|Movement", EditAnywhere)
 		FVector JumpVelocity;
+
+	UPROPERTY(Category = "Player|Movement", EditAnywhere)
+		float ClimbDuration;
+
+	UPROPERTY(Category = "Player|Movement", EditAnywhere)
+		float ClimbVelocity;
+
+	UPROPERTY(Category = "Player|Movement", EditAnywhere)
+		FName NotClimbableTag;
 
 	UPROPERTY(Category = "Player|Movement", EditAnywhere)
 		float HSensitivityMultiplier;
