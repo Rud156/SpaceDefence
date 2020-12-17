@@ -2,6 +2,7 @@
 
 
 #include "TD_PlaceableSpawnerActor.h"
+#include "DrawDebugHelpers.h"
 
 // Sets default values
 ATD_PlaceableSpawnerActor::ATD_PlaceableSpawnerActor()
@@ -60,17 +61,31 @@ void ATD_PlaceableSpawnerActor::RemoveGhost()
 {
 	Ghost->SetMaterial(0, nullptr);
 	Ghost->SetStaticMesh(nullptr);
+	bIsRotated = false;
 }
 
-void ATD_PlaceableSpawnerActor::SetGhostPosition(FVector Location, FRotator Rot= FRotator(0,0,0))
+void ATD_PlaceableSpawnerActor::SetGhostPosition(FVector Location, FRotator Rot= FRotator(0,0,0), FVector Offset= FVector(0,0,0))
 {
 	FTransform Temp;
 	Temp.SetLocation(Location);
 	//FQuat TempRot = FQuat(Rot.Quaternion().X,0, Rot.Quaternion().Z,Rot.Quaternion().W);
 	//Temp.SetRotation(Rot.Quaternion());
+	
 	Temp.SetScale3D(FVector(1, 1, 1));
+	Temp.SetRotation(Ghost->GetComponentRotation().Quaternion());
 	Ghost->SetWorldTransform(Temp);
-	Ghost->SetWorldRotation(Rot);
+	
+	if(bIsRotated)
+	{
+		Rot = Ghost->GetComponentRotation();
+		//Ghost->SetWorldRotation(Rot);
+		//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Printf(TEXT("here")));
+	}else
+	{
+		Ghost->SetWorldRotation(Rot);
+		
+	}
+	Ghost->AddLocalOffset(Offset);
 	ChangeColor();
 }
 
@@ -99,21 +114,43 @@ bool ATD_PlaceableSpawnerActor::CanPlace()
 	return (!bIsColliding && bIsOnGround);
 }
 
+void ATD_PlaceableSpawnerActor::RotateLeft(FRotator Rot)
+{
+	bIsRotated = true;
+	Ghost->AddWorldRotation(Rot);
+}
+
+void ATD_PlaceableSpawnerActor::RotateRight(FRotator Rot)
+{
+	bIsRotated = true;
+	
+	Ghost->AddWorldRotation(Rot);
+}
+
 bool ATD_PlaceableSpawnerActor::CheckIsOnGround()
 {
-	FCollisionQueryParams CollisionParams = FCollisionQueryParams(FName(TEXT("Line Trace")), true, this);
-	FHitResult Hit(ForceInit);
+	/*FCollisionQueryParams CollisionParams = FCollisionQueryParams(FName(TEXT("Line Trace")), true, this);
+	const FName TraceTag("MyTraceTag");
+	GetWorld()->DebugDrawTraceTag = TraceTag;
+	CollisionParams.TraceTag = TraceTag;
+	FHitResult Hit;
 	if(GetWorld() && Ghost->GetStaticMesh())
 	{
-		auto X= Ghost->GetStaticMesh()->GetBounds().BoxExtent.X/2;
+		FVector Min, Max;
+		Ghost->GetLocalBounds(Min, Max);
 
-		FVector Start= FVector(Ghost->GetComponentLocation().X-X, Ghost->GetComponentLocation().Y, Ghost->GetComponentLocation().Z);
+		FVector Start= FVector(Ghost->GetComponentLocation().X, Ghost->GetComponentLocation().Y, Ghost->GetComponentLocation().Z);
+		
 		FVector End = FVector(Start.X, Start.Y, Start.Z - MinGroundCheckDistance);
-	
+		
+		DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 1);
 		GetWorld()->LineTraceSingleByChannel(Hit,Start,End,ECollisionChannel::ECC_Visibility);
-
+		if(Hit.bBlockingHit)
+		{
+			GEngine->AddOnScreenDebugMessage(-1,1.0f,FColor::Red,FString::Printf(TEXT("Sir you are hitting ground %s"),*Hit.GetActor()->GetName()));
+		}
 		return Hit.bBlockingHit;
-	}
+	}*/
 	return false;
 }
 
@@ -122,9 +159,8 @@ bool ATD_PlaceableSpawnerActor::CheckIsOnGround()
 void ATD_PlaceableSpawnerActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if(Ghost!=nullptr)
-	{
-		bIsOnGround = CheckIsOnGround();
-	}
+
+	
+	
 }
 

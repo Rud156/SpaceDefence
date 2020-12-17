@@ -49,15 +49,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		bool bIsColliding = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		bool bIsOnGround = false;
 	
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool bIsRotated = false;
 
 
 	//float 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		float MinGroundCheckDistance = 0.001;
+		float MinGroundCheckDistance = 10;
 
 
 	
@@ -74,7 +76,7 @@ public:
 		void RemoveGhost();
 	
 	UFUNCTION(BlueprintCallable)
-		void SetGhostPosition(FVector Location, FRotator Rot);
+		void SetGhostPosition(FVector Location, FRotator Rot, FVector Offset);
 
 	UFUNCTION(BlueprintCallable)
 		void ChangeColor();
@@ -84,6 +86,12 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		bool CanPlace();
+	
+	UFUNCTION(BlueprintCallable)
+		void RotateLeft(FRotator Rot);
+
+	UFUNCTION(BlueprintCallable)
+		void RotateRight(FRotator Rot);
 	
 	UFUNCTION(BlueprintCallable)
 		bool CheckIsOnGround();
