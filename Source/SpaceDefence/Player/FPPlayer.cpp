@@ -2,6 +2,7 @@
 
 
 #include "FPPlayer.h"
+#include "./Projectiles/BasePlayerProjectile.h"
 
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -19,6 +20,7 @@ AFPPlayer::AFPPlayer()
 	CharacterCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("CharacterCamera"));
 	GroundCheckPoint = CreateDefaultSubobject<USceneComponent>(TEXT("GroundCheckPoint"));
 	WallCheckPoint = CreateDefaultSubobject<USceneComponent>(TEXT("WallCheckPoint"));
+	ShootingPoint = CreateDefaultSubobject<USceneComponent>(TEXT("TestShootingPoint"));
 
 	CameraBoom->SetupAttachment(GetCapsuleComponent());
 	CameraBoom->bUsePawnControlRotation = true;
@@ -27,6 +29,7 @@ AFPPlayer::AFPPlayer()
 	FpMesh->SetupAttachment(CharacterCamera);
 	GroundCheckPoint->SetupAttachment(GetCapsuleComponent());
 	WallCheckPoint->SetupAttachment(GetCapsuleComponent());
+	ShootingPoint->SetupAttachment(CharacterCamera);
 
 	HSensitivityMultiplier = 1;
 	VSensitivityMultiplier = 1;
@@ -51,6 +54,7 @@ void AFPPlayer::Tick(float DeltaTime)
 	UpdateGroundStatus();
 	UpdateCharacterSliding(DeltaTime);
 
+	FireUpdate();
 	WallClimbCheck();
 }
 
@@ -64,6 +68,8 @@ void AFPPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction("Run", EInputEvent::IE_Released, this, &AFPPlayer::RunReleased);
 	PlayerInputComponent->BindAction("Crouch", EInputEvent::IE_Pressed, this, &AFPPlayer::CrouchPressed);
 	PlayerInputComponent->BindAction("Crouch", EInputEvent::IE_Released, this, &AFPPlayer::CrouchReleased);
+	PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Pressed, this, &AFPPlayer::FirePressed);
+	PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Released, this, &AFPPlayer::FireReleased);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AFPPlayer::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AFPPlayer::MoveRight);
@@ -389,4 +395,35 @@ void AFPPlayer::StopCharacterSliding()
 
 	RemovePlayerMovementState(EPlayerMovementState::Slide);
 	ApplyChangesToCharacter();
+}
+
+void AFPPlayer::FirePressed()
+{
+	// TODO: Change to Melee when there is concept of weapons
+	_firePressed = true;
+}
+
+void AFPPlayer::FireReleased()
+{
+	_firePressed = false;
+}
+
+void AFPPlayer::FireUpdate()
+{
+	if (_firePressed)
+	{
+		float currentTime = GetWorld()->GetTimeSeconds();
+		float difference = currentTime - _lastShotTime;
+		if (difference > FireRate)
+		{
+			FVector spawnPoint = ShootingPoint->GetComponentLocation();
+			FRotator spawnRotation = GetControlRotation();
+
+			FActorSpawnParameters spawnParams;
+			spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+			GetWorld()->SpawnActor<ABasePlayerProjectile>(TempPlayerProjectile, spawnPoint, spawnRotation, spawnParams);
+			_lastShotTime = currentTime;
+		}
+	}
 }

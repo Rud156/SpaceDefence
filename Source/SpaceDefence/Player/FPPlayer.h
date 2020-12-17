@@ -9,6 +9,8 @@
 
 #include "FPPlayer.generated.h"
 
+class ABasePlayerProjectile;
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayerLanded);
 
 UCLASS()
@@ -25,11 +27,14 @@ class SPACEDEFENCE_API AFPPlayer : public ACharacter
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
 		class USceneComponent* WallCheckPoint;
 
+	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
+		class USceneComponent* ShootingPoint;
+
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly)
 		class UCameraComponent* CharacterCamera;
 
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly)
-		class	USpringArmComponent* CameraBoom;
+		class USpringArmComponent* CameraBoom;
 
 	TArray<EPlayerMovementState> _movementStack;
 	float _slideTimer;
@@ -61,6 +66,12 @@ class SPACEDEFENCE_API AFPPlayer : public ACharacter
 	void RunReleased();
 	void CrouchPressed();
 	void CrouchReleased();
+
+	float _lastShotTime;
+	bool _firePressed;
+	void FirePressed();
+	void FireReleased();
+	void FireUpdate();
 
 protected:
 	virtual void BeginPlay() override;
@@ -124,6 +135,12 @@ public:
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
 		float DefaultRadius;
+
+	UPROPERTY(Category = "Player|Shooting", EditAnywhere)
+		float FireRate;
+
+	UPROPERTY(Category = "Player|Shooting", EditAnywhere)
+		TSubclassOf<class ABasePlayerProjectile> TempPlayerProjectile;
 
 	UPROPERTY(Category = "Player|Delegates", BlueprintAssignable)
 		FPlayerLanded OnPlayerLanded;
