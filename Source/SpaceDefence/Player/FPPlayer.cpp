@@ -12,6 +12,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 
 #include "Kismet/GameplayStatics.h"
+#include "Weapons/BaseWeapon.h"
 
 AFPPlayer::AFPPlayer()
 {
@@ -21,6 +22,7 @@ AFPPlayer::AFPPlayer()
 	GroundCheckPoint = CreateDefaultSubobject<USceneComponent>(TEXT("GroundCheckPoint"));
 	WallCheckPoint = CreateDefaultSubobject<USceneComponent>(TEXT("WallCheckPoint"));
 	ShootingPoint = CreateDefaultSubobject<USceneComponent>(TEXT("TestShootingPoint"));
+	WeaponAttachPoint = CreateDefaultSubobject<USceneComponent>(TEXT("WeaponAttachPoint"));
 
 	CameraBoom->SetupAttachment(GetCapsuleComponent());
 	CameraBoom->bUsePawnControlRotation = true;
@@ -30,6 +32,7 @@ AFPPlayer::AFPPlayer()
 	GroundCheckPoint->SetupAttachment(GetCapsuleComponent());
 	WallCheckPoint->SetupAttachment(GetCapsuleComponent());
 	ShootingPoint->SetupAttachment(CharacterCamera);
+	WeaponAttachPoint->SetupAttachment(CharacterCamera);
 
 	HSensitivityMultiplier = 1;
 	VSensitivityMultiplier = 1;
@@ -39,12 +42,13 @@ AFPPlayer::AFPPlayer()
 
 void AFPPlayer::BeginPlay()
 {
+	OnPlayerLanded.AddDynamic(this, &AFPPlayer::PlayerLanded);
+
 	_slideTimer = 0;
 
 	PushPlayerMovementState(EPlayerMovementState::Walk);
 	ApplyChangesToCharacter();
 
-	OnPlayerLanded.AddDynamic(this, &AFPPlayer::PlayerLanded);
 	Super::BeginPlay();
 }
 
@@ -70,6 +74,7 @@ void AFPPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction("Crouch", EInputEvent::IE_Released, this, &AFPPlayer::CrouchReleased);
 	PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Pressed, this, &AFPPlayer::FirePressed);
 	PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Released, this, &AFPPlayer::FireReleased);
+	PlayerInputComponent->BindAction("Interact", EInputEvent::IE_Pressed, this, &AFPPlayer::HandleInteractPressed);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AFPPlayer::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AFPPlayer::MoveRight);
@@ -289,6 +294,25 @@ void AFPPlayer::PlayerLanded()
 	ApplyChangesToCharacter();
 }
 
+void AFPPlayer::SetInteractableObject(AActor* callingObject)
+{
+	_currentInteractable = callingObject;
+}
+
+void AFPPlayer::ClearInteractableObject()
+{
+	_currentInteractable = nullptr;
+}
+
+void AFPPlayer::HandleInteractPressed()
+{
+	if (_currentInteractable != nullptr)
+	{
+		// TODO: Call Pickup On Interactable Object
+		_currentInteractable = nullptr;
+	}
+}
+
 void AFPPlayer::UpdateGroundStatus()
 {
 	FHitResult hitResult;
@@ -399,7 +423,6 @@ void AFPPlayer::StopCharacterSliding()
 
 void AFPPlayer::FirePressed()
 {
-	// TODO: Change to Melee when there is concept of weapons
 	_firePressed = true;
 }
 
@@ -412,18 +435,174 @@ void AFPPlayer::FireUpdate()
 {
 	if (_firePressed)
 	{
-		float currentTime = GetWorld()->GetTimeSeconds();
-		float difference = currentTime - _lastShotTime;
-		if (difference > FireRate)
+		switch (_currentWeapon)
 		{
-			FVector spawnPoint = ShootingPoint->GetComponentLocation();
-			FRotator spawnRotation = GetControlRotation();
-
-			FActorSpawnParameters spawnParams;
-			spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-			GetWorld()->SpawnActor<ABasePlayerProjectile>(TempPlayerProjectile, spawnPoint, spawnRotation, spawnParams);
-			_lastShotTime = currentTime;
+		case EPlayerWeapon::Melee:
+		{
+			if (_meleeWeapon->CanFire())
+			{
+				_meleeWeapon->Attack();
+			}
 		}
+		break;
+
+		case EPlayerWeapon::Primary:
+		{
+			if (_primaryWeapon->CanFire())
+			{
+				_primaryWeapon->Attack();
+				SpawnWeaponProjectile(_primaryWeapon->GetProjectile());
+			}
+		}
+		break;
+
+		case EPlayerWeapon::Secondary:
+		{
+			if (_secondaryWeapon->CanFire())
+			{
+				_secondaryWeapon->Attack();
+				SpawnWeaponProjectile(_secondaryWeapon->GetProjectile());
+			}
+		}
+		break;
+		}
+	}
+}
+
+void AFPPlayer::SpawnWeaponProjectile(TSubclassOf<class AActor> projectile)
+{
+	FVector spawnPoint = ShootingPoint->GetComponentLocation();
+	FRotator spawnRotation = GetControlRotation();
+
+	FActorSpawnParameters spawnParams;
+	spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
+
+	GetWorld()->SpawnActor<ABasePlayerProjectile>(projectile, spawnPoint, spawnRotation, spawnParams);
+}
+
+EPlayerWeapon AFPPlayer::GetCurrentWeapon()
+{
+	return _currentWeapon;
+}
+
+void AFPPlayer::ChangeCurrentWeapon(EPlayerWeapon weapon)
+{
+	if (_currentWeapon == weapon)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Trying to Equip Same Weapon");
+	}
+
+	_currentWeapon = weapon;
+	ApplyWeaponChangesToCharacter();
+}
+
+ABaseWeapon* AFPPlayer::GetPrimaryWeapon()
+{
+	return _primaryWeapon;
+}
+
+void AFPPlayer::PickupPrimaryWeapon(ABaseWeapon* primaryWeapon)
+{
+	if (_primaryWeapon != nullptr)
+	{
+		DropPrimaryWeapon();
+	}
+
+	_primaryWeapon = primaryWeapon;
+	ChangeCurrentWeapon(EPlayerWeapon::Primary);
+}
+
+ABaseWeapon* AFPPlayer::DropPrimaryWeapon()
+{
+	auto weaponCopy = _primaryWeapon;
+	_primaryWeapon = nullptr;
+
+	if (HasSecondaryWeapon())
+	{
+		ChangeCurrentWeapon(EPlayerWeapon::Secondary);
+	}
+	else
+	{
+		ChangeCurrentWeapon(EPlayerWeapon::Melee);
+	}
+
+	return weaponCopy;
+}
+
+bool AFPPlayer::HasPrimaryWeapon()
+{
+	return _primaryWeapon != nullptr;
+}
+
+ABaseWeapon* AFPPlayer::GetSecondaryWeapon()
+{
+	return _secondaryWeapon;
+}
+
+void AFPPlayer::PickupSecondaryWeapon(ABaseWeapon* secondaryWeapon)
+{
+	if (_secondaryWeapon != nullptr)
+	{
+		DropSecondaryWeapon();
+	}
+
+	_secondaryWeapon = secondaryWeapon;
+	ChangeCurrentWeapon(EPlayerWeapon::Secondary);
+}
+
+ABaseWeapon* AFPPlayer::DropSecondaryWeapon()
+{
+	auto weaponCopy = _secondaryWeapon;
+	_secondaryWeapon = nullptr;
+
+	if (HasPrimaryWeapon())
+	{
+		ChangeCurrentWeapon(EPlayerWeapon::Primary);
+	}
+	else
+	{
+		ChangeCurrentWeapon(EPlayerWeapon::Melee);
+	}
+
+	return weaponCopy;
+}
+
+bool AFPPlayer::HasSecondaryWeapon()
+{
+	return  _secondaryWeapon != nullptr;
+}
+
+void AFPPlayer::ApplyWeaponChangesToCharacter()
+{
+	if (_primaryWeapon != nullptr)
+	{
+		_primaryWeapon->HideWeapon();
+	}
+	if (_secondaryWeapon != nullptr)
+	{
+		_secondaryWeapon->HideWeapon();
+	}
+	if (_meleeWeapon != nullptr)
+	{
+		_meleeWeapon->HideWeapon();
+	}
+
+	switch (_currentWeapon)
+	{
+	case EPlayerWeapon::Melee:
+		_meleeWeapon->ShowWeapon();
+		break;
+
+	case EPlayerWeapon::Primary:
+		_primaryWeapon->ShowWeapon();
+		break;
+
+	case EPlayerWeapon::Secondary:
+		_secondaryWeapon->ShowWeapon();
+		break;
+
+	default:
+		// This should never be triggered...
+		break;
 	}
 }

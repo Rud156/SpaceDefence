@@ -16,3 +16,11 @@ enum class EPlayerMovementState: uint8
 	Crouch,
 	Slide
 };
+
+UENUM(BlueprintType)
+enum class EPlayerWeapon: uint8
+{
+	Melee,
+	Primary,
+	Secondary
+};

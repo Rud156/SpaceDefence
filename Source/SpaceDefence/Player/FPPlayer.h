@@ -10,6 +10,7 @@
 #include "FPPlayer.generated.h"
 
 class ABasePlayerProjectile;
+class ABaseWeapon;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayerLanded);
 
@@ -35,6 +36,9 @@ class SPACEDEFENCE_API AFPPlayer : public ACharacter
 
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly)
 		class USpringArmComponent* CameraBoom;
+
+	UPROPERTY(Category = Weapon, VisibleDefaultsOnly)
+		class USceneComponent* WeaponAttachPoint;
 
 	TArray<EPlayerMovementState> _movementStack;
 	float _slideTimer;
@@ -67,11 +71,23 @@ class SPACEDEFENCE_API AFPPlayer : public ACharacter
 	void CrouchPressed();
 	void CrouchReleased();
 
-	float _lastShotTime;
 	bool _firePressed;
 	void FirePressed();
 	void FireReleased();
 	void FireUpdate();
+	void SpawnWeaponProjectile(TSubclassOf<class AActor> projectile);
+
+	AActor* _currentInteractable;
+	void SetInteractableObject(AActor* callingObject);
+	void ClearInteractableObject();
+	void HandleInteractPressed();
+
+	ABaseWeapon* _meleeWeapon;
+	ABaseWeapon* _primaryWeapon;
+	ABaseWeapon* _secondaryWeapon;
+	EPlayerWeapon _currentWeapon;
+	void ChangeCurrentWeapon(EPlayerWeapon weapon);
+	void ApplyWeaponChangesToCharacter();
 
 protected:
 	virtual void BeginPlay() override;
@@ -149,6 +165,19 @@ public:
 
 	UFUNCTION(Category = "Debug", BlueprintImplementableEvent)
 		void MovementStatePushed(EPlayerMovementState playerMovementState);
+
+	UFUNCTION(Category = Weapons, BlueprintCallable, BlueprintPure)
+		EPlayerWeapon GetCurrentWeapon();
+	UFUNCTION(Category = Weapons, BlueprintCallable, BlueprintPure)
+		ABaseWeapon* GetPrimaryWeapon();
+	void PickupPrimaryWeapon(ABaseWeapon* primaryWeapon);
+	ABaseWeapon* DropPrimaryWeapon();
+	bool HasPrimaryWeapon();
+	UFUNCTION(Category = Weapons, BlueprintCallable, BlueprintPure)
+		ABaseWeapon* GetSecondaryWeapon();
+	bool HasSecondaryWeapon();
+	void PickupSecondaryWeapon(ABaseWeapon* secondaryWeapon);
+	ABaseWeapon* DropSecondaryWeapon();
 
 	AFPPlayer();
 	virtual void Tick(float DeltaTime) override;
