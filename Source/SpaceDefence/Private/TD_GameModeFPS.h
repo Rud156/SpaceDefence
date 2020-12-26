@@ -22,6 +22,8 @@ public:
 public:
 	UPROPERTY(VisibleAnywhere, Category="References",BlueprintReadWrite)
 		class UUserWidget* InventoryBPRef;
+	UPROPERTY(Category = "References", BlueprintReadWrite)
+		class UTD_MainHUD* MainHUDRef;
 
 
 protected:

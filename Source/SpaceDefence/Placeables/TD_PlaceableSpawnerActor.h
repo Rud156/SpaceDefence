@@ -68,7 +68,9 @@ public:
 	//game play functions
 	UFUNCTION(BlueprintCallable)
 		void SpawnPlaceAbleGhost(FVector Location, int PlaceAbleID);
-
+	UFUNCTION(BlueprintCallable)
+		void ChangeGhost(int PlaceAbleID);
+	
 	UFUNCTION(BlueprintCallable)
 		void SpawnActorFromGhost( int PlaceAbleID);
 

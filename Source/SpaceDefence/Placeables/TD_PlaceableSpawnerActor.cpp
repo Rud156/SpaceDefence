@@ -41,6 +41,15 @@ void ATD_PlaceableSpawnerActor::SpawnPlaceAbleGhost(FVector Location, int PlaceA
 	
 }
 
+void ATD_PlaceableSpawnerActor::ChangeGhost(int PlaceAbleID)
+{
+	if (GetWorld() && PlaceAbleID > -1 && PlaceAbleID < 9)
+	{
+
+		Ghost->SetStaticMesh(GetStaticMeshFromList(PlaceAbleID));
+	}
+}
+
 void ATD_PlaceableSpawnerActor::SpawnActorFromGhost( int PlaceAbleID)
 {
 	if (GetWorld() )
