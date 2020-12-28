@@ -4,6 +4,7 @@
 #include "TD_PlaceableSpawnerActor.h"
 #include "DrawDebugHelpers.h"
 #include "TD_GameModeFPS.h"
+#include "CurrencyManager/TD_CurrencyManager.h"
 
 
 // Sets default values
@@ -21,36 +22,58 @@ ATD_PlaceableSpawnerActor::ATD_PlaceableSpawnerActor()
 void ATD_PlaceableSpawnerActor::BeginPlay()
 {
 	Super::BeginPlay();
+	auto GameMode = GetWorld()->GetAuthGameMode();
+	CurrencyRef = Cast<ATD_GameModeFPS>(GameMode)->CurrencyManagerRef;
 
 }
 
 bool ATD_PlaceableSpawnerActor::CanSpawnGhost(int Cost)
 {
-	auto GameMode = GetWorld()->GetAuthGameMode();
-	if(GameMode)
-	{
-		auto CurrencyRef = Cast<ATD_GameModeFPS>(GameMode)->CurrencyManagerRef;
 	
-	}
+	
+		
+		if (CurrencyRef)
+			if (Cast<ATD_CurrencyManager>(CurrencyRef)->HasCurrency(Cost))
+			{
+				return true;
+			}
+	
+	
 	return false;
 }
 
-void ATD_PlaceableSpawnerActor::SpawnPlaceAbleGhost(FVector Location, int PlaceAbleID)
+int ATD_PlaceableSpawnerActor::GetCostFromID(int PlaceAbleID)
+{
+	return PlaceAbleData[PlaceAbleID].GoldCost;
+}
+
+bool ATD_PlaceableSpawnerActor::SpawnPlaceAbleGhost(FVector Location, int PlaceAbleID)
 {
 	if (GetWorld()&& PlaceAbleID>-1 && PlaceAbleID<9)
 	{
 
-		Ghost->SetStaticMesh(GetStaticMeshFromList(PlaceAbleID));
+
+		if(CanSpawnGhost(GetCostFromID(PlaceAbleID)))
+		{
+			
+			Ghost->SetStaticMesh(GetStaticMeshFromList(PlaceAbleID));
+			return true;
+		}
+		else
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Printf(TEXT("Not Enough Gold Print UI here")));
+			Ghost->SetStaticMesh(nullptr);
+			return false;
+		}
 
 		
 
 		//Ghost->AttachToActor(this,FAttachmentTransformRules::KeepWorldTransform);
 
 	}
-	else
-	{
-	}
 	
+
+	return false;
 	
 }
 
@@ -69,10 +92,15 @@ void ATD_PlaceableSpawnerActor::SpawnActorFromGhost( int PlaceAbleID)
 	{
 		if(CanPlace())
 		{
-			
-			FRotator Rot = Ghost->GetComponentRotation();
-		auto Location = Ghost->GetComponentLocation();
-		ActorRef = Cast<ATD_PlaceablesActors>(GetWorld()->SpawnActor(PlaceAbleData[PlaceAbleID].ActorRef,&Location, &Rot));
+			if(Ghost->GetStaticMesh())
+			{
+				
+				FRotator Rot = Ghost->GetComponentRotation();
+				auto Location = Ghost->GetComponentLocation();
+				CurrencyRef->RemoveCurrency(GetCostFromID(PlaceAbleID));
+				GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Printf(TEXT("Not Enough Gold Print UI here %d"),CurrencyRef->GetCurrency()));
+				ActorRef = Cast<ATD_PlaceablesActors>(GetWorld()->SpawnActor(PlaceAbleData[PlaceAbleID].ActorRef,&Location, &Rot));
+			}
 		}
 
 		RemoveGhost();

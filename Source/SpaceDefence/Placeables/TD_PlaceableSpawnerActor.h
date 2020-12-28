@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "TD_PlaceablesActors.h"
+#include "CurrencyManager/TD_CurrencyManager.h"
 #include "GameFramework/Actor.h"
 #include "SpaceDefence/Utils/Structs.h"
 
@@ -68,7 +69,7 @@ public:
 
 	//game play functions
 	UFUNCTION(BlueprintCallable)
-		void SpawnPlaceAbleGhost(FVector Location, int PlaceAbleID);
+		bool SpawnPlaceAbleGhost(FVector Location, int PlaceAbleID);
 	UFUNCTION(BlueprintCallable)
 		void ChangeGhost(int PlaceAbleID);
 	
@@ -101,4 +102,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		bool CanSpawnGhost(int Cost);
+
+
+private:
+	ATD_CurrencyManager* CurrencyRef;
+	int GetCostFromID(int PlaceAbleID);
 };

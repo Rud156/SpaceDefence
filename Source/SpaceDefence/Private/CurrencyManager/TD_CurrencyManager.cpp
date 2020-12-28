@@ -30,7 +30,7 @@ bool ATD_CurrencyManager::HasCurrency(const int PlaceAbleActorCurrency)
 	if(PlaceAbleActorCurrency>0)
 	{
 		
-		return (Currency - PlaceAbleActorCurrency) > 0;
+		return (Currency - PlaceAbleActorCurrency) > -1;
 	}
 	return false;
 }

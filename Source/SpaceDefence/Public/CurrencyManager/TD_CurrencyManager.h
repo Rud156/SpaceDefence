@@ -26,7 +26,7 @@ public:
 
 	//Game Play variables.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Currency Manager")
-		int Currency;
+		int Currency = 100;
 
 
 
@@ -40,5 +40,11 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		void RemoveCurrency(int PlaceAbleActorCurrency);
+	
+	UFUNCTION(BlueprintCallable)
+		void SetCurrency(int InitialCost) { Currency = InitialCost; }
+	
+	UFUNCTION(BlueprintCallable)
+		int GetCurrency() { return Currency; }
 	
 };
