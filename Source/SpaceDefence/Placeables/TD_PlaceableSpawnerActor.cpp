@@ -3,6 +3,8 @@
 
 #include "TD_PlaceableSpawnerActor.h"
 #include "DrawDebugHelpers.h"
+#include "TD_GameModeFPS.h"
+
 
 // Sets default values
 ATD_PlaceableSpawnerActor::ATD_PlaceableSpawnerActor()
@@ -20,6 +22,17 @@ void ATD_PlaceableSpawnerActor::BeginPlay()
 {
 	Super::BeginPlay();
 
+}
+
+bool ATD_PlaceableSpawnerActor::CanSpawnGhost(int Cost)
+{
+	auto GameMode = GetWorld()->GetAuthGameMode();
+	if(GameMode)
+	{
+		auto CurrencyRef = Cast<ATD_GameModeFPS>(GameMode)->CurrencyManagerRef;
+	
+	}
+	return false;
 }
 
 void ATD_PlaceableSpawnerActor::SpawnPlaceAbleGhost(FVector Location, int PlaceAbleID)

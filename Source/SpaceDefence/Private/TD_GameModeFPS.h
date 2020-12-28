@@ -24,7 +24,8 @@ public:
 		class UUserWidget* InventoryBPRef;
 	UPROPERTY(Category = "References", BlueprintReadWrite)
 		class UTD_MainHUD* MainHUDRef;
-
+	UPROPERTY(Category = "References", BlueprintReadWrite)
+		class ATD_CurrencyManager* CurrencyManagerRef;
 
 protected:
 	

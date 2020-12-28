@@ -45,6 +45,7 @@ public:
 
 
 	//bool
+
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		bool bIsColliding = false;
@@ -97,4 +98,7 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 		bool CheckIsOnGround();
+
+	UFUNCTION(BlueprintCallable)
+		bool CanSpawnGhost(int Cost);
 };
