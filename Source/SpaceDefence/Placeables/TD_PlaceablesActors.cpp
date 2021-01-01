@@ -3,6 +3,15 @@
 
 #include "TD_PlaceablesActors.h"
 
+
+
+#include "SpaceDefence/Public/DevelopmentTools/TD_DevelopmentTools.h"
+
+
+#define ZER0 0.0
+
+//#include "SpaceDefence/Utils/Structs.h"
+
 // Sets default values
 ATD_PlaceablesActors::ATD_PlaceablesActors()
 {
@@ -12,6 +21,7 @@ ATD_PlaceablesActors::ATD_PlaceablesActors()
 	SetRootComponent(RootMeshComponent);
 	Model = CreateDefaultSubobject<UStaticMeshComponent>("Model");
 	Model->SetupAttachment(GetRootComponent());
+	Model->SetCollisionProfileName(TEXT("InteractionPreset"));
 
 }
 
@@ -25,24 +35,53 @@ void ATD_PlaceablesActors::BeginPlay()
 		RightSnapPoint = Model->GetStaticMesh()->GetBounds().BoxExtent.Y;
 		LeftSnapPoint = RightSnapPoint * -1;
 	}
+
+
 }
 
-void ATD_PlaceablesActors::Place()
+void ATD_PlaceablesActors::ApplyDamage(float Amount)
 {
+	if(ActorData.Health> ZER0)
+	{
+		ActorData.Health -= Amount;
+		if(ActorData.Health < ZER0)
+		{
+			RemoveActor();
+		}
+	}
 }
 
-void ATD_PlaceablesActors::LeftRotate()
+int ATD_PlaceablesActors::GetDestructionCost() const
 {
+	if(ActorData.GoldCost> ZER0)
+	{
+		return ActorData.GoldCost / 2;
+	}
+	return 0;
 }
 
-void ATD_PlaceablesActors::RightRotate()
+void ATD_PlaceablesActors::RemoveActor()
 {
+	//TODO do stuff here;
+	this->Destroy();
+	
 }
+
+void ATD_PlaceablesActors::CheckIfAlive()
+{
+	if (ActorData.GoldCost < ZER0)
+	{
+		RemoveActor();
+	}
+}
+
 
 // Called every frame
 void ATD_PlaceablesActors::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+
+	CheckIfAlive();
 }
 

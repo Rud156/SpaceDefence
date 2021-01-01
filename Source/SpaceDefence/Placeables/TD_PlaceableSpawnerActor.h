@@ -28,6 +28,9 @@ public:
 
 	//Game play Variables.
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spawn Settings")
+		class UDataTable* PlaceAbleDataTable;
+	
 	UPROPERTY(EditAnywhere, Category = "Spawn Settings", BlueprintReadWrite)
 		TArray<FPlaceAbleData> PlaceAbleData;
 

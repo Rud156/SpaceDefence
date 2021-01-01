@@ -3,7 +3,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/StaticMesh.h"
-
+#include "Engine/DataTable.h"
 #include "Structs.generated.h"
 
 
@@ -11,7 +11,7 @@ class ATD_PlaceablesActors;
 
 
 USTRUCT(BlueprintType)
-struct FPlaceAbleData
+struct FPlaceAbleData :public FTableRowBase
 {
 	GENERATED_BODY()
 public:
@@ -27,6 +27,11 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Spawn Settings", BlueprintReadOnly)
 		float GoldCost;
+
+	UPROPERTY(EditAnywhere, Category = "Spawn Settings", BlueprintReadOnly)
+		float Health;
+	UPROPERTY(EditAnywhere, Category = "Spawn Settings", BlueprintReadOnly)
+		bool bCanBeUpgraded;
 
 	//add a upgradable stuffs here
 	

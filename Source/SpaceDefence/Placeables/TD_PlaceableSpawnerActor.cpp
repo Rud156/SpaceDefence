@@ -4,7 +4,9 @@
 #include "TD_PlaceableSpawnerActor.h"
 #include "DrawDebugHelpers.h"
 #include "TD_GameModeFPS.h"
+#include "SpaceDefence/Public/DevelopmentTools/TD_DevelopmentTools.h"
 #include "CurrencyManager/TD_CurrencyManager.h"
+
 
 
 // Sets default values
@@ -16,6 +18,27 @@ ATD_PlaceableSpawnerActor::ATD_PlaceableSpawnerActor()
 	SetRootComponent(RootMeshComponent);
 	Ghost = CreateDefaultSubobject<UStaticMeshComponent>("Model");
 	Ghost->SetupAttachment(GetRootComponent());
+	static ConstructorHelpers::FObjectFinder<UDataTable> PlaceAbleDataTableObject(TEXT("DataTable'/Game/Data/PlaceAbleActorData.PlaceAbleActorData'"));
+	if (PlaceAbleDataTableObject.Succeeded())
+	{
+		PlaceAbleDataTable = PlaceAbleDataTableObject.Object;
+	}
+	if (PlaceAbleDataTable)
+	{
+		auto Names = PlaceAbleDataTable->GetRowNames();
+		const FString ContextString;
+		for (const auto RowName : Names)
+		{
+			FPlaceAbleData* tempData = PlaceAbleDataTable->FindRow<FPlaceAbleData>(RowName, ContextString);
+			if(tempData)
+				PlaceAbleData.Add(*tempData);
+			else
+			{
+				PrintToScreen_Color("Error in the placable data table rows", FColor::Red);
+			}
+		}
+	}
+	
 }
 
 // Called when the game starts or when spawned
@@ -24,7 +47,7 @@ void ATD_PlaceableSpawnerActor::BeginPlay()
 	Super::BeginPlay();
 	auto GameMode = GetWorld()->GetAuthGameMode();
 	CurrencyRef = Cast<ATD_GameModeFPS>(GameMode)->CurrencyManagerRef;
-
+	
 }
 
 bool ATD_PlaceableSpawnerActor::CanSpawnGhost(int Cost)
@@ -100,6 +123,8 @@ void ATD_PlaceableSpawnerActor::SpawnActorFromGhost( int PlaceAbleID)
 				CurrencyRef->RemoveCurrency(GetCostFromID(PlaceAbleID));
 				GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Printf(TEXT("Not Enough Gold Print UI here %d"),CurrencyRef->GetCurrency()));
 				ActorRef = Cast<ATD_PlaceablesActors>(GetWorld()->SpawnActor(PlaceAbleData[PlaceAbleID].ActorRef,&Location, &Rot));
+				//TODO: Check optimization here. 
+				ActorRef->SetData(PlaceAbleData[PlaceAbleID]);
 			}
 		}
 
