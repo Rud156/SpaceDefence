@@ -4,6 +4,10 @@
 #include "TD_PlaceablesActors.h"
 
 
+#include "TD_GameModeFPS.h"
+#include "CurrencyManager/TD_CurrencyManager.h"
+
+#include "Kismet/GameplayStatics.h"
 
 #include "SpaceDefence/Public/DevelopmentTools/TD_DevelopmentTools.h"
 
@@ -35,6 +39,7 @@ void ATD_PlaceablesActors::BeginPlay()
 		RightSnapPoint = Model->GetStaticMesh()->GetBounds().BoxExtent.Y;
 		LeftSnapPoint = RightSnapPoint * -1;
 	}
+	
 
 
 }
@@ -51,6 +56,16 @@ void ATD_PlaceablesActors::ApplyDamage(float Amount)
 	}
 }
 
+void ATD_PlaceablesActors::SetData(FPlaceAbleData Data)
+{
+	ActorData = Data;
+	if (ActorData.PlacementSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this,ActorData.PlacementSound,this->GetActorLocation());
+
+	}
+}
+
 int ATD_PlaceablesActors::GetDestructionCost() const
 {
 	if(ActorData.GoldCost> ZER0)
@@ -63,8 +78,32 @@ int ATD_PlaceablesActors::GetDestructionCost() const
 void ATD_PlaceablesActors::RemoveActor()
 {
 	//TODO do stuff here;
+	if(ActorData.DestructionSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, ActorData.DestructionSound, this->GetActorLocation());
+	}
+	auto GameMode = GetWorld()->GetAuthGameMode();
+	if(GameMode)
+	{
+		auto tempCurrency = Cast<ATD_GameModeFPS>(GameMode)->CurrencyManagerRef;
+		if(tempCurrency)
+		{
+			tempCurrency->AddCurrency(GetDestructionCost());
+		}
+		
+	}
+	
 	this->Destroy();
 	
+}
+
+void ATD_PlaceablesActors::UpgradeActor()
+{
+	PrintToScreen_Color("Upgrade pressed!", FColor::Blue);
+	if (ActorData.UpgradeSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, ActorData.UpgradeSound, this->GetActorLocation());
+	}
 }
 
 void ATD_PlaceablesActors::CheckIfAlive()

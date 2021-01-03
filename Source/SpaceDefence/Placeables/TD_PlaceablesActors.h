@@ -46,13 +46,14 @@ public:
 		void ApplyDamage(float Amount);
 
 	//Non blueprint functions calls
-	void SetData(FPlaceAbleData Data) { ActorData = Data; }
+	void SetData(FPlaceAbleData Data);
 
 	int GetDestructionCost() const;
 
-
-private:
 	void RemoveActor();
+	void UpgradeActor();
+private:
+	
 
 	void CheckIfAlive();
 };

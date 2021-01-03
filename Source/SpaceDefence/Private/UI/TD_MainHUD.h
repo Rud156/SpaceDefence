@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "UI/TD_InteractionWidget.h"
 #include "TD_MainHUD.generated.h"
 
 /**
@@ -18,6 +19,8 @@ public:
 
 	UPROPERTY(VisibleAnywhere,Category = "Game Play variables", BlueprintReadWrite)
 		TArray<UUserWidget*>	ListOfQuickSlotItems;
+	UPROPERTY(BlueprintReadWrite)
+		UTD_InteractionWidget* InteractionWidgetRef;
 
 	UPROPERTY(EditAnywhere, Category = "Game Play variables", BlueprintReadWrite)
 		float NormalModeYSlotPosition = -100;
@@ -31,6 +34,17 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 		void ToggleQuickSlotPosition();
 
+	
+	UFUNCTION(BlueprintCallable)
+		void ShowInteractionMenu(ATD_PlaceablesActors* Actor);
+
+	UFUNCTION(BlueprintCallable)
+		void HideInteractionMenu();
+	UFUNCTION(BlueprintCallable)
+		void HandleUpgrade() const { InteractionWidgetRef->OnUpgradePressed(); }
+	UFUNCTION(BlueprintCallable)
+		void HandleRemoval() const { InteractionWidgetRef->OnRemovePressed(); }
+	
 	
 private:
 	//game play variables.

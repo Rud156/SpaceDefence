@@ -4,6 +4,8 @@
 #include "CoreMinimal.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/DataTable.h"
+#include "Sound/SoundCue.h"
+
 #include "Structs.generated.h"
 
 
@@ -18,7 +20,14 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Spawn Settings", BlueprintReadWrite)
 	TSubclassOf<ATD_PlaceablesActors> ActorRef;
 
-
+	UPROPERTY(EditAnywhere, Category = "Spawn Settings", BlueprintReadOnly)
+		USoundCue* PlacementSound;
+	UPROPERTY(EditAnywhere, Category = "Spawn Settings", BlueprintReadOnly)
+		USoundCue* DamageSound;
+	UPROPERTY(EditAnywhere, Category = "Spawn Settings", BlueprintReadOnly)
+		USoundCue* DestructionSound;
+	UPROPERTY(EditAnywhere, Category = "Spawn Settings", BlueprintReadOnly)
+		USoundCue* UpgradeSound;
 	UPROPERTY(EditAnywhere, Category = "Spawn Settings", BlueprintReadOnly)
 		FText DisplayName;
 
