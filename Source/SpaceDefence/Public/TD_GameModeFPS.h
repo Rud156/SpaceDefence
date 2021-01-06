@@ -26,6 +26,9 @@ public:
 		class UTD_MainHUD* MainHUDRef;
 	UPROPERTY(Category = "References", BlueprintReadWrite)
 		class ATD_CurrencyManager* CurrencyManagerRef;
+	UPROPERTY(Category = "References", BlueprintReadWrite)
+		class ATD_WaveController* WaveControllerRef;
+	
 
 protected:
 	

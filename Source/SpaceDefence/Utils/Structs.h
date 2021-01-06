@@ -10,7 +10,8 @@
 
 
 class ATD_PlaceablesActors;
-
+class ABaseEnemy;
+class ATD_SpawnPoints;
 
 USTRUCT(BlueprintType)
 struct FPlaceAbleData :public FTableRowBase
@@ -54,3 +55,46 @@ public:
 	UStaticMesh*  StaticMeshRef =nullptr ;
 
 };
+USTRUCT(BlueprintType)
+struct FWaveGroup
+{
+	GENERATED_BODY()
+public:
+	UPROPERTY(EditAnywhere, Category = "Group Settings", BlueprintReadWrite)
+		TSubclassOf<ABaseEnemy> EnemyType;
+	UPROPERTY(EditAnywhere, Category = "Group Settings", BlueprintReadWrite)
+		int EnemyCount;
+	UPROPERTY(EditAnywhere, Category = "Group Settings", BlueprintReadWrite)
+		float EnemyInterval;
+	UPROPERTY(EditAnywhere, Category = "Group Settings", BlueprintReadWrite)
+		float SpawnRadius=50;
+	UPROPERTY(EditAnywhere, Category = "Group Settings", BlueprintReadWrite)
+		ATD_SpawnPoints* OptionalSpawnLocation = nullptr;
+};
+
+USTRUCT(BlueprintType)
+struct FWaveSettings
+{
+	GENERATED_BODY()
+public:
+	UPROPERTY(EditAnywhere, Category = "Wave Settings", BlueprintReadWrite)
+		ATD_SpawnPoints* SpawnPoints;
+
+	UPROPERTY(EditAnywhere, Category = "Wave Settings", BlueprintReadWrite)
+		float GroupInterval;
+	UPROPERTY(EditAnywhere, Category = "Wave Settings", BlueprintReadWrite)
+		TArray<FWaveGroup> GroupSettings;
+	
+
+	
+	FWaveSettings(ATD_SpawnPoints* I_SpawnPoints):SpawnPoints(I_SpawnPoints), GroupInterval(0.0f)
+	{
+		
+	}
+	FWaveSettings()
+	{}
+};
+
+
+
+
