@@ -3,6 +3,8 @@
 
 #include "FPPlayer.h"
 #include "./Projectiles/BasePlayerProjectile.h"
+#include "../Interactibles/IntfBaseInteractible.h"
+#include "./Weapons/BaseWeapon.h"
 
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -11,8 +13,8 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
+#include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
-#include "Weapons/BaseWeapon.h"
 
 AFPPlayer::AFPPlayer()
 {
@@ -21,7 +23,8 @@ AFPPlayer::AFPPlayer()
 	CharacterCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("CharacterCamera"));
 	GroundCheckPoint = CreateDefaultSubobject<USceneComponent>(TEXT("GroundCheckPoint"));
 	WallCheckPoint = CreateDefaultSubobject<USceneComponent>(TEXT("WallCheckPoint"));
-	ShootingPoint = CreateDefaultSubobject<USceneComponent>(TEXT("TestShootingPoint"));
+	WeaponTempShootingPoint = CreateDefaultSubobject<USceneComponent>(TEXT("WeaponTempShootingPoint"));
+	InteractionCastPoint = CreateDefaultSubobject<USceneComponent>(TEXT("InteractionCastPoint"));
 	WeaponAttachPoint = CreateDefaultSubobject<USceneComponent>(TEXT("WeaponAttachPoint"));
 
 	CameraBoom->SetupAttachment(GetCapsuleComponent());
@@ -31,7 +34,8 @@ AFPPlayer::AFPPlayer()
 	FpMesh->SetupAttachment(CharacterCamera);
 	GroundCheckPoint->SetupAttachment(GetCapsuleComponent());
 	WallCheckPoint->SetupAttachment(GetCapsuleComponent());
-	ShootingPoint->SetupAttachment(CharacterCamera);
+	WeaponTempShootingPoint->SetupAttachment(CharacterCamera);
+	InteractionCastPoint->SetupAttachment(CharacterCamera);
 	WeaponAttachPoint->SetupAttachment(CharacterCamera);
 
 	HSensitivityMultiplier = 1;
@@ -49,6 +53,10 @@ void AFPPlayer::BeginPlay()
 	PushPlayerMovementState(EPlayerMovementState::Walk);
 	ApplyChangesToCharacter();
 
+	AActor* weapon = GetWorld()->SpawnActor(MeleeWeapon, &FVector::ZeroVector, &FRotator::ZeroRotator);
+	ABaseWeapon* meleeWeapon = Cast<ABaseWeapon>(weapon);
+	PickupMeleeWeapon(meleeWeapon);
+
 	Super::BeginPlay();
 }
 
@@ -57,8 +65,9 @@ void AFPPlayer::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	UpdateGroundStatus();
 	UpdateCharacterSliding(DeltaTime);
+	UpdateInteractibleCollection(DeltaTime);
 
-	FireUpdate();
+	FireUpdate(DeltaTime);
 	WallClimbCheck();
 }
 
@@ -75,6 +84,10 @@ void AFPPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Pressed, this, &AFPPlayer::FirePressed);
 	PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Released, this, &AFPPlayer::FireReleased);
 	PlayerInputComponent->BindAction("Interact", EInputEvent::IE_Pressed, this, &AFPPlayer::HandleInteractPressed);
+	PlayerInputComponent->BindAction("Interact", EInputEvent::IE_Released, this, &AFPPlayer::HandleInteractReleased);
+	PlayerInputComponent->BindAction("Melee", EInputEvent::IE_Pressed, this, &AFPPlayer::HandleMeleeSelected);
+	PlayerInputComponent->BindAction("Primary", EInputEvent::IE_Pressed, this, &AFPPlayer::HandlePrimarySelected);
+	PlayerInputComponent->BindAction("Secondary", EInputEvent::IE_Pressed, this, &AFPPlayer::HandleSecondarySelected);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AFPPlayer::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AFPPlayer::MoveRight);
@@ -294,7 +307,27 @@ void AFPPlayer::PlayerLanded()
 	ApplyChangesToCharacter();
 }
 
-void AFPPlayer::SetInteractableObject(AActor* callingObject)
+void AFPPlayer::UpdateInteractibleCollection(float deltaTime)
+{
+	if (_currentInteractable != nullptr)
+	{
+		bool interactionComplete = _currentInteractable->InteractUpdate_Implementation(deltaTime);
+		if (interactionComplete)
+		{
+			switch (_currentInteractable->GetInteractibleType_Implementation())
+			{
+			case EInteractibleType::Weapon:
+				PickupWeapon(Cast<ABaseWeapon>(_currentInteractable));
+				break;
+			}
+
+			GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Interaction Complete");
+			ClearInteractableObject();
+		}
+	}
+}
+
+void AFPPlayer::SetInteractableObject(IIntfBaseInteractible* callingObject)
 {
 	_currentInteractable = callingObject;
 }
@@ -306,10 +339,41 @@ void AFPPlayer::ClearInteractableObject()
 
 void AFPPlayer::HandleInteractPressed()
 {
+	if (_currentInteractable == nullptr)
+	{
+		FHitResult hitResult;
+		FVector startPosition = InteractionCastPoint->GetComponentLocation();
+		FVector endPosition = startPosition + CharacterCamera->GetForwardVector() * MaxInteractionDistance;
+
+		bool hit = GetWorld()->LineTraceSingleByChannel(hitResult, startPosition, endPosition, ECollisionChannel::ECC_Visibility);
+		if (hit && hitResult.GetActor() != nullptr)
+		{
+			AActor* tempActor = hitResult.GetActor();
+			GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Hit: " + tempActor->GetName());
+
+			_currentInteractable = Cast<IIntfBaseInteractible>(tempActor);
+			if (_currentInteractable != nullptr)
+			{
+				_currentInteractable->SetInteractionTime_Implementation(1);
+			}
+			else
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Interaction Cast Failed");
+			}
+		}
+		else
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Nothing hit");
+		}
+	}
+}
+
+void AFPPlayer::HandleInteractReleased()
+{
 	if (_currentInteractable != nullptr)
 	{
-		// TODO: Call Pickup On Interactable Object
-		_currentInteractable = nullptr;
+		_currentInteractable->CancelInteraction_Implementation();
+		ClearInteractableObject();
 	}
 }
 
@@ -360,7 +424,6 @@ bool AFPPlayer::HasPlayerState(EPlayerMovementState movementState)
 
 	return false;
 }
-
 
 void AFPPlayer::ApplyChangesToCharacter()
 {
@@ -431,7 +494,7 @@ void AFPPlayer::FireReleased()
 	_firePressed = false;
 }
 
-void AFPPlayer::FireUpdate()
+void AFPPlayer::FireUpdate(float deltaTime)
 {
 	if (_firePressed)
 	{
@@ -439,18 +502,18 @@ void AFPPlayer::FireUpdate()
 		{
 		case EPlayerWeapon::Melee:
 		{
-			if (_meleeWeapon->CanFire())
+			if (_meleeWeapon->ShootTick(deltaTime))
 			{
-				_meleeWeapon->Attack();
+				_meleeWeapon->Shoot();
 			}
 		}
 		break;
 
 		case EPlayerWeapon::Primary:
 		{
-			if (_primaryWeapon->CanFire())
+			if (_primaryWeapon->ShootTick(deltaTime))
 			{
-				_primaryWeapon->Attack();
+				_primaryWeapon->Shoot();
 				SpawnWeaponProjectile(_primaryWeapon->GetProjectile());
 			}
 		}
@@ -458,9 +521,9 @@ void AFPPlayer::FireUpdate()
 
 		case EPlayerWeapon::Secondary:
 		{
-			if (_secondaryWeapon->CanFire())
+			if (_secondaryWeapon->ShootTick(deltaTime))
 			{
-				_secondaryWeapon->Attack();
+				_secondaryWeapon->Shoot();
 				SpawnWeaponProjectile(_secondaryWeapon->GetProjectile());
 			}
 		}
@@ -471,7 +534,9 @@ void AFPPlayer::FireUpdate()
 
 void AFPPlayer::SpawnWeaponProjectile(TSubclassOf<class AActor> projectile)
 {
-	FVector spawnPoint = ShootingPoint->GetComponentLocation();
+	GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Projectile Spawned");
+
+	FVector spawnPoint = WeaponTempShootingPoint->GetComponentLocation();
 	FRotator spawnRotation = GetControlRotation();
 
 	FActorSpawnParameters spawnParams;
@@ -496,6 +561,31 @@ void AFPPlayer::ChangeCurrentWeapon(EPlayerWeapon weapon)
 	ApplyWeaponChangesToCharacter();
 }
 
+void AFPPlayer::PickupWeapon(ABaseWeapon* weapon)
+{
+	if (weapon == nullptr)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Trying to Pickup NULL Weapon");
+		return;
+	}
+
+	EPlayerWeapon weaponType = weapon->WeaponType;
+	switch (weaponType)
+	{
+	case EPlayerWeapon::Melee:
+		// Do nothing as Melee Weapon cannot be changed...
+		break;
+
+	case EPlayerWeapon::Primary:
+		PickupPrimaryWeapon(weapon);
+		break;
+
+	case EPlayerWeapon::Secondary:
+		PickupSecondaryWeapon(weapon);
+		break;
+	}
+}
+
 ABaseWeapon* AFPPlayer::GetPrimaryWeapon()
 {
 	return _primaryWeapon;
@@ -510,10 +600,22 @@ void AFPPlayer::PickupPrimaryWeapon(ABaseWeapon* primaryWeapon)
 
 	_primaryWeapon = primaryWeapon;
 	ChangeCurrentWeapon(EPlayerWeapon::Primary);
+
+	FAttachmentTransformRules attachmentRules = FAttachmentTransformRules(EAttachmentRule::SnapToTarget,
+		EAttachmentRule::SnapToTarget,
+		EAttachmentRule::KeepWorld,
+		false);
+	_primaryWeapon->AttachToComponent(WeaponAttachPoint, attachmentRules);
 }
 
 ABaseWeapon* AFPPlayer::DropPrimaryWeapon()
 {
+	FDetachmentTransformRules detachRules = FDetachmentTransformRules(EDetachmentRule::KeepRelative,
+		EDetachmentRule::KeepRelative,
+		EDetachmentRule::KeepRelative,
+		true);
+	_primaryWeapon->DetachFromActor(detachRules);
+
 	auto weaponCopy = _primaryWeapon;
 	_primaryWeapon = nullptr;
 
@@ -548,10 +650,22 @@ void AFPPlayer::PickupSecondaryWeapon(ABaseWeapon* secondaryWeapon)
 
 	_secondaryWeapon = secondaryWeapon;
 	ChangeCurrentWeapon(EPlayerWeapon::Secondary);
+
+	FAttachmentTransformRules attachmentRules = FAttachmentTransformRules(EAttachmentRule::SnapToTarget,
+		EAttachmentRule::SnapToTarget,
+		EAttachmentRule::KeepRelative,
+		true);
+	_secondaryWeapon->AttachToComponent(WeaponAttachPoint, attachmentRules);
 }
 
 ABaseWeapon* AFPPlayer::DropSecondaryWeapon()
 {
+	FDetachmentTransformRules detachRules = FDetachmentTransformRules(EDetachmentRule::KeepRelative,
+		EDetachmentRule::KeepRelative,
+		EDetachmentRule::KeepRelative,
+		true);
+	_secondaryWeapon->DetachFromActor(detachRules);
+
 	auto weaponCopy = _secondaryWeapon;
 	_secondaryWeapon = nullptr;
 
@@ -570,6 +684,34 @@ ABaseWeapon* AFPPlayer::DropSecondaryWeapon()
 bool AFPPlayer::HasSecondaryWeapon()
 {
 	return  _secondaryWeapon != nullptr;
+}
+
+ABaseWeapon* AFPPlayer::GetMeleeWeapon()
+{
+	return  _meleeWeapon;
+}
+
+bool AFPPlayer::HasMeleeWeapon()
+{
+	return _meleeWeapon != nullptr;
+}
+
+void AFPPlayer::PickupMeleeWeapon(ABaseWeapon* meleeWeapon)
+{
+	if (_meleeWeapon != nullptr)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Trying to Pickup Second Melee Weapon!!!");
+		return;
+	}
+
+	_meleeWeapon = meleeWeapon;
+	ChangeCurrentWeapon(EPlayerWeapon::Melee);
+
+	FAttachmentTransformRules attachmentRules = FAttachmentTransformRules(EAttachmentRule::SnapToTarget,
+		EAttachmentRule::SnapToTarget,
+		EAttachmentRule::KeepRelative,
+		true);
+	_meleeWeapon->AttachToComponent(WeaponAttachPoint, attachmentRules);
 }
 
 void AFPPlayer::ApplyWeaponChangesToCharacter()
@@ -604,5 +746,29 @@ void AFPPlayer::ApplyWeaponChangesToCharacter()
 	default:
 		// This should never be triggered...
 		break;
+	}
+}
+
+void AFPPlayer::HandleMeleeSelected()
+{
+	ChangeCurrentWeapon(EPlayerWeapon::Melee);
+	ApplyWeaponChangesToCharacter();
+}
+
+void AFPPlayer::HandlePrimarySelected()
+{
+	if (HasPrimaryWeapon())
+	{
+		ChangeCurrentWeapon(EPlayerWeapon::Primary);
+		ApplyWeaponChangesToCharacter();
+	}
+}
+
+void AFPPlayer::HandleSecondarySelected()
+{
+	if (HasSecondaryWeapon())
+	{
+		ChangeCurrentWeapon(EPlayerWeapon::Secondary);
+		ApplyWeaponChangesToCharacter();
 	}
 }

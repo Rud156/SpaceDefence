@@ -11,6 +11,7 @@
 
 class ABasePlayerProjectile;
 class ABaseWeapon;
+class IIntfBaseInteractible;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayerLanded);
 
@@ -29,7 +30,10 @@ class SPACEDEFENCE_API AFPPlayer : public ACharacter
 		class USceneComponent* WallCheckPoint;
 
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
-		class USceneComponent* ShootingPoint;
+		class USceneComponent* WeaponTempShootingPoint;
+
+	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
+		class USceneComponent* InteractionCastPoint;
 
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly)
 		class UCameraComponent* CharacterCamera;
@@ -74,21 +78,27 @@ class SPACEDEFENCE_API AFPPlayer : public ACharacter
 	bool _firePressed;
 	void FirePressed();
 	void FireReleased();
-	void FireUpdate();
+	void FireUpdate(float deltaTime);
 	void SpawnWeaponProjectile(TSubclassOf<class AActor> projectile);
 
-	AActor* _currentInteractable;
-	void SetInteractableObject(AActor* callingObject);
+	IIntfBaseInteractible* _currentInteractable;
+	void UpdateInteractibleCollection(float deltaTime);
+	void SetInteractableObject(IIntfBaseInteractible* callingObject);
 	void ClearInteractableObject();
 	void HandleInteractPressed();
+	void HandleInteractReleased();
 
 	ABaseWeapon* _meleeWeapon;
 	ABaseWeapon* _primaryWeapon;
 	ABaseWeapon* _secondaryWeapon;
 	EPlayerWeapon _currentWeapon;
+	void PickupWeapon(ABaseWeapon* weapon);
 	void ChangeCurrentWeapon(EPlayerWeapon weapon);
 	void ApplyWeaponChangesToCharacter();
-
+	void HandleMeleeSelected();
+	void HandlePrimarySelected();
+	void HandleSecondarySelected();
+	
 protected:
 	virtual void BeginPlay() override;
 
@@ -152,8 +162,11 @@ public:
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
 		float DefaultRadius;
 
-	UPROPERTY(Category = "Player|Shooting", EditAnywhere)
-		float FireRate;
+	UPROPERTY(Category = "Player|Interaction", EditAnywhere)
+		float MaxInteractionDistance;
+
+	UPROPERTY(Category = "Player|Weapon", EditAnywhere)
+		TSubclassOf<class ABaseWeapon> MeleeWeapon;
 
 	UPROPERTY(Category = "Player|Shooting", EditAnywhere)
 		TSubclassOf<class ABasePlayerProjectile> TempPlayerProjectile;
@@ -178,6 +191,10 @@ public:
 	bool HasSecondaryWeapon();
 	void PickupSecondaryWeapon(ABaseWeapon* secondaryWeapon);
 	ABaseWeapon* DropSecondaryWeapon();
+	UFUNCTION(Category = Weapons, BlueprintCallable, BlueprintPure)
+		ABaseWeapon* GetMeleeWeapon();
+	bool HasMeleeWeapon();
+	void PickupMeleeWeapon(ABaseWeapon* meleeWeapon);
 
 	AFPPlayer();
 	virtual void Tick(float DeltaTime) override;

@@ -29,22 +29,27 @@ protected:
 
 	virtual void BeginPlay() override;
 
+	float _lastShotTime;
+
 public:
 #pragma region Properties
 
 	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
 		EPlayerWeapon WeaponType;
 
+	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
+		float FireRate;
+	
 #pragma endregion
 
 	ABaseWeapon();
 	virtual void Tick(float DeltaTime) override;
-
-	virtual void Attack();
+	
+	virtual void Shoot();
 
 	virtual void HideWeapon();
 	virtual void ShowWeapon();
 
-	virtual bool CanFire();
+	virtual bool ShootTick(float DeltaTime);
 	virtual TSubclassOf<class AActor> GetProjectile();
 };

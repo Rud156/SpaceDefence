@@ -33,14 +33,23 @@ void ABaseWeapon::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ABaseWeapon::Attack()
+bool ABaseWeapon::ShootTick(float DeltaTime)
 {
-
+	float currentTime = GetWorld()->GetTimeSeconds();
+	float difference = currentTime - _lastShotTime;
+	if (difference > FireRate)
+	{
+		_lastShotTime = currentTime;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
-bool ABaseWeapon::CanFire()
+void ABaseWeapon::Shoot()
 {
-	return false;
 }
 
 TSubclassOf<AActor> ABaseWeapon::GetProjectile()
@@ -50,10 +59,14 @@ TSubclassOf<AActor> ABaseWeapon::GetProjectile()
 
 void ABaseWeapon::HideWeapon()
 {
-
+	SetActorHiddenInGame(true);
+	SetActorEnableCollision(false);
+	SetActorTickEnabled(false);
 }
 
 void ABaseWeapon::ShowWeapon()
 {
-
+	SetActorHiddenInGame(false);
+	SetActorEnableCollision(true);
+	SetActorTickEnabled(true);
 }

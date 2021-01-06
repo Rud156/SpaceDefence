@@ -24,3 +24,9 @@ enum class EPlayerWeapon: uint8
 	Primary,
 	Secondary
 };
+
+UENUM(BlueprintType)
+enum class EInteractibleType: uint8
+{
+	Weapon
+};
