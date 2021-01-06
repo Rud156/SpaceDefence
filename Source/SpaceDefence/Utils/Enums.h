@@ -30,3 +30,14 @@ enum class EInteractibleType: uint8
 {
 	Weapon
 };
+
+
+//PlaceAble Actor Upgrades
+UENUM(BlueprintType)
+enum class EPlaceAbleUpgrades : uint8
+{
+	None,
+	Ability1,
+	Ability2
+};
+

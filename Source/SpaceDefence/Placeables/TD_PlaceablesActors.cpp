@@ -3,6 +3,19 @@
 
 #include "TD_PlaceablesActors.h"
 
+
+#include "TD_GameModeFPS.h"
+#include "CurrencyManager/TD_CurrencyManager.h"
+
+#include "Kismet/GameplayStatics.h"
+
+#include "SpaceDefence/Public/DevelopmentTools/TD_DevelopmentTools.h"
+
+
+#define ZER0 0.0
+
+//#include "SpaceDefence/Utils/Structs.h"
+
 // Sets default values
 ATD_PlaceablesActors::ATD_PlaceablesActors()
 {
@@ -12,6 +25,7 @@ ATD_PlaceablesActors::ATD_PlaceablesActors()
 	SetRootComponent(RootMeshComponent);
 	Model = CreateDefaultSubobject<UStaticMeshComponent>("Model");
 	Model->SetupAttachment(GetRootComponent());
+	Model->SetCollisionProfileName(TEXT("InteractionPreset"));
 
 }
 
@@ -25,24 +39,88 @@ void ATD_PlaceablesActors::BeginPlay()
 		RightSnapPoint = Model->GetStaticMesh()->GetBounds().BoxExtent.Y;
 		LeftSnapPoint = RightSnapPoint * -1;
 	}
+	
+
+
 }
 
-void ATD_PlaceablesActors::Place()
+void ATD_PlaceablesActors::ApplyDamage(float Amount)
 {
+	if(ActorData.Health> ZER0)
+	{
+		ActorData.Health -= Amount;
+		if(ActorData.Health < ZER0)
+		{
+			RemoveActor();
+		}
+	}
 }
 
-void ATD_PlaceablesActors::LeftRotate()
+void ATD_PlaceablesActors::SetData(FPlaceAbleData Data)
 {
+	ActorData = Data;
+	if (ActorData.PlacementSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this,ActorData.PlacementSound,this->GetActorLocation());
+
+	}
 }
 
-void ATD_PlaceablesActors::RightRotate()
+int ATD_PlaceablesActors::GetDestructionCost() const
 {
+	if(ActorData.GoldCost> ZER0)
+	{
+		return ActorData.GoldCost / 2;
+	}
+	return 0;
 }
+
+void ATD_PlaceablesActors::RemoveActor()
+{
+	//TODO do stuff here;
+	if(ActorData.DestructionSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, ActorData.DestructionSound, this->GetActorLocation());
+	}
+	auto GameMode = GetWorld()->GetAuthGameMode();
+	if(GameMode)
+	{
+		auto tempCurrency = Cast<ATD_GameModeFPS>(GameMode)->CurrencyManagerRef;
+		if(tempCurrency)
+		{
+			tempCurrency->AddCurrency(GetDestructionCost());
+		}
+		
+	}
+	
+	this->Destroy();
+	
+}
+
+void ATD_PlaceablesActors::UpgradeActor()
+{
+	PrintToScreen_Color("Upgrade pressed!", FColor::Blue);
+	if (ActorData.UpgradeSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, ActorData.UpgradeSound, this->GetActorLocation());
+	}
+}
+
+void ATD_PlaceablesActors::CheckIfAlive()
+{
+	if (ActorData.GoldCost < ZER0)
+	{
+		RemoveActor();
+	}
+}
+
 
 // Called every frame
 void ATD_PlaceablesActors::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+
+	CheckIfAlive();
 }
 

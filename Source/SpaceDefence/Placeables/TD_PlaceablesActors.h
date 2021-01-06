@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "SpaceDefence/Utils/Structs.h"
 #include "TD_PlaceablesActors.generated.h"
 
 UCLASS()
@@ -24,12 +25,15 @@ public:
 	//Game play variables.
 	bool bCanPlace = false;
 
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawn Settings")
+		FPlaceAbleData ActorData;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Place Able Settings")
 		USceneComponent* RootMeshComponent = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Place Able Settings")
 		UStaticMeshComponent* Model = nullptr;
 
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		float LeftSnapPoint;
 
@@ -38,14 +42,18 @@ public:
 	
 	//Game play functions
 
+	UFUNCTION(BlueprintCallable)
+		void ApplyDamage(float Amount);
+
+	//Non blueprint functions calls
+	void SetData(FPlaceAbleData Data);
+
+	int GetDestructionCost() const;
+
+	void RemoveActor();
+	void UpgradeActor();
+private:
 	
-	UFUNCTION(BlueprintCallable)
-		void Place();
 
-	UFUNCTION(BlueprintCallable)
-		void LeftRotate();
-
-	UFUNCTION(BlueprintCallable)
-		void RightRotate();
-
+	void CheckIfAlive();
 };
