@@ -2,14 +2,14 @@
 
 
 #include "DevelopmentTools/TD_DevelopmentTools.h"
-#include "Enemy/BaseEnemy.h"
+#include "../../Enemies/BaseEnemy.h"
 #include "WaveSystem/TD_WaveController.h"
 
 
 // Sets default values
 ATD_WaveController::ATD_WaveController()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	
