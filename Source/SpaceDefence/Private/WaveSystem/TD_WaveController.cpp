@@ -75,7 +75,7 @@ void ATD_WaveController::SpawnGroups(int GroupCount)
 	}
 }
 
-void ATD_WaveController::SpawnEnemies(FWaveGroup GroupSettings, int GroupCount)
+void ATD_WaveController::SpawnEnemies(const FWaveGroup& GroupSettings, int GroupCount)
 {
 	if (SpawnEnemyCount < GroupSettings.EnemyCount)
 	{
@@ -85,9 +85,9 @@ void ATD_WaveController::SpawnEnemies(FWaveGroup GroupSettings, int GroupCount)
 		FRotator Rot;
 		if(GroupSettings.EnemyType!=nullptr)
 		{
-			FActorSpawnParameters test;
-			test.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-			auto TempEnemy = GetWorld()->SpawnActor(GroupSettings.EnemyType.Get(), &Location, &Rot,test);
+			FActorSpawnParameters SpawnParameters;
+			SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+			auto TempEnemy = GetWorld()->SpawnActor(GroupSettings.EnemyType.Get(), &Location, &Rot,SpawnParameters);
 			
 		}
 		SpawnEnemyCount++;

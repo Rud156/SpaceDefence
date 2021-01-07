@@ -49,7 +49,7 @@ protected:
 
 	//This has to be a UFUNCTION for the timer delegate. 
 	UFUNCTION()
-		void SpawnEnemies(FWaveGroup GroupSettings, int GroupCount);
+		void SpawnEnemies(const FWaveGroup& GroupSettings, int GroupCount);
 
 	
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
