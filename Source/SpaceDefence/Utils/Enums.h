@@ -17,6 +17,19 @@ enum class EPlayerMovementState: uint8
 	Slide
 };
 
+UENUM(BlueprintType)
+enum class EPlayerWeapon: uint8
+{
+	Melee,
+	Primary,
+	Secondary
+};
+
+UENUM(BlueprintType)
+enum class EInteractibleType: uint8
+{
+	Weapon
+};
 
 
 //PlaceAble Actor Upgrades
