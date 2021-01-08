@@ -30,10 +30,11 @@ EInteractibleType ASecondaryWeapon::GetInteractibleType_Implementation()
 }
 
 bool ASecondaryWeapon::InteractUpdate_Implementation(float DeltaTime)
-{
+{	
 	_currentInteractionTime -= DeltaTime;
 	if (_currentInteractionTime <= 0)
 	{
+		_interactionStarted = false;
 		return true;
 	}
 
@@ -42,7 +43,12 @@ bool ASecondaryWeapon::InteractUpdate_Implementation(float DeltaTime)
 
 void ASecondaryWeapon::CancelInteraction_Implementation()
 {
+	_interactionStarted = false;
+}
 
+bool ASecondaryWeapon::InteractionStarted_Implementation()
+{
+	return _interactionStarted;
 }
 
 float ASecondaryWeapon::GetCurrentInteractionTime_Implementation()
@@ -52,10 +58,17 @@ float ASecondaryWeapon::GetCurrentInteractionTime_Implementation()
 
 float ASecondaryWeapon::GetBaseInteractionTime_Implementation()
 {
-	return WeaponInteractionTime;
+	return _interactionDuration;
+}
+
+float ASecondaryWeapon::GetInteractionProgress_Implementation()
+{
+	return 1 - (_currentInteractionTime / _interactionDuration);
 }
 
 void ASecondaryWeapon::SetInteractionTime_Implementation(float DurationMultiplier)
 {
-	_currentInteractionTime = WeaponInteractionTime * DurationMultiplier;
+	_interactionStarted = true;
+	_interactionDuration = WeaponInteractionTime * DurationMultiplier;
+	_currentInteractionTime = _interactionDuration;
 }

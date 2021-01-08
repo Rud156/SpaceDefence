@@ -17,6 +17,8 @@ class SPACEDEFENCE_API ASecondaryWeapon : public ABaseWeapon, public IIntfBaseIn
 	GENERATED_BODY()
 
 	float _currentInteractionTime;
+	float _interactionDuration;
+	bool _interactionStarted;
 
 protected:
 	virtual void BeginPlay() override;
@@ -40,7 +42,9 @@ public:
 	virtual EInteractibleType GetInteractibleType_Implementation() override;
 	virtual bool InteractUpdate_Implementation(float DeltaTime) override;
 	virtual void CancelInteraction_Implementation() override;
+	virtual bool InteractionStarted_Implementation() override;
 	virtual float GetCurrentInteractionTime_Implementation() override;
 	virtual float GetBaseInteractionTime_Implementation() override;
+	virtual float GetInteractionProgress_Implementation() override;
 	virtual void SetInteractionTime_Implementation(float DurationMultiplier) override;
 };

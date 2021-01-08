@@ -12,6 +12,7 @@
 class ABasePlayerProjectile;
 class ABaseWeapon;
 class IIntfBaseInteractible;
+class AInteractionDisplayManager;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayerLanded);
 
@@ -82,6 +83,7 @@ class SPACEDEFENCE_API AFPPlayer : public ACharacter
 	void SpawnWeaponProjectile(TSubclassOf<class AActor> projectile);
 
 	IIntfBaseInteractible* _currentInteractable;
+	AInteractionDisplayManager* _interactionManager;
 	void UpdateInteractibleCollection(float deltaTime);
 	void SetInteractableObject(IIntfBaseInteractible* callingObject);
 	void ClearInteractableObject();
@@ -93,6 +95,7 @@ class SPACEDEFENCE_API AFPPlayer : public ACharacter
 	ABaseWeapon* _secondaryWeapon;
 	EPlayerWeapon _currentWeapon;
 	void PickupWeapon(ABaseWeapon* weapon);
+	void CheckAndDropWeapon();
 	void ChangeCurrentWeapon(EPlayerWeapon weapon);
 	void ApplyWeaponChangesToCharacter();
 	void HandleMeleeSelected();

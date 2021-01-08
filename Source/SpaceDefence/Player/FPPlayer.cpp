@@ -5,6 +5,7 @@
 #include "./Projectiles/BasePlayerProjectile.h"
 #include "../Interactibles/IntfBaseInteractible.h"
 #include "./Weapons/BaseWeapon.h"
+#include "../Interactibles/InteractionDisplayManager.h"
 
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -46,7 +47,19 @@ AFPPlayer::AFPPlayer()
 
 void AFPPlayer::BeginPlay()
 {
+	Super::BeginPlay();
+
 	OnPlayerLanded.AddDynamic(this, &AFPPlayer::PlayerLanded);
+	auto interactionActor = UGameplayStatics::GetActorOfClass(GetWorld(), AInteractionDisplayManager::StaticClass());
+	AInteractionDisplayManager* interactionDisplayInstance = Cast<AInteractionDisplayManager>(interactionActor);
+	if (interactionDisplayInstance != nullptr)
+	{
+		_interactionManager = interactionDisplayInstance;
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Interaction Display Not Found!!!");
+	}
 
 	_slideTimer = 0;
 
@@ -56,8 +69,6 @@ void AFPPlayer::BeginPlay()
 	AActor* weapon = GetWorld()->SpawnActor(MeleeWeapon, &FVector::ZeroVector, &FRotator::ZeroRotator);
 	ABaseWeapon* meleeWeapon = Cast<ABaseWeapon>(weapon);
 	PickupMeleeWeapon(meleeWeapon);
-
-	Super::BeginPlay();
 }
 
 void AFPPlayer::Tick(float DeltaTime)
@@ -88,6 +99,7 @@ void AFPPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction("Melee", EInputEvent::IE_Pressed, this, &AFPPlayer::HandleMeleeSelected);
 	PlayerInputComponent->BindAction("Primary", EInputEvent::IE_Pressed, this, &AFPPlayer::HandlePrimarySelected);
 	PlayerInputComponent->BindAction("Secondary", EInputEvent::IE_Pressed, this, &AFPPlayer::HandleSecondarySelected);
+	PlayerInputComponent->BindAction("TestDropCurrentWeapon", IE_Pressed, this, &AFPPlayer::CheckAndDropWeapon);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AFPPlayer::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AFPPlayer::MoveRight);
@@ -309,8 +321,16 @@ void AFPPlayer::PlayerLanded()
 
 void AFPPlayer::UpdateInteractibleCollection(float deltaTime)
 {
-	if (_currentInteractable != nullptr)
+	if (_currentInteractable != nullptr && _currentInteractable->InteractionStarted_Implementation())
 	{
+		auto actor = Cast<AActor>(_currentInteractable);
+		float distance = FVector::Distance(actor->GetActorLocation(), GetActorLocation());
+		if (distance > MaxInteractionDistance)
+		{
+			HandleInteractReleased();
+			return;
+		}
+
 		bool interactionComplete = _currentInteractable->InteractUpdate_Implementation(deltaTime);
 		if (interactionComplete)
 		{
@@ -321,8 +341,36 @@ void AFPPlayer::UpdateInteractibleCollection(float deltaTime)
 				break;
 			}
 
-			GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Interaction Complete");
+			_interactionManager->HideInteractionBar();
 			ClearInteractableObject();
+
+			GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Interaction Complete");
+		}
+		else
+		{
+			_interactionManager->SetInteractionBarProgress(_currentInteractable->GetInteractionProgress_Implementation());
+		}
+	}
+	else
+	{
+		FHitResult hitResult;
+		FVector startPosition = InteractionCastPoint->GetComponentLocation();
+		FVector endPosition = startPosition + CharacterCamera->GetForwardVector() * MaxInteractionDistance;
+
+		bool hit = GetWorld()->LineTraceSingleByChannel(hitResult, startPosition, endPosition, ECollisionChannel::ECC_Visibility);
+		if (hit && hitResult.GetActor() != nullptr)
+		{
+			AActor* tempActor = hitResult.GetActor();
+
+			_currentInteractable = Cast<IIntfBaseInteractible>(tempActor);
+			if (_currentInteractable != nullptr)
+			{
+				_interactionManager->ShowInteractionBar();
+			}
+		}
+		else
+		{
+			_interactionManager->HideInteractionBar();
 		}
 	}
 }
@@ -339,32 +387,9 @@ void AFPPlayer::ClearInteractableObject()
 
 void AFPPlayer::HandleInteractPressed()
 {
-	if (_currentInteractable == nullptr)
+	if (_currentInteractable != nullptr)
 	{
-		FHitResult hitResult;
-		FVector startPosition = InteractionCastPoint->GetComponentLocation();
-		FVector endPosition = startPosition + CharacterCamera->GetForwardVector() * MaxInteractionDistance;
-
-		bool hit = GetWorld()->LineTraceSingleByChannel(hitResult, startPosition, endPosition, ECollisionChannel::ECC_Visibility);
-		if (hit && hitResult.GetActor() != nullptr)
-		{
-			AActor* tempActor = hitResult.GetActor();
-			GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Hit: " + tempActor->GetName());
-
-			_currentInteractable = Cast<IIntfBaseInteractible>(tempActor);
-			if (_currentInteractable != nullptr)
-			{
-				_currentInteractable->SetInteractionTime_Implementation(1);
-			}
-			else
-			{
-				GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Interaction Cast Failed");
-			}
-		}
-		else
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Nothing hit");
-		}
+		_currentInteractable->SetInteractionTime_Implementation(1);
 	}
 }
 
@@ -372,7 +397,9 @@ void AFPPlayer::HandleInteractReleased()
 {
 	if (_currentInteractable != nullptr)
 	{
+		_interactionManager->SetInteractionBarProgress(0);
 		_currentInteractable->CancelInteraction_Implementation();
+
 		ClearInteractableObject();
 	}
 }
@@ -586,6 +613,25 @@ void AFPPlayer::PickupWeapon(ABaseWeapon* weapon)
 	}
 }
 
+void AFPPlayer::CheckAndDropWeapon()
+{
+	switch (_currentWeapon)
+	{
+	case EPlayerWeapon::Melee:
+		// Do nothing as Melee Weapon cannot be changed...
+		break;
+
+	case EPlayerWeapon::Primary:
+		DropPrimaryWeapon();
+		break;
+
+	case EPlayerWeapon::Secondary:
+		DropSecondaryWeapon();
+		break;
+	}
+}
+
+
 ABaseWeapon* AFPPlayer::GetPrimaryWeapon()
 {
 	return _primaryWeapon;
@@ -610,9 +656,9 @@ void AFPPlayer::PickupPrimaryWeapon(ABaseWeapon* primaryWeapon)
 
 ABaseWeapon* AFPPlayer::DropPrimaryWeapon()
 {
-	FDetachmentTransformRules detachRules = FDetachmentTransformRules(EDetachmentRule::KeepRelative,
-		EDetachmentRule::KeepRelative,
-		EDetachmentRule::KeepRelative,
+	FDetachmentTransformRules detachRules = FDetachmentTransformRules(EDetachmentRule::KeepWorld,
+		EDetachmentRule::KeepWorld,
+		EDetachmentRule::KeepWorld,
 		true);
 	_primaryWeapon->DetachFromActor(detachRules);
 
@@ -660,9 +706,9 @@ void AFPPlayer::PickupSecondaryWeapon(ABaseWeapon* secondaryWeapon)
 
 ABaseWeapon* AFPPlayer::DropSecondaryWeapon()
 {
-	FDetachmentTransformRules detachRules = FDetachmentTransformRules(EDetachmentRule::KeepRelative,
-		EDetachmentRule::KeepRelative,
-		EDetachmentRule::KeepRelative,
+	FDetachmentTransformRules detachRules = FDetachmentTransformRules(EDetachmentRule::KeepWorld,
+		EDetachmentRule::KeepWorld,
+		EDetachmentRule::KeepWorld,
 		true);
 	_secondaryWeapon->DetachFromActor(detachRules);
 

@@ -31,10 +31,16 @@ public:
 		void CancelInteraction();
 
 	UFUNCTION(Category = "Interact", BlueprintCallable, BlueprintNativeEvent)
+		bool InteractionStarted();
+
+	UFUNCTION(Category = "Interact", BlueprintCallable, BlueprintNativeEvent)
 		float GetCurrentInteractionTime();
 
 	UFUNCTION(Category = "Interact", BlueprintCallable, BlueprintNativeEvent)
 		float GetBaseInteractionTime();
+
+	UFUNCTION(Category = "Interact", BlueprintCallable, BlueprintNativeEvent)
+		float GetInteractionProgress();
 
 	UFUNCTION(Category = "Interact", BlueprintCallable, BlueprintNativeEvent)
 		void SetInteractionTime(float DurationMultiplier);
