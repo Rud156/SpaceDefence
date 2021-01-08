@@ -80,7 +80,7 @@ class SPACEDEFENCE_API AFPPlayer : public ACharacter
 	void FirePressed();
 	void FireReleased();
 	void FireUpdate(float deltaTime);
-	void SpawnWeaponProjectile(TSubclassOf<class AActor> projectile);
+	void SpawnWeaponProjectile(TSubclassOf<class AActor> projectile, FVector spawnPoint);
 
 	IIntfBaseInteractible* _currentInteractable;
 	AInteractionDisplayManager* _interactionManager;
@@ -170,9 +170,9 @@ public:
 
 	UPROPERTY(Category = "Player|Weapon", EditAnywhere)
 		TSubclassOf<class ABaseWeapon> MeleeWeapon;
-
-	UPROPERTY(Category = "Player|Shooting", EditAnywhere)
-		TSubclassOf<class ABasePlayerProjectile> TempPlayerProjectile;
+	
+	UPROPERTY(Category = "Player|Weapon", EditAnywhere)
+		float MaxShootRayCastRange;
 
 	UPROPERTY(Category = "Player|Delegates", BlueprintAssignable)
 		FPlayerLanded OnPlayerLanded;

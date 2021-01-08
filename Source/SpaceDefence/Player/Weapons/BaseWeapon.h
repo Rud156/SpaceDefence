@@ -25,6 +25,9 @@ protected:
 		class USkeletalMeshComponent* SkeletalWeaponMesh;
 
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
+		class USceneComponent* ShootingPoint;
+
+	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
 		class UBoxComponent* WeaponCollider;
 
 	virtual void BeginPlay() override;
@@ -44,7 +47,8 @@ public:
 
 	ABaseWeapon();
 	virtual void Tick(float DeltaTime) override;
-	
+
+	virtual FVector GetShootingPoint();
 	virtual void Shoot();
 
 	virtual void HideWeapon();

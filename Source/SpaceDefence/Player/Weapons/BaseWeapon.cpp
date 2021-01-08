@@ -13,11 +13,13 @@ ABaseWeapon::ABaseWeapon()
 	WeaponRoot = CreateDefaultSubobject<USceneComponent>(TEXT("WeaponRoot"));
 	StaticWeaponMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaitcWeaponMesh"));
 	SkeletalWeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalWeaponMesh"));
+	ShootingPoint = CreateDefaultSubobject<USceneComponent>(TEXT("ShootingPoint"));
 	WeaponCollider = CreateDefaultSubobject<UBoxComponent>(TEXT("WeaponCollider"));
 
 	RootComponent = WeaponRoot;
 	StaticWeaponMesh->SetupAttachment(WeaponRoot);
 	SkeletalWeaponMesh->SetupAttachment(WeaponRoot);
+	ShootingPoint->SetupAttachment(WeaponRoot);
 	WeaponCollider->SetupAttachment(WeaponRoot);
 
 	PrimaryActorTick.bCanEverTick = true;
@@ -46,6 +48,11 @@ bool ABaseWeapon::ShootTick(float DeltaTime)
 	{
 		return false;
 	}
+}
+
+FVector ABaseWeapon::GetShootingPoint()
+{
+	return ShootingPoint->GetComponentLocation();
 }
 
 void ABaseWeapon::Shoot()

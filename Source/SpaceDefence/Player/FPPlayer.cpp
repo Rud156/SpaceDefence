@@ -9,13 +9,16 @@
 
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/SceneComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/ProjectileMovementComponent.h"
+
 
 #include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 
 AFPPlayer::AFPPlayer()
 {
@@ -343,8 +346,6 @@ void AFPPlayer::UpdateInteractibleCollection(float deltaTime)
 
 			_interactionManager->HideInteractionBar();
 			ClearInteractableObject();
-
-			GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Interaction Complete");
 		}
 		else
 		{
@@ -541,7 +542,7 @@ void AFPPlayer::FireUpdate(float deltaTime)
 			if (_primaryWeapon->ShootTick(deltaTime))
 			{
 				_primaryWeapon->Shoot();
-				SpawnWeaponProjectile(_primaryWeapon->GetProjectile());
+				SpawnWeaponProjectile(_primaryWeapon->GetProjectile(), _primaryWeapon->GetShootingPoint());
 			}
 		}
 		break;
@@ -551,7 +552,7 @@ void AFPPlayer::FireUpdate(float deltaTime)
 			if (_secondaryWeapon->ShootTick(deltaTime))
 			{
 				_secondaryWeapon->Shoot();
-				SpawnWeaponProjectile(_secondaryWeapon->GetProjectile());
+				SpawnWeaponProjectile(_secondaryWeapon->GetProjectile(), _secondaryWeapon->GetShootingPoint());
 			}
 		}
 		break;
@@ -559,16 +560,28 @@ void AFPPlayer::FireUpdate(float deltaTime)
 	}
 }
 
-void AFPPlayer::SpawnWeaponProjectile(TSubclassOf<class AActor> projectile)
+void AFPPlayer::SpawnWeaponProjectile(TSubclassOf<class AActor> projectile, FVector spawnPoint)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Projectile Spawned");
+	FVector startingPoint = CharacterCamera->GetComponentLocation();
+	FVector forwardVector = CharacterCamera->GetForwardVector();
+	FVector endingPoint = startingPoint + forwardVector * MaxShootRayCastRange;
 
-	FVector spawnPoint = WeaponTempShootingPoint->GetComponentLocation();
-	FRotator spawnRotation = GetControlRotation();
+	FHitResult hitResult;
+	FCollisionQueryParams collisionParams;
+	collisionParams.AddIgnoredActor(this);
+
+	FVector targetPoint = endingPoint;
+
+	bool hit = GetWorld()->LineTraceSingleByChannel(hitResult, startingPoint, endingPoint, ECollisionChannel::ECC_Visibility, collisionParams);
+	if (hit && hitResult.GetActor() != nullptr)
+	{
+		targetPoint = hitResult.ImpactPoint;
+	}
 
 	FActorSpawnParameters spawnParams;
 	spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
 
+	FRotator spawnRotation = UKismetMathLibrary::FindLookAtRotation(spawnPoint, targetPoint);
 	GetWorld()->SpawnActor<ABasePlayerProjectile>(projectile, spawnPoint, spawnRotation, spawnParams);
 }
 
