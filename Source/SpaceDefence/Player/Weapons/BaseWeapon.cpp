@@ -8,6 +8,8 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
 
+#include "TextAsset/Public/TextAsset.h"
+
 ABaseWeapon::ABaseWeapon()
 {
 	WeaponRoot = CreateDefaultSubobject<USceneComponent>(TEXT("WeaponRoot"));
@@ -48,6 +50,11 @@ bool ABaseWeapon::ShootTick(float DeltaTime)
 	{
 		return false;
 	}
+}
+
+FText ABaseWeapon::GetRecoilString()
+{
+	return RecoilData->Text;
 }
 
 FVector ABaseWeapon::GetShootingPoint()

@@ -9,6 +9,8 @@
 
 #include "BaseWeapon.generated.h"
 
+class UTextAsset;
+
 UCLASS()
 class SPACEDEFENCE_API ABaseWeapon : public AActor
 {
@@ -42,12 +44,16 @@ public:
 
 	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
 		float FireRate;
+
+	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
+		UTextAsset* RecoilData;
 	
 #pragma endregion
 
 	ABaseWeapon();
 	virtual void Tick(float DeltaTime) override;
 
+	virtual FText GetRecoilString();
 	virtual FVector GetShootingPoint();
 	virtual void Shoot();
 
