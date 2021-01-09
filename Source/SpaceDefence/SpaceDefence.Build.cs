@@ -17,7 +17,10 @@ public class SpaceDefence : ModuleRules
             "UMG",
             "Slate",
             "SlateCore",
-            "TextAsset"
+            "TextAsset",
+            "AIModule",
+            "GameplayTasks",
+            "NavigationSystem"
         });
     }
 }
