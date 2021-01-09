@@ -32,6 +32,8 @@ class SPACEDEFENCE_API ABaseWeapon : public AActor
 {
 	GENERATED_BODY()
 
+	float BASE_RECOIL_MULTIPLIER = 0.1f;
+
 protected:
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
 		class USceneComponent* WeaponRoot;
@@ -52,7 +54,8 @@ protected:
 
 	float _lastShotTime;
 	TArray<FRecoilOffset> _recoilOffsets;
-	TMap<int, TMap<int, FString>> _recoilMatrix;
+	int _currentRecoilIndex;
+	float _currentRecoilTime;
 
 public:
 #pragma region Properties
@@ -65,6 +68,9 @@ public:
 
 	UPROPERTY(Category = "Weapon|Data", BlueprintReadOnly, EditAnywhere)
 		UTextAsset* RecoilData;
+
+	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
+		float RecoilResetTime;
 
 #pragma endregion
 
@@ -79,6 +85,7 @@ public:
 
 	virtual bool ShootTick(float DeltaTime);
 	virtual TSubclassOf<class AActor> GetProjectile();
+	virtual FVector2D GetCurrentRecoilOffset();
 
 	UFUNCTION(Category = Weapon, BlueprintCallable)
 		void LoadRecoilData(FText recoilText);

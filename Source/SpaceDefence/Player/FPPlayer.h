@@ -80,6 +80,7 @@ class SPACEDEFENCE_API AFPPlayer : public ACharacter
 	void FirePressed();
 	void FireReleased();
 	void FireUpdate(float deltaTime);
+	void UpdateRecoilCamera(FVector2D recoilOffset);
 	void SpawnWeaponProjectile(TSubclassOf<class AActor> projectile, FVector spawnPoint);
 
 	IIntfBaseInteractible* _currentInteractable;

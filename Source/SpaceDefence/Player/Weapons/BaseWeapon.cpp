@@ -41,10 +41,7 @@ void ABaseWeapon::Tick(float DeltaTime)
 void ABaseWeapon::LoadRecoilData(FText recoilText)
 {
 	_recoilOffsets = TArray<FRecoilOffset>();
-	_recoilMatrix = TMap<int, TMap<int, FString>>();
-	
 	FString recoilString = recoilText.ToString();
-
 	FString currentNumberString = "";
 
 	int currentRowIndex = 0;
@@ -53,12 +50,6 @@ void ABaseWeapon::LoadRecoilData(FText recoilText)
 	for (int i = 0; i < recoilString.Len(); i++)
 	{
 		auto letter = recoilString[i];
-
-		if (!_recoilMatrix.Contains(currentRowIndex))
-		{
-			TMap<int, FString> dict = TMap<int, FString>();
-			_recoilMatrix.Add(currentRowIndex, dict);
-		}
 
 		if (letter == '\r')
 		{
@@ -78,8 +69,8 @@ void ABaseWeapon::LoadRecoilData(FText recoilText)
 			if (currentNumberString != "")
 			{
 				int number;
-				bool succes = FDefaultValueHelper::ParseInt(currentNumberString, number);
-				if (succes)
+				bool success = FDefaultValueHelper::ParseInt(currentNumberString, number);
+				if (success)
 				{
 					FRecoilOffset recoilOffset;
 					recoilOffset.index = number;
@@ -88,7 +79,6 @@ void ABaseWeapon::LoadRecoilData(FText recoilText)
 					recoilOffset.offset = FVector2D::ZeroVector;
 
 					_recoilOffsets.Add(recoilOffset);
-					_recoilMatrix[currentRowIndex].Add(currentColumnIndex, currentNumberString);
 				}
 
 				currentNumberString = "";
@@ -110,17 +100,21 @@ void ABaseWeapon::LoadRecoilData(FText recoilText)
 		int rowDiff = centerRow - recoilData.rowIndex;
 		int columnDiff = centerColumn - recoilData.columnIndex;
 
-		FVector2D offset = FVector2D(columnDiff, rowDiff);
+		FVector2D offset = FVector2D(columnDiff * BASE_RECOIL_MULTIPLIER, rowDiff * BASE_RECOIL_MULTIPLIER);
 		recoilData.offset = offset;
 
 		_recoilOffsets[j] = recoilData;
 	}
-
 	_recoilOffsets.Sort(FSortRecoil());
 }
 
 bool ABaseWeapon::ShootTick(float DeltaTime)
 {
+	if (_currentRecoilTime > 0)
+	{
+		_currentRecoilTime -= DeltaTime;
+	}
+
 	float currentTime = GetWorld()->GetTimeSeconds();
 	float difference = currentTime - _lastShotTime;
 	if (difference > FireRate)
@@ -141,11 +135,26 @@ FVector ABaseWeapon::GetShootingPoint()
 
 void ABaseWeapon::Shoot()
 {
+	// Probably use this to play VFX or something...
 }
 
 TSubclassOf<AActor> ABaseWeapon::GetProjectile()
 {
 	return nullptr;
+}
+
+FVector2D ABaseWeapon::GetCurrentRecoilOffset()
+{
+	if (_currentRecoilIndex >= _recoilOffsets.Num())
+	{
+		_currentRecoilIndex = _recoilOffsets.Num() - 1;
+	}
+
+	FVector2D offset = _recoilOffsets[_currentRecoilIndex].offset;
+	_currentRecoilIndex += 1;
+	_currentRecoilTime = RecoilResetTime;
+
+	return offset;
 }
 
 void ABaseWeapon::HideWeapon()

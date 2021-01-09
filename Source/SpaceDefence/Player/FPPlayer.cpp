@@ -542,6 +542,8 @@ void AFPPlayer::FireUpdate(float deltaTime)
 			if (_primaryWeapon->ShootTick(deltaTime))
 			{
 				_primaryWeapon->Shoot();
+				FVector2D recoilOffset = _primaryWeapon->GetCurrentRecoilOffset();
+				UpdateRecoilCamera(recoilOffset);
 				SpawnWeaponProjectile(_primaryWeapon->GetProjectile(), _primaryWeapon->GetShootingPoint());
 			}
 		}
@@ -552,12 +554,20 @@ void AFPPlayer::FireUpdate(float deltaTime)
 			if (_secondaryWeapon->ShootTick(deltaTime))
 			{
 				_secondaryWeapon->Shoot();
+				FVector2D recoilOffset = _secondaryWeapon->GetCurrentRecoilOffset();
+				UpdateRecoilCamera(recoilOffset);
 				SpawnWeaponProjectile(_secondaryWeapon->GetProjectile(), _secondaryWeapon->GetShootingPoint());
 			}
 		}
 		break;
 		}
 	}
+}
+
+void AFPPlayer::UpdateRecoilCamera(FVector2D recoilOffset)
+{
+	AddControllerYawInput(recoilOffset.X);
+	AddControllerPitchInput(-recoilOffset.Y);
 }
 
 void AFPPlayer::SpawnWeaponProjectile(TSubclassOf<class AActor> projectile, FVector spawnPoint)
