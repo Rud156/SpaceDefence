@@ -9,6 +9,22 @@
 
 #include "BaseWeapon.generated.h"
 
+struct FRecoilOffset
+{
+	int index;
+	int rowIndex;
+	int columnIndex;
+	FVector2D offset;
+};
+
+struct FSortRecoil
+{
+	bool operator() (const FRecoilOffset A, const FRecoilOffset B) const
+	{
+		return A.index < B.index;
+	}
+};
+
 class UTextAsset;
 
 UCLASS()
@@ -35,6 +51,8 @@ protected:
 	virtual void BeginPlay() override;
 
 	float _lastShotTime;
+	TArray<FRecoilOffset> _recoilOffsets;
+	TMap<int, TMap<int, FString>> _recoilMatrix;
 
 public:
 #pragma region Properties
@@ -45,15 +63,14 @@ public:
 	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
 		float FireRate;
 
-	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
+	UPROPERTY(Category = "Weapon|Data", BlueprintReadOnly, EditAnywhere)
 		UTextAsset* RecoilData;
-	
+
 #pragma endregion
 
 	ABaseWeapon();
 	virtual void Tick(float DeltaTime) override;
 
-	virtual FText GetRecoilString();
 	virtual FVector GetShootingPoint();
 	virtual void Shoot();
 
@@ -62,4 +79,7 @@ public:
 
 	virtual bool ShootTick(float DeltaTime);
 	virtual TSubclassOf<class AActor> GetProjectile();
+
+	UFUNCTION(Category = Weapon, BlueprintCallable)
+		void LoadRecoilData(FText recoilText);
 };

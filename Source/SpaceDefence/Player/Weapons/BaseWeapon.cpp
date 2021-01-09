@@ -8,7 +8,8 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
 
-#include "TextAsset/Public/TextAsset.h"
+#include "Containers/UnrealString.h"
+#include "Misc/DefaultValueHelper.h"
 
 ABaseWeapon::ABaseWeapon()
 {
@@ -37,6 +38,87 @@ void ABaseWeapon::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+void ABaseWeapon::LoadRecoilData(FText recoilText)
+{
+	_recoilOffsets = TArray<FRecoilOffset>();
+	_recoilMatrix = TMap<int, TMap<int, FString>>();
+	
+	FString recoilString = recoilText.ToString();
+
+	FString currentNumberString = "";
+
+	int currentRowIndex = 0;
+	int currentColumnIndex = 0;
+
+	for (int i = 0; i < recoilString.Len(); i++)
+	{
+		auto letter = recoilString[i];
+
+		if (!_recoilMatrix.Contains(currentRowIndex))
+		{
+			TMap<int, FString> dict = TMap<int, FString>();
+			_recoilMatrix.Add(currentRowIndex, dict);
+		}
+
+		if (letter == '\r')
+		{
+			currentRowIndex += 1;
+			currentColumnIndex = 0;
+			i += 1;
+		}
+		else if (letter == '\n')
+		{
+			currentRowIndex += 1;
+			currentColumnIndex = 0;
+		}
+		else if (letter == ',')
+		{
+			currentColumnIndex += 1;
+
+			if (currentNumberString != "")
+			{
+				int number;
+				bool succes = FDefaultValueHelper::ParseInt(currentNumberString, number);
+				if (succes)
+				{
+					FRecoilOffset recoilOffset;
+					recoilOffset.index = number;
+					recoilOffset.rowIndex = currentRowIndex;
+					recoilOffset.columnIndex = currentColumnIndex;
+					recoilOffset.offset = FVector2D::ZeroVector;
+
+					_recoilOffsets.Add(recoilOffset);
+					_recoilMatrix[currentRowIndex].Add(currentColumnIndex, currentNumberString);
+				}
+
+				currentNumberString = "";
+			}
+		}
+		else
+		{
+			currentNumberString += letter;
+		}
+	}
+
+	int centerRow = currentRowIndex / 2;
+	int centerColumn = currentColumnIndex / 2;
+
+	for (int j = 0; j < _recoilOffsets.Num(); j++)
+	{
+		auto recoilData = _recoilOffsets[j];
+
+		int rowDiff = centerRow - recoilData.rowIndex;
+		int columnDiff = centerColumn - recoilData.columnIndex;
+
+		FVector2D offset = FVector2D(columnDiff, rowDiff);
+		recoilData.offset = offset;
+
+		_recoilOffsets[j] = recoilData;
+	}
+
+	_recoilOffsets.Sort(FSortRecoil());
+}
+
 bool ABaseWeapon::ShootTick(float DeltaTime)
 {
 	float currentTime = GetWorld()->GetTimeSeconds();
@@ -50,11 +132,6 @@ bool ABaseWeapon::ShootTick(float DeltaTime)
 	{
 		return false;
 	}
-}
-
-FText ABaseWeapon::GetRecoilString()
-{
-	return RecoilData->Text;
 }
 
 FVector ABaseWeapon::GetShootingPoint()
