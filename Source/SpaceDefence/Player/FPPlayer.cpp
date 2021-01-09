@@ -271,7 +271,7 @@ void AFPPlayer::FrameDelayedJump()
 	directionVector.Y *= JumpVelocity.Y * velocity;
 	directionVector.Z = JumpVelocity.Z;
 
-	LaunchCharacter(directionVector, false, false);
+	LaunchCharacter(directionVector, true, true);
 }
 
 void AFPPlayer::RunPressed()
