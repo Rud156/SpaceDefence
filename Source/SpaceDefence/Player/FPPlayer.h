@@ -13,6 +13,7 @@ class ABasePlayerProjectile;
 class ABaseWeapon;
 class IIntfBaseInteractible;
 class AInteractionDisplayManager;
+class AWorldPingMarker;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayerLanded);
 
@@ -102,6 +103,8 @@ class SPACEDEFENCE_API AFPPlayer : public ACharacter
 	void HandleMeleeSelected();
 	void HandlePrimarySelected();
 	void HandleSecondarySelected();
+
+	void HandlePlayerPinged();
 	
 protected:
 	virtual void BeginPlay() override;
@@ -171,6 +174,12 @@ public:
 
 	UPROPERTY(Category = "Player|Weapon", EditAnywhere)
 		TSubclassOf<class ABaseWeapon> MeleeWeapon;
+
+	UPROPERTY(Category = "Player|Ping", EditAnywhere)
+		TSubclassOf<class AWorldPingMarker> PingMarker;
+
+	UPROPERTY(Category = "Player|Ping", EditAnywhere)
+		FVector PingSpawnOffset;
 	
 	UPROPERTY(Category = "Player|Weapon", EditAnywhere)
 		float MaxShootRayCastRange;

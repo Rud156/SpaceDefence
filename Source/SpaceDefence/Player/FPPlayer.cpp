@@ -6,6 +6,8 @@
 #include "../Interactibles/IntfBaseInteractible.h"
 #include "./Weapons/BaseWeapon.h"
 #include "../Interactibles/InteractionDisplayManager.h"
+#include "../Markers/WorldPingComponent.h"
+#include "../Markers/WorldPingMarker.h"
 
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -103,6 +105,7 @@ void AFPPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction("Primary", EInputEvent::IE_Pressed, this, &AFPPlayer::HandlePrimarySelected);
 	PlayerInputComponent->BindAction("Secondary", EInputEvent::IE_Pressed, this, &AFPPlayer::HandleSecondarySelected);
 	PlayerInputComponent->BindAction("TestDropCurrentWeapon", IE_Pressed, this, &AFPPlayer::CheckAndDropWeapon);
+	PlayerInputComponent->BindAction("Ping", EInputEvent::IE_Pressed, this, &AFPPlayer::HandlePlayerPinged);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AFPPlayer::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AFPPlayer::MoveRight);
@@ -839,5 +842,37 @@ void AFPPlayer::HandleSecondarySelected()
 	{
 		ChangeCurrentWeapon(EPlayerWeapon::Secondary);
 		ApplyWeaponChangesToCharacter();
+	}
+}
+
+void AFPPlayer::HandlePlayerPinged()
+{
+	FVector startingPoint = CharacterCamera->GetComponentLocation();
+	FVector forwardVector = CharacterCamera->GetForwardVector();
+	FVector endingPoint = startingPoint + forwardVector * MaxShootRayCastRange;
+
+	FHitResult hitResult;
+	FCollisionQueryParams collisionParams;
+	collisionParams.AddIgnoredActor(this);
+
+	bool hit = GetWorld()->LineTraceSingleByChannel(hitResult, startingPoint, endingPoint, ECollisionChannel::ECC_Visibility, collisionParams);
+	if (hit && hitResult.GetActor() != nullptr)
+	{
+		auto hitActor = hitResult.GetActor();
+		UActorComponent* actorComponent = hitActor->GetComponentByClass(UWorldPingComponent::StaticClass());
+
+		FVector spawnPoint = hitResult.ImpactPoint + PingSpawnOffset;
+		AActor* spawnedActorInstance = GetWorld()->SpawnActor(PingMarker, &spawnPoint, &FRotator::ZeroRotator);
+
+		if (actorComponent != nullptr)
+		{
+			UWorldPingComponent* pingComponent = Cast<UWorldPingComponent>(actorComponent);
+			UTexture2D* pingTexture = pingComponent->GetPingTexture();
+			float pingTime = pingComponent->GetPingTime();
+
+			AWorldPingMarker* worldPingMarker = Cast<AWorldPingMarker>(spawnedActorInstance);
+			worldPingMarker->UpdateWidgetTexture(pingTexture);
+			worldPingMarker->SetPingTime(pingTime);
+		}
 	}
 }
