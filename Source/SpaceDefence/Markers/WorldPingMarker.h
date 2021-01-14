@@ -15,6 +15,7 @@ class SPACEDEFENCE_API AWorldPingMarker : public AActor
 
 	void UpdateWidgetRotation(float deltaTime);
 	void UpdateWidgetDistance(float deltaTime);
+	void UpdateWidgetScale(float deltaTime, float distance);
 	void UpdateWidgetDestroyTimer(float deltaTime);
 
 	float _currentTime;
@@ -33,6 +34,18 @@ public:
 
 	UPROPERTY(Category = "Ping", EditAnywhere)
 		float DefaultPingTime;
+
+	UPROPERTY(Category = "Ping", EditAnywhere)
+		float MinPingScale;
+
+	UPROPERTY(Category = "Ping", EditAnywhere)
+		float MaxPingScale;
+
+	UPROPERTY(Category = "Ping", EditAnywhere)
+		float MinDistance;
+
+	UPROPERTY(Category = "Ping", EditAnywhere)
+		float MaxDistance;
 
 #pragma endregion
 

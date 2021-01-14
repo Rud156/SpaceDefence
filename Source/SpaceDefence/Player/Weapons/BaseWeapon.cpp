@@ -36,6 +36,7 @@ void ABaseWeapon::BeginPlay()
 void ABaseWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	RecoilTick(DeltaTime);
 }
 
 void ABaseWeapon::LoadRecoilData(FText recoilText)
@@ -64,8 +65,6 @@ void ABaseWeapon::LoadRecoilData(FText recoilText)
 		}
 		else if (letter == ',')
 		{
-			currentColumnIndex += 1;
-
 			if (currentNumberString != "")
 			{
 				int number;
@@ -83,6 +82,8 @@ void ABaseWeapon::LoadRecoilData(FText recoilText)
 
 				currentNumberString = "";
 			}
+
+			currentColumnIndex += 1;
 		}
 		else
 		{
@@ -110,11 +111,6 @@ void ABaseWeapon::LoadRecoilData(FText recoilText)
 
 bool ABaseWeapon::ShootTick(float DeltaTime)
 {
-	if (_currentRecoilTime > 0)
-	{
-		_currentRecoilTime -= DeltaTime;
-	}
-
 	float currentTime = GetWorld()->GetTimeSeconds();
 	float difference = currentTime - _lastShotTime;
 	if (difference > FireRate)
@@ -125,6 +121,18 @@ bool ABaseWeapon::ShootTick(float DeltaTime)
 	else
 	{
 		return false;
+	}
+}
+
+void ABaseWeapon::RecoilTick(float deltaTime)
+{
+	if (_currentRecoilTime > 0)
+	{
+		_currentRecoilTime -= deltaTime;
+		if (_currentRecoilTime <= 0)
+		{
+			_currentRecoilIndex = 0;
+		}
 	}
 }
 
@@ -143,18 +151,71 @@ TSubclassOf<AActor> ABaseWeapon::GetProjectile()
 	return nullptr;
 }
 
-FVector2D ABaseWeapon::GetCurrentRecoilOffset()
+FRecoilOffset ABaseWeapon::GetCurrentRecoilData()
 {
+	FRecoilOffset recoilData;
 	if (_currentRecoilIndex >= _recoilOffsets.Num())
 	{
+		recoilData.columnIndex = -1;
+		recoilData.rowIndex = -1;
+		recoilData.index = -1;
+		recoilData.offset = FVector2D(_currentRandomIndex * BASE_RECOIL_MULTIPLIER, 0);
+
+		if (_isLeft)
+		{
+			_currentRandomIndex -= 1;
+			if (_currentRandomIndex <= -RandomXOffset)
+			{
+				_currentRandomShotCount += 1;
+
+				if (_currentRandomShotCount > RandomXStopCount)
+				{
+					_isLeft = false;
+					_currentRandomShotCount = 0;
+				}
+				else
+				{
+					float randomOffset = FMath::RandRange(-1.5f, 1.5f);
+					recoilData.offset = FVector2D(randomOffset * BASE_RECOIL_MULTIPLIER, randomOffset * BASE_RECOIL_MULTIPLIER);
+				}
+			}
+		}
+		else
+		{
+			_currentRandomIndex += 1;
+			if (_currentRandomIndex >= RandomXOffset)
+			{
+				_currentRandomShotCount += 1;
+
+				if (_currentRandomShotCount > RandomXStopCount)
+				{
+					_isLeft = true;
+					_currentRandomShotCount = 0;
+				}
+				else
+				{
+					float randomOffset = FMath::RandRange(-1.5f, 1.5f);
+					recoilData.offset = FVector2D(randomOffset * BASE_RECOIL_MULTIPLIER, randomOffset * BASE_RECOIL_MULTIPLIER);
+				}
+			}
+		}
+
 		_currentRecoilIndex = _recoilOffsets.Num() - 1;
 	}
+	else
+	{
+		recoilData = _recoilOffsets[_currentRecoilIndex];
+	}
 
-	FVector2D offset = _recoilOffsets[_currentRecoilIndex].offset;
 	_currentRecoilIndex += 1;
 	_currentRecoilTime = RecoilResetTime;
 
-	return offset;
+	return recoilData;
+}
+
+int ABaseWeapon::GetMaxRecoilCount()
+{
+	return _recoilOffsets.Num();
 }
 
 void ABaseWeapon::HideWeapon()

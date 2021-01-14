@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 
 #include "../Utils/Enums.h"
+#include "../Utils/Structs.h"
 
 #include "FPPlayer.generated.h"
 
@@ -81,8 +82,9 @@ class SPACEDEFENCE_API AFPPlayer : public ACharacter
 	void FirePressed();
 	void FireReleased();
 	void FireUpdate(float deltaTime);
-	void UpdateRecoilCamera(FVector2D recoilOffset);
-	void SpawnWeaponProjectile(TSubclassOf<class AActor> projectile, FVector spawnPoint);
+	void UpdateRecoilCamera(FRecoilOffset recoilOffset, int maxRecoilCount);
+	UFUNCTION()
+		void SpawnWeaponProjectile(TSubclassOf<class AActor> projectile, FVector spawnPoint);
 
 	IIntfBaseInteractible* _currentInteractable;
 	AInteractionDisplayManager* _interactionManager;

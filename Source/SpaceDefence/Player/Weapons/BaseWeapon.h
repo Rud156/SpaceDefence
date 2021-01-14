@@ -6,16 +6,9 @@
 #include "GameFramework/Actor.h"
 
 #include "../../Utils/Enums.h"
+#include "../../Utils/Structs.h"
 
 #include "BaseWeapon.generated.h"
-
-struct FRecoilOffset
-{
-	int index;
-	int rowIndex;
-	int columnIndex;
-	FVector2D offset;
-};
 
 struct FSortRecoil
 {
@@ -56,6 +49,11 @@ protected:
 	TArray<FRecoilOffset> _recoilOffsets;
 	int _currentRecoilIndex;
 	float _currentRecoilTime;
+	void RecoilTick(float deltaTime);
+
+	bool _isLeft;
+	int _currentRandomIndex;
+	int _currentRandomShotCount;
 
 public:
 #pragma region Properties
@@ -68,6 +66,12 @@ public:
 
 	UPROPERTY(Category = "Weapon|Data", BlueprintReadOnly, EditAnywhere)
 		UTextAsset* RecoilData;
+
+	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
+		int RandomXOffset;
+
+	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
+		int RandomXStopCount;
 
 	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
 		float RecoilResetTime;
@@ -85,7 +89,8 @@ public:
 
 	virtual bool ShootTick(float DeltaTime);
 	virtual TSubclassOf<class AActor> GetProjectile();
-	virtual FVector2D GetCurrentRecoilOffset();
+	virtual FRecoilOffset GetCurrentRecoilData();
+	virtual int GetMaxRecoilCount();
 
 	UFUNCTION(Category = Weapon, BlueprintCallable)
 		void LoadRecoilData(FText recoilText);

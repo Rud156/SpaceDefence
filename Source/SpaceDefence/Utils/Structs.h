@@ -19,7 +19,7 @@ struct FPlaceAbleData :public FTableRowBase
 	GENERATED_BODY()
 public:
 	UPROPERTY(EditAnywhere, Category = "Spawn Settings", BlueprintReadWrite)
-	TSubclassOf<ATD_PlaceablesActors> ActorRef;
+		TSubclassOf<ATD_PlaceablesActors> ActorRef;
 
 	UPROPERTY(EditAnywhere, Category = "Spawn Settings", BlueprintReadOnly)
 		USoundCue* PlacementSound;
@@ -44,15 +44,15 @@ public:
 		bool bCanBeUpgraded;
 
 	//add a upgradable stuffs here
-	
-	UPROPERTY(EditAnywhere, Category = "Spawn Settings", BlueprintReadOnly)
-	class UMaterialInterface* MaterialIcon;
-	
-	UPROPERTY(EditAnywhere, Category = "Spawn Settings", BlueprintReadOnly)
-	class UTexture2D* Icon;
 
-	
-	UStaticMesh*  StaticMeshRef =nullptr ;
+	UPROPERTY(EditAnywhere, Category = "Spawn Settings", BlueprintReadOnly)
+		class UMaterialInterface* MaterialIcon;
+
+	UPROPERTY(EditAnywhere, Category = "Spawn Settings", BlueprintReadOnly)
+		class UTexture2D* Icon;
+
+
+	UStaticMesh* StaticMeshRef = nullptr;
 
 };
 USTRUCT(BlueprintType)
@@ -67,7 +67,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Group Settings", BlueprintReadWrite)
 		float EnemyInterval;
 	UPROPERTY(EditAnywhere, Category = "Group Settings", BlueprintReadWrite)
-		float SpawnRadius=50;
+		float SpawnRadius = 50;
 	UPROPERTY(EditAnywhere, Category = "Group Settings", BlueprintReadWrite)
 		ATD_SpawnPoints* OptionalSpawnLocation = nullptr;
 };
@@ -84,13 +84,24 @@ public:
 		float GroupInterval;
 	UPROPERTY(EditAnywhere, Category = "Wave Settings", BlueprintReadWrite)
 		TArray<FWaveGroup> GroupSettings;
-	
 
-	
-	FWaveSettings(ATD_SpawnPoints* I_SpawnPoints):SpawnPoints(I_SpawnPoints), GroupInterval(0.0f)
+
+
+	FWaveSettings(ATD_SpawnPoints* I_SpawnPoints) :SpawnPoints(I_SpawnPoints), GroupInterval(0.0f)
 	{
-		
+
 	}
 	FWaveSettings()
 	{}
+};
+
+USTRUCT(BlueprintType)
+struct FRecoilOffset
+{
+	GENERATED_BODY();
+
+	int index;
+	int rowIndex;
+	int columnIndex;
+	FVector2D offset;
 };

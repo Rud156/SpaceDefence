@@ -55,7 +55,18 @@ void AWorldPingMarker::UpdateWidgetDistance(float deltaTime)
 	FVector cameraLocation = cameraManager->GetCameraLocation();
 
 	float distance = FVector::Distance(cameraLocation, GetActorLocation());
+	UpdateWidgetScale(deltaTime, distance);
 	EventUpdateWidgetDistance(distance);
+}
+
+void AWorldPingMarker::UpdateWidgetScale(float deltaTime, float distance)
+{
+	FVector2D inputRange = FVector2D(MinDistance, MaxDistance);
+	FVector2D outputRange = FVector2D(MinPingScale, MaxPingScale);
+	float mappedValue = FMath::GetMappedRangeValueClamped(inputRange, outputRange, distance);
+
+	FVector pingScale = FVector::OneVector * mappedValue;
+	SetActorScale3D(pingScale);
 }
 
 void AWorldPingMarker::UpdateWidgetDestroyTimer(float deltaTime)
