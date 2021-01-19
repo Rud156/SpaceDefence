@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
+#include "WaveSystem/TD_WaveController.h"
 #include "DevelopmentTools/TD_DevelopmentTools.h"
 #include "../../Enemies/BaseEnemy.h"
-#include "WaveSystem/TD_WaveController.h"
 
 
 // Sets default values

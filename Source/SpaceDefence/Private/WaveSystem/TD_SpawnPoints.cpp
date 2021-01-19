@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "DevelopmentTools/TD_DevelopmentTools.h"
 #include "WaveSystem/TD_SpawnPoints.h"
+#include "DevelopmentTools/TD_DevelopmentTools.h"
 
 
 //Settings! Event tick turned off for this actor
