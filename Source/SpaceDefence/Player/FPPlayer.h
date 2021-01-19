@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 
 #include "../Utils/Enums.h"
+#include "../Utils/Structs.h"
 
 #include "FPPlayer.generated.h"
 
@@ -13,6 +14,7 @@ class ABasePlayerProjectile;
 class ABaseWeapon;
 class IIntfBaseInteractible;
 class AInteractionDisplayManager;
+class AWorldPingMarker;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayerLanded);
 
@@ -80,8 +82,9 @@ class SPACEDEFENCE_API AFPPlayer : public ACharacter
 	void FirePressed();
 	void FireReleased();
 	void FireUpdate(float deltaTime);
-	void UpdateRecoilCamera(FVector2D recoilOffset);
-	void SpawnWeaponProjectile(TSubclassOf<class AActor> projectile, FVector spawnPoint);
+	void UpdateRecoilCamera(FRecoilOffset recoilOffset, int maxRecoilCount);
+	UFUNCTION()
+		void SpawnWeaponProjectile(TSubclassOf<class AActor> projectile, FVector spawnPoint);
 
 	IIntfBaseInteractible* _currentInteractable;
 	AInteractionDisplayManager* _interactionManager;
@@ -102,6 +105,8 @@ class SPACEDEFENCE_API AFPPlayer : public ACharacter
 	void HandleMeleeSelected();
 	void HandlePrimarySelected();
 	void HandleSecondarySelected();
+
+	void HandlePlayerPinged();
 	
 protected:
 	virtual void BeginPlay() override;
@@ -171,6 +176,12 @@ public:
 
 	UPROPERTY(Category = "Player|Weapon", EditAnywhere)
 		TSubclassOf<class ABaseWeapon> MeleeWeapon;
+
+	UPROPERTY(Category = "Player|Ping", EditAnywhere)
+		TSubclassOf<class AWorldPingMarker> PingMarker;
+
+	UPROPERTY(Category = "Player|Ping", EditAnywhere)
+		FVector PingSpawnOffset;
 	
 	UPROPERTY(Category = "Player|Weapon", EditAnywhere)
 		float MaxShootRayCastRange;

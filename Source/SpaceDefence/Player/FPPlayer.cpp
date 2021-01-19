@@ -6,6 +6,8 @@
 #include "../Interactibles/IntfBaseInteractible.h"
 #include "./Weapons/BaseWeapon.h"
 #include "../Interactibles/InteractionDisplayManager.h"
+#include "../Markers/WorldPingComponent.h"
+#include "../Markers/WorldPingMarker.h"
 
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -103,6 +105,7 @@ void AFPPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction("Primary", EInputEvent::IE_Pressed, this, &AFPPlayer::HandlePrimarySelected);
 	PlayerInputComponent->BindAction("Secondary", EInputEvent::IE_Pressed, this, &AFPPlayer::HandleSecondarySelected);
 	PlayerInputComponent->BindAction("TestDropCurrentWeapon", IE_Pressed, this, &AFPPlayer::CheckAndDropWeapon);
+	PlayerInputComponent->BindAction("Ping", EInputEvent::IE_Pressed, this, &AFPPlayer::HandlePlayerPinged);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AFPPlayer::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AFPPlayer::MoveRight);
@@ -542,9 +545,15 @@ void AFPPlayer::FireUpdate(float deltaTime)
 			if (_primaryWeapon->ShootTick(deltaTime))
 			{
 				_primaryWeapon->Shoot();
-				FVector2D recoilOffset = _primaryWeapon->GetCurrentRecoilOffset();
-				UpdateRecoilCamera(recoilOffset);
-				SpawnWeaponProjectile(_primaryWeapon->GetProjectile(), _primaryWeapon->GetShootingPoint());
+
+				FRecoilOffset recoilOffset = _primaryWeapon->GetCurrentRecoilData();
+				int maxRecoilCount = _primaryWeapon->GetMaxRecoilCount();
+				UpdateRecoilCamera(recoilOffset, maxRecoilCount);
+
+				FTimerDelegate timerHandle;
+				FTimerHandle unusedHandle;
+				timerHandle.BindUFunction(this, FName("SpawnWeaponProjectile"), _primaryWeapon->GetProjectile(), _primaryWeapon->GetShootingPoint());
+				GetWorldTimerManager().SetTimer(unusedHandle, timerHandle, GetWorld()->GetDeltaSeconds(), false);
 			}
 		}
 		break;
@@ -554,9 +563,15 @@ void AFPPlayer::FireUpdate(float deltaTime)
 			if (_secondaryWeapon->ShootTick(deltaTime))
 			{
 				_secondaryWeapon->Shoot();
-				FVector2D recoilOffset = _secondaryWeapon->GetCurrentRecoilOffset();
-				UpdateRecoilCamera(recoilOffset);
-				SpawnWeaponProjectile(_secondaryWeapon->GetProjectile(), _secondaryWeapon->GetShootingPoint());
+
+				FRecoilOffset recoilOffset = _secondaryWeapon->GetCurrentRecoilData();
+				int maxRecoilCount = _secondaryWeapon->GetMaxRecoilCount();
+				UpdateRecoilCamera(recoilOffset, maxRecoilCount);
+
+				FTimerDelegate timerHandle;
+				FTimerHandle unusedHandle;
+				timerHandle.BindUFunction(this, FName("SpawnWeaponProjectile"), _secondaryWeapon->GetProjectile(), _secondaryWeapon->GetShootingPoint());
+				GetWorldTimerManager().SetTimer(unusedHandle, timerHandle, GetWorld()->GetDeltaSeconds(), false);
 			}
 		}
 		break;
@@ -564,10 +579,18 @@ void AFPPlayer::FireUpdate(float deltaTime)
 	}
 }
 
-void AFPPlayer::UpdateRecoilCamera(FVector2D recoilOffset)
+void AFPPlayer::UpdateRecoilCamera(FRecoilOffset recoilOffset, int maxRecoilCount)
 {
-	AddControllerYawInput(recoilOffset.X);
-	AddControllerPitchInput(-recoilOffset.Y);
+	if (recoilOffset.index == maxRecoilCount - 1)
+	{
+		// Don't do anything...
+	}
+	else
+	{
+		FVector2D offset = recoilOffset.offset;
+		AddControllerYawInput(offset.X);
+		AddControllerPitchInput(-offset.Y);
+	}
 }
 
 void AFPPlayer::SpawnWeaponProjectile(TSubclassOf<class AActor> projectile, FVector spawnPoint)
@@ -839,5 +862,37 @@ void AFPPlayer::HandleSecondarySelected()
 	{
 		ChangeCurrentWeapon(EPlayerWeapon::Secondary);
 		ApplyWeaponChangesToCharacter();
+	}
+}
+
+void AFPPlayer::HandlePlayerPinged()
+{
+	FVector startingPoint = CharacterCamera->GetComponentLocation();
+	FVector forwardVector = CharacterCamera->GetForwardVector();
+	FVector endingPoint = startingPoint + forwardVector * MaxShootRayCastRange;
+
+	FHitResult hitResult;
+	FCollisionQueryParams collisionParams;
+	collisionParams.AddIgnoredActor(this);
+
+	bool hit = GetWorld()->LineTraceSingleByChannel(hitResult, startingPoint, endingPoint, ECollisionChannel::ECC_Visibility, collisionParams);
+	if (hit && hitResult.GetActor() != nullptr)
+	{
+		auto hitActor = hitResult.GetActor();
+		UActorComponent* actorComponent = hitActor->GetComponentByClass(UWorldPingComponent::StaticClass());
+
+		FVector spawnPoint = hitResult.ImpactPoint + PingSpawnOffset;
+		AActor* spawnedActorInstance = GetWorld()->SpawnActor(PingMarker, &spawnPoint, &FRotator::ZeroRotator);
+
+		if (actorComponent != nullptr)
+		{
+			UWorldPingComponent* pingComponent = Cast<UWorldPingComponent>(actorComponent);
+			UTexture2D* pingTexture = pingComponent->GetPingTexture();
+			float pingTime = pingComponent->GetPingTime();
+
+			AWorldPingMarker* worldPingMarker = Cast<AWorldPingMarker>(spawnedActorInstance);
+			worldPingMarker->UpdateWidgetTexture(pingTexture);
+			worldPingMarker->SetPingTime(pingTime);
+		}
 	}
 }
