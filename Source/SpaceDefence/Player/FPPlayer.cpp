@@ -15,10 +15,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/SceneComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "GameFramework/ProjectileMovementComponent.h"
 
-
-#include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -84,33 +81,7 @@ void AFPPlayer::Tick(float DeltaTime)
 	UpdateInteractibleCollection(DeltaTime);
 
 	FireUpdate(DeltaTime);
-	WallClimbCheck();
-}
-
-void AFPPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-	check(PlayerInputComponent);
-
-	PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Pressed, this, &AFPPlayer::CharacterJump);
-	PlayerInputComponent->BindAction("Run", EInputEvent::IE_Pressed, this, &AFPPlayer::RunPressed);
-	PlayerInputComponent->BindAction("Run", EInputEvent::IE_Released, this, &AFPPlayer::RunReleased);
-	PlayerInputComponent->BindAction("Crouch", EInputEvent::IE_Pressed, this, &AFPPlayer::CrouchPressed);
-	PlayerInputComponent->BindAction("Crouch", EInputEvent::IE_Released, this, &AFPPlayer::CrouchReleased);
-	PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Pressed, this, &AFPPlayer::FirePressed);
-	PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Released, this, &AFPPlayer::FireReleased);
-	PlayerInputComponent->BindAction("Interact", EInputEvent::IE_Pressed, this, &AFPPlayer::HandleInteractPressed);
-	PlayerInputComponent->BindAction("Interact", EInputEvent::IE_Released, this, &AFPPlayer::HandleInteractReleased);
-	PlayerInputComponent->BindAction("Melee", EInputEvent::IE_Pressed, this, &AFPPlayer::HandleMeleeSelected);
-	PlayerInputComponent->BindAction("Primary", EInputEvent::IE_Pressed, this, &AFPPlayer::HandlePrimarySelected);
-	PlayerInputComponent->BindAction("Secondary", EInputEvent::IE_Pressed, this, &AFPPlayer::HandleSecondarySelected);
-	PlayerInputComponent->BindAction("TestDropCurrentWeapon", IE_Pressed, this, &AFPPlayer::CheckAndDropWeapon);
-	PlayerInputComponent->BindAction("Ping", EInputEvent::IE_Pressed, this, &AFPPlayer::HandlePlayerPinged);
-
-	PlayerInputComponent->BindAxis("MoveForward", this, &AFPPlayer::MoveForward);
-	PlayerInputComponent->BindAxis("MoveRight", this, &AFPPlayer::MoveRight);
-	PlayerInputComponent->BindAxis("Turn", this, &AFPPlayer::Turn);
-	PlayerInputComponent->BindAxis("LookUp", this, &AFPPlayer::LookUp);
+	WallClimbCheck(DeltaTime);
 }
 
 void AFPPlayer::UpdateCharacterSliding(float deltaTime)
@@ -140,7 +111,7 @@ void AFPPlayer::UpdateCharacterSliding(float deltaTime)
 	}
 }
 
-void AFPPlayer::WallClimbCheck()
+void AFPPlayer::WallClimbCheck(float deltaTime)
 {
 	FHitResult hitResult;
 	FCollisionQueryParams collisionParams;
@@ -155,30 +126,36 @@ void AFPPlayer::WallClimbCheck()
 		auto playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 		FKey key = EKeys::SpaceBar;
 
-		float duration = playerController->GetInputKeyTimeDown(key);
-		_currentClimbTime = duration;
-
-		if (_currentClimbTime != 0)
+		float duration = playerController->GetInputKeyTimeDown(key); // TODO: Change this when custom input is added...
+		if (duration != 0)
 		{
+			_currentClimbTime += deltaTime;
 			if (_currentClimbTime <= ClimbDuration)
 			{
+				_isClimbing = true;
 				LaunchCharacter(FVector(0, 0, ClimbVelocity), true, true);
 			}
+			else if (_isOnGround)
+			{
+				_isClimbing = false;
+				_currentClimbTime = 0;
+			}
+		}
+		else
+		{
+			_isClimbing = false;
+			_currentClimbTime = 0;
 		}
 	}
 	else
 	{
+		_isClimbing = false;
 		_currentClimbTime = 0;
 	}
 }
 
 void AFPPlayer::MoveForward(float value)
 {
-	if (_currentClimbTime != 0)
-	{
-		return;
-	}
-
 	auto lastState = _movementStack.Last();
 	if (lastState != EPlayerMovementState::Slide)
 	{
@@ -242,6 +219,11 @@ void AFPPlayer::LookUp(float value)
 
 void AFPPlayer::CharacterJump()
 {
+	if (!_isOnGround)
+	{
+		return;
+	}
+
 	RemovePlayerMovementState(EPlayerMovementState::Crouch);
 
 	if (_movementStack.Last() == EPlayerMovementState::Slide)
@@ -414,7 +396,10 @@ void AFPPlayer::UpdateGroundStatus()
 	FVector startPosition = GroundCheckPoint->GetComponentLocation();
 	FVector endPosition = startPosition + FVector::DownVector * GroundCheckDistance;
 
-	bool hit = GetWorld()->LineTraceSingleByChannel(hitResult, startPosition, endPosition, ECollisionChannel::ECC_Visibility);
+	FCollisionQueryParams collisionParams;
+	collisionParams.AddIgnoredActor(this);
+
+	bool hit = GetWorld()->LineTraceSingleByChannel(hitResult, startPosition, endPosition, ECollisionChannel::ECC_Visibility, collisionParams);
 	if (!_isOnGround && hit)
 	{
 		OnPlayerLanded.Broadcast();

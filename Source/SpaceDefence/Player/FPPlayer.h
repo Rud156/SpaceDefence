@@ -23,7 +23,7 @@ class SPACEDEFENCE_API AFPPlayer : public ACharacter
 {
 	GENERATED_BODY()
 
-	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
+		UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
 		class USkeletalMeshComponent* FpMesh;
 
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
@@ -55,7 +55,8 @@ class SPACEDEFENCE_API AFPPlayer : public ACharacter
 	void ApplyChangesToCharacter();
 
 	float _currentClimbTime;
-	void WallClimbCheck();
+	bool _isClimbing;
+	void WallClimbCheck(float deltaTime);
 
 	UFUNCTION()
 		void FrameDelayedJump();
@@ -68,19 +69,7 @@ class SPACEDEFENCE_API AFPPlayer : public ACharacter
 	void UpdateCharacterSliding(float deltaTime);
 	void StopCharacterSliding();
 
-	void MoveForward(float value);
-	void MoveRight(float value);
-	void Turn(float value);
-	void LookUp(float value);
-	void CharacterJump();
-	void RunPressed();
-	void RunReleased();
-	void CrouchPressed();
-	void CrouchReleased();
-
 	bool _firePressed;
-	void FirePressed();
-	void FireReleased();
 	void FireUpdate(float deltaTime);
 	void UpdateRecoilCamera(FRecoilOffset recoilOffset, int maxRecoilCount);
 	UFUNCTION()
@@ -91,23 +80,15 @@ class SPACEDEFENCE_API AFPPlayer : public ACharacter
 	void UpdateInteractibleCollection(float deltaTime);
 	void SetInteractableObject(IIntfBaseInteractible* callingObject);
 	void ClearInteractableObject();
-	void HandleInteractPressed();
-	void HandleInteractReleased();
 
 	ABaseWeapon* _meleeWeapon;
 	ABaseWeapon* _primaryWeapon;
 	ABaseWeapon* _secondaryWeapon;
 	EPlayerWeapon _currentWeapon;
 	void PickupWeapon(ABaseWeapon* weapon);
-	void CheckAndDropWeapon();
 	void ChangeCurrentWeapon(EPlayerWeapon weapon);
 	void ApplyWeaponChangesToCharacter();
-	void HandleMeleeSelected();
-	void HandlePrimarySelected();
-	void HandleSecondarySelected();
 
-	void HandlePlayerPinged();
-	
 protected:
 	virtual void BeginPlay() override;
 
@@ -182,12 +163,36 @@ public:
 
 	UPROPERTY(Category = "Player|Ping", EditAnywhere)
 		FVector PingSpawnOffset;
-	
+
 	UPROPERTY(Category = "Player|Weapon", EditAnywhere)
 		float MaxShootRayCastRange;
 
 	UPROPERTY(Category = "Player|Delegates", BlueprintAssignable)
 		FPlayerLanded OnPlayerLanded;
+
+#pragma endregion
+
+#pragma region Inputs
+
+	void MoveForward(float value);
+	void MoveRight(float value);
+	void Turn(float value);
+	void LookUp(float value);
+
+	void CharacterJump();
+	void RunPressed();
+	void RunReleased();
+	void CrouchPressed();
+	void CrouchReleased();
+	void FirePressed();
+	void FireReleased();
+	void HandleInteractPressed();
+	void HandleInteractReleased();
+	void HandleMeleeSelected();
+	void HandlePrimarySelected();
+	void HandleSecondarySelected();
+	void CheckAndDropWeapon();
+	void HandlePlayerPinged();
 
 #pragma endregion
 
@@ -213,6 +218,4 @@ public:
 
 	AFPPlayer();
 	virtual void Tick(float DeltaTime) override;
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
 };
