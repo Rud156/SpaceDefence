@@ -51,10 +51,7 @@ void ATD_PlaceableSpawnerActor::BeginPlay()
 }
 
 bool ATD_PlaceableSpawnerActor::CanSpawnGhost(int Cost)
-{
-	
-	
-		
+{	
 		if (CurrencyRef)
 			if (Cast<ATD_CurrencyManager>(CurrencyRef)->HasCurrency(Cost))
 			{

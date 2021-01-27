@@ -55,6 +55,27 @@ public:
 	UStaticMesh* StaticMeshRef = nullptr;
 
 };
+
+USTRUCT(BlueprintType)
+struct FEnemySettings
+{
+	GENERATED_BODY()
+public:
+	UPROPERTY(EditAnywhere, Category = "Enemy Settings", BlueprintReadOnly)
+		USoundCue* RandomSoundToPlayWhenMoving;
+	
+	UPROPERTY(EditAnywhere, Category = "Enemy Settings", BlueprintReadOnly)
+		USoundCue* AttackSound;
+	
+	UPROPERTY(EditAnywhere, Category = "Enemy Settings", BlueprintReadOnly)
+		USoundCue* TakeDamageSound;
+
+	UPROPERTY(EditAnywhere, Category = "Enemy Settings", BlueprintReadOnly)
+		USoundCue* AttackDamageSound;
+
+	UPROPERTY(EditAnywhere, Category = "Enemy Settings", BlueprintReadOnly)
+		USoundCue* DeathSound;
+};
 USTRUCT(BlueprintType)
 struct FWaveGroup
 {

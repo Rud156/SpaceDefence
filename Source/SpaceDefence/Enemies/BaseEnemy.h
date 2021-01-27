@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-
+#include "SpaceDefence/Utils/Structs.h"
 #include "../Utils/ActorUtils/IntfHealthDmg.h"
 
 #include "BaseEnemy.generated.h"
@@ -26,14 +26,27 @@ protected:
 public:
 #pragma region Properties
 
+	UPROPERTY(Category = "Enemy Settings", EditAnywhere)
+		FEnemySettings Settings;
+		
 	UPROPERTY(Category = "Enemy|Data", EditAnywhere)
 		float MaxHealth;
 
 	UPROPERTY(Category = "Enemy|Delegates", EditAnywhere)
 		FEnemyDied OnEnemyDied;
 
+
+	UPROPERTY(Category = "Optimization", EditAnywhere)
+		bool bClothSimulation = false;
+	UPROPERTY(Category = "Optimization", EditAnywhere)
+		bool bCanAffectNavigation = false;
+	UPROPERTY(Category = "Optimization", EditAnywhere)
+		bool bCastShadow = false;
+
 #pragma endregion
 
+	void PlayRandomSoundWhenMoving();
+	
 	ABaseEnemy();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -43,4 +56,6 @@ public:
 	virtual void SetCurrentHealth_Implementation(float HealthAmount) override;
 	virtual void TakeDamage_Implementation(float DamageAmount) override;
 
+private:
+	FTimerHandle TimerHandle;
 };
