@@ -2,9 +2,12 @@
 
 
 #include "BaseEnemy.h"
+#include "../Common/HealthAndDamageComp.h"
 
 ABaseEnemy::ABaseEnemy()
 {
+	HealthAndDamage = CreateDefaultSubobject<UHealthAndDamageComp>(TEXT("HealthAndDamage"));
+
 	PrimaryActorTick.bCanEverTick = true;
 }
 
@@ -23,35 +26,7 @@ void ABaseEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-void ABaseEnemy::NotifyEnemyDied()
+int ABaseEnemy::Attack()
 {
-	OnEnemyDied.Broadcast();
-}
-
-float ABaseEnemy::GetCurrentHealth_Implementation()
-{
-	return  _currentHealth;
-}
-
-float ABaseEnemy::GetMaxHealth_Implementation()
-{
-	return  MaxHealth;
-}
-
-void ABaseEnemy::SetCurrentHealth_Implementation(float HealthAmount)
-{
-	_currentHealth = HealthAmount;
-	if (_currentHealth > MaxHealth)
-	{
-		_currentHealth = MaxHealth;
-	}
-}
-
-void ABaseEnemy::TakeDamage_Implementation(float DamageAmount)
-{
-	_currentHealth -= DamageAmount;
-	if (_currentHealth <= 0)
-	{
-		NotifyEnemyDied();
-	}
+	return 0;
 }
