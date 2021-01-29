@@ -39,6 +39,10 @@
 				"Linux",
 				"Mac"
 			]
+		},
+		{
+			"Name": "AnimationBudgetAllocator",
+			"Enabled": true
 		}
 	]
 }

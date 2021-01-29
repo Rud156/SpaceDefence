@@ -82,7 +82,7 @@ void ATD_WaveController::SpawnEnemies(const FWaveGroup& GroupSettings, int Group
 
 		PrintToScreen_1("Test %d", SpawnEnemyCount);
 		FVector Location = GetRandomLocationWithInTheRadius(GroupSettings.SpawnRadius,GroupSettings.OptionalSpawnLocation->GetActorLocation());
-		FRotator Rot;
+		FRotator Rot (0.0f,0.0f,0.0f);
 		if(GroupSettings.EnemyType!=nullptr)
 		{
 			FActorSpawnParameters SpawnParameters;
