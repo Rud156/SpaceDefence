@@ -23,7 +23,9 @@ class SPACEDEFENCE_API AFPPlayer : public ACharacter
 {
 	GENERATED_BODY()
 
-		UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
+private:
+
+	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
 		class USkeletalMeshComponent* FpMesh;
 
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
@@ -90,6 +92,9 @@ class SPACEDEFENCE_API AFPPlayer : public ACharacter
 	void ApplyWeaponChangesToCharacter();
 
 protected:
+	UPROPERTY(Category = PlayerHealth, VisibleAnywhere, BlueprintReadOnly)
+		class UHealthAndDamageComp* HealthAndDamage;
+
 	virtual void BeginPlay() override;
 
 public:
