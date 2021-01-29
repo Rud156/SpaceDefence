@@ -2,6 +2,8 @@
 
 
 #include "BaseEnemy.h"
+#include "../Common/HealthAndDamageComp.h"
+
 #include "Components/CapsuleComponent.h"
 
 #include "DevelopmentTools/TD_DevelopmentTools.h"
