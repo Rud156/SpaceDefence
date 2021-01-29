@@ -30,7 +30,7 @@ ABaseEnemy::ABaseEnemy()
 	GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
 	GetMesh()->bEnableUpdateRateOptimizations = true;
 	//Collision
-	
+
 	GetCapsuleComponent()->SetCollisionProfileName("OverlapOnlyPawn");
 	GetMesh()->bDisableClothSimulation = true;
 	GetMesh()->SetAllowRigidBodyAnimNode(false);
