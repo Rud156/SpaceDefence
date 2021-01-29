@@ -14,6 +14,10 @@ class SPACEDEFENCE_API AMutantEnemy : public ABaseEnemy
 {
 	GENERATED_BODY()
 
+private:
+	bool _isAttacking;
+	float _currentAttackDuration;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -26,6 +30,9 @@ public:
 	UPROPERTY(Category = "Enemy|AI", EditAnywhere)
 		int TeleportCountMax;
 
+	UPROPERTY(Category = "Enemy|AI", EditAnywhere)
+		float TempAttackDuration;
+
 #pragma endregion 
 
 	AMutantEnemy();
@@ -34,4 +41,8 @@ public:
 
 	void TeleportStart();
 	void TeleportEnd();
+
+	UFUNCTION(Category = "Enemy|Attack", BlueprintCallable, BlueprintPure)
+		bool GetIsAttacking();
+	virtual void Attack() override;
 };

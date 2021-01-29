@@ -8,10 +8,11 @@
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
-UBTService_MutantMain::UBTService_MutantMain()
+UBTService_MutantMain::UBTService_MutantMain() : Super()
 {
 	EnemyState = "Enemy State";
 	TeleportCount = "Teleport Count";
+	IsAttacking = "Is Attacking";
 
 	bNotifyTick = true;
 	bNotifyBecomeRelevant = true;
@@ -36,6 +37,7 @@ void UBTService_MutantMain::OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, 
 void UBTService_MutantMain::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	auto blackboard = OwnerComp.GetBlackboardComponent();
+
 	int teleportCount = blackboard->GetValueAsInt(TeleportCount);
 	EMutantStates currentState = static_cast<EMutantStates>(blackboard->GetValueAsEnum(EnemyState));
 
@@ -43,4 +45,16 @@ void UBTService_MutantMain::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* N
 	{
 		blackboard->SetValueAsEnum(EnemyState, static_cast<uint8>(EMutantStates::Attack));
 	}
+
+	auto aiController = OwnerComp.GetAIOwner();
+	auto mutantEnemy = Cast<AMutantEnemy>(aiController->GetPawn());
+	bool isAttackingBB = blackboard->GetValueAsBool(IsAttacking);
+	bool isAttackingME = mutantEnemy->GetIsAttacking();
+
+	if (isAttackingBB && !isAttackingME && currentState == EMutantStates::Attack)
+	{
+		blackboard->SetValueAsEnum(EnemyState, static_cast<uint8>(EMutantStates::Wait));
+	}
+
+	blackboard->SetValueAsBool(IsAttacking, isAttackingME);
 }

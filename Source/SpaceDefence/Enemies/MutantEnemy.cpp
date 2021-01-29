@@ -16,6 +16,15 @@ void AMutantEnemy::BeginPlay()
 void AMutantEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (_currentAttackDuration > 0)
+	{
+		_currentAttackDuration -= DeltaTime;
+		if (_currentAttackDuration <= 0)
+		{
+			_isAttacking = false;
+		}
+	}
 }
 
 void AMutantEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -31,4 +40,15 @@ void AMutantEnemy::TeleportStart()
 void AMutantEnemy::TeleportEnd()
 {
 
+}
+
+void AMutantEnemy::Attack()
+{
+	_isAttacking = true;
+	_currentAttackDuration = TempAttackDuration;
+}
+
+bool AMutantEnemy::GetIsAttacking()
+{
+	return _isAttacking;
 }

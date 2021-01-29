@@ -20,6 +20,9 @@ public:
 	UPROPERTY(Category = "Enemy|AI", EditAnywhere)
 		FName TeleportCount;
 
+	UPROPERTY(Category = "Enemy|AI", EditAnywhere)
+		FName IsAttacking;
+
 #pragma endregion
 
 	UBTService_MutantMain();

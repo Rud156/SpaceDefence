@@ -7,7 +7,7 @@
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
-UBTTask_TeleportToPoint::UBTTask_TeleportToPoint()
+UBTTask_TeleportToPoint::UBTTask_TeleportToPoint() : Super()
 {
 	TeleportStartTime = 1.0f;
 	TeleportEndTime = 1.5f;

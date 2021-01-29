@@ -8,7 +8,7 @@
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
-UBTTask_MutantResetWait::UBTTask_MutantResetWait()
+UBTTask_MutantResetWait::UBTTask_MutantResetWait() : Super()
 {
 	EnemyState = "Enemy State";
 	TeleportCount = "Teleport Count";

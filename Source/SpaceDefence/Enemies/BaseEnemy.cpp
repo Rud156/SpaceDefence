@@ -26,7 +26,7 @@ void ABaseEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-int ABaseEnemy::Attack()
+void ABaseEnemy::Attack()
 {
-	return 0;
+
 }
