@@ -6,7 +6,7 @@
 #include "Enums.generated.h"
 
 UENUM(BlueprintType)
-enum class EPlayerMovementState: uint8
+enum class EPlayerMovementState : uint8
 {
 	None,
 	Walk,
@@ -18,7 +18,7 @@ enum class EPlayerMovementState: uint8
 };
 
 UENUM(BlueprintType)
-enum class EPlayerWeapon: uint8
+enum class EPlayerWeapon : uint8
 {
 	Melee,
 	Primary,
@@ -26,7 +26,7 @@ enum class EPlayerWeapon: uint8
 };
 
 UENUM(BlueprintType)
-enum class EInteractibleType: uint8
+enum class EInteractibleType : uint8
 {
 	Weapon
 };
@@ -41,3 +41,11 @@ enum class EPlaceAbleUpgrades : uint8
 	Ability2
 };
 
+// Mutant Enemy
+UENUM(BlueprintType)
+enum class EMutantStates : uint8
+{
+	IdleWander,
+	Attack,
+	Wait
+};

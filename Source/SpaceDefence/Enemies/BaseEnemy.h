@@ -5,57 +5,46 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "SpaceDefence/Utils/Structs.h"
-#include "../Utils/ActorUtils/IntfHealthDmg.h"
 
 #include "BaseEnemy.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FEnemyDied);
 
 UCLASS()
-class SPACEDEFENCE_API ABaseEnemy : public ACharacter, public IIntfHealthDmg
+class SPACEDEFENCE_API ABaseEnemy : public ACharacter
 {
 	GENERATED_BODY()
 
+private:
+	FTimerHandle TimerHandle;
+
 protected:
-	float _currentHealth;
+	UPROPERTY(Category = EnemyHealth, VisibleAnywhere, BlueprintReadOnly)
+		class UHealthAndDamageComp* HealthAndDamage;
 
 	virtual void BeginPlay() override;
-
-	void NotifyEnemyDied();
 
 public:
 #pragma region Properties
 
 	UPROPERTY(Category = "Enemy Settings", EditAnywhere)
 		FEnemySettings Settings;
-		
-	UPROPERTY(Category = "Enemy|Data", EditAnywhere)
-		float MaxHealth;
-
-	UPROPERTY(Category = "Enemy|Delegates", EditAnywhere)
-		FEnemyDied OnEnemyDied;
-
 
 	UPROPERTY(Category = "Optimization", EditAnywhere)
 		bool bClothSimulation = false;
+
 	UPROPERTY(Category = "Optimization", EditAnywhere)
 		bool bCanAffectNavigation = false;
+
 	UPROPERTY(Category = "Optimization", EditAnywhere)
 		bool bCastShadow = false;
 
 #pragma endregion
 
-	void PlayRandomSoundWhenMoving();
-	
 	ABaseEnemy();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	virtual float GetCurrentHealth_Implementation() override;
-	virtual float GetMaxHealth_Implementation() override;
-	virtual void SetCurrentHealth_Implementation(float HealthAmount) override;
-	virtual void TakeDamage_Implementation(float DamageAmount) override;
-
-private:
-	FTimerHandle TimerHandle;
+	void PlayRandomSoundWhenMoving();
+	virtual void Attack();
 };

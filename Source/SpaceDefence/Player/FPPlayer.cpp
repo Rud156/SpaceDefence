@@ -8,6 +8,7 @@
 #include "../Interactibles/InteractionDisplayManager.h"
 #include "../Markers/WorldPingComponent.h"
 #include "../Markers/WorldPingMarker.h"
+#include "../Common/HealthAndDamageComp.h"
 
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -29,6 +30,7 @@ AFPPlayer::AFPPlayer()
 	WeaponTempShootingPoint = CreateDefaultSubobject<USceneComponent>(TEXT("WeaponTempShootingPoint"));
 	InteractionCastPoint = CreateDefaultSubobject<USceneComponent>(TEXT("InteractionCastPoint"));
 	WeaponAttachPoint = CreateDefaultSubobject<USceneComponent>(TEXT("WeaponAttachPoint"));
+	HealthAndDamage = CreateDefaultSubobject<UHealthAndDamageComp>(TEXT("HealthAndDamage"));
 
 	CameraBoom->SetupAttachment(GetCapsuleComponent());
 	CameraBoom->bUsePawnControlRotation = true;

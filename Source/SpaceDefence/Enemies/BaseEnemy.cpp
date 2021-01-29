@@ -7,25 +7,10 @@
 #include "DevelopmentTools/TD_DevelopmentTools.h"
 #include "Kismet/GameplayStatics.h"
 
-void ABaseEnemy::PlayRandomSoundWhenMoving()
-{
-	//this->GetVelocity().len
-	//check if its moving and active
-	{
-		if(Settings.RandomSoundToPlayWhenMoving)
-			UGameplayStatics::PlaySoundAtLocation(this, Settings.RandomSoundToPlayWhenMoving, this->GetActorLocation());
-	}
-	
-	float InitalTime = FMath::RandRange(5.0f, 20.f);
-	//PrintToScreen_1("Next sound is playing in %f",InitalTime);
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ABaseEnemy::PlayRandomSoundWhenMoving, InitalTime, false);
-	
-}
-
 ABaseEnemy::ABaseEnemy()
 {
-	PrimaryActorTick.bCanEverTick = false;
-	
+	HealthAndDamage = CreateDefaultSubobject<UHealthAndDamageComp>(TEXT("HealthAndDamage"));
+
 	//Optimization
 	GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
 	GetMesh()->bEnableUpdateRateOptimizations = true;
@@ -50,14 +35,15 @@ ABaseEnemy::ABaseEnemy()
 	//Block input here.
 	bBlockInput = true;
 	AutoReceiveInput = EAutoReceiveInput::Disabled;
-	
-	
+
+	PrimaryActorTick.bCanEverTick = false;
 }
 
 void ABaseEnemy::BeginPlay()
 {
 	
 	Super::BeginPlay();
+	
 	float InitalTime = FMath::RandRange(1.0f, 10.0f);
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ABaseEnemy::PlayRandomSoundWhenMoving, InitalTime, false);
 }
@@ -73,35 +59,22 @@ void ABaseEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-void ABaseEnemy::NotifyEnemyDied()
+void ABaseEnemy::PlayRandomSoundWhenMoving()
 {
-	OnEnemyDied.Broadcast();
-}
-
-float ABaseEnemy::GetCurrentHealth_Implementation()
-{
-	return  _currentHealth;
-}
-
-float ABaseEnemy::GetMaxHealth_Implementation()
-{
-	return  MaxHealth;
-}
-
-void ABaseEnemy::SetCurrentHealth_Implementation(float HealthAmount)
-{
-	_currentHealth = HealthAmount;
-	if (_currentHealth > MaxHealth)
+	//this->GetVelocity().len
+	//check if its moving and active
 	{
-		_currentHealth = MaxHealth;
+		if(Settings.RandomSoundToPlayWhenMoving)
+			UGameplayStatics::PlaySoundAtLocation(this, Settings.RandomSoundToPlayWhenMoving, this->GetActorLocation());
 	}
+	
+	float InitalTime = FMath::RandRange(5.0f, 20.f);
+	//PrintToScreen_1("Next sound is playing in %f",InitalTime);
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ABaseEnemy::PlayRandomSoundWhenMoving, InitalTime, false);
+	
 }
 
-void ABaseEnemy::TakeDamage_Implementation(float DamageAmount)
+void ABaseEnemy::Attack()
 {
-	_currentHealth -= DamageAmount;
-	if (_currentHealth <= 0)
-	{
-		NotifyEnemyDied();
-	}
+
 }
