@@ -18,7 +18,6 @@ EBTNodeResult::Type UBTTask_SelectPointInRadius::ExecuteTask(UBehaviorTreeCompon
 
 	if (success)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Point: " + navLocation.Location.ToString());
 
 		auto blackboard = OwnerComp.GetBlackboardComponent();
 		blackboard->SetValueAsVector(MovementPoint, navLocation.Location);

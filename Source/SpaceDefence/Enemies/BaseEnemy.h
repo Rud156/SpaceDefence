@@ -8,8 +8,6 @@
 
 #include "BaseEnemy.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FEnemyDied);
-
 UCLASS()
 class SPACEDEFENCE_API ABaseEnemy : public ACharacter
 {
@@ -30,18 +28,13 @@ public:
 
 	UPROPERTY(Category = "Enemy Settings", EditAnywhere)
 		FEnemySettings Settings;
-		
-	UPROPERTY(Category = "Enemy|Data", EditAnywhere)
-		float MaxHealth;
-
-	UPROPERTY(Category = "Enemy|Delegates", EditAnywhere)
-		FEnemyDied OnEnemyDied;
-
 
 	UPROPERTY(Category = "Optimization", EditAnywhere)
 		bool bClothSimulation = false;
+	
 	UPROPERTY(Category = "Optimization", EditAnywhere)
 		bool bCanAffectNavigation = false;
+	
 	UPROPERTY(Category = "Optimization", EditAnywhere)
 		bool bCastShadow = false;
 
