@@ -21,6 +21,10 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Spawn Settings", BlueprintReadWrite)
 		TSubclassOf<ATD_PlaceablesActors> ActorRef;
 
+	// Temporary static mesh, add only if you have a different static meshes in the actor
+	UPROPERTY(EditAnywhere, Category = "Spawn Settings", BlueprintReadWrite)
+		UStaticMesh* TempStaticMesh;
+
 	UPROPERTY(EditAnywhere, Category = "Spawn Settings", BlueprintReadOnly)
 		USoundCue* PlacementSound;
 	UPROPERTY(EditAnywhere, Category = "Spawn Settings", BlueprintReadOnly)

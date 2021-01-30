@@ -101,8 +101,12 @@ void ATD_PlaceableSpawnerActor::ChangeGhost(int PlaceAbleID)
 {
 	if (GetWorld() && PlaceAbleID > -1 && PlaceAbleID < 9)
 	{
-
-		Ghost->SetStaticMesh(GetStaticMeshFromList(PlaceAbleID));
+		if(CanSpawnGhost(GetCostFromID(PlaceAbleID)))
+			Ghost->SetStaticMesh(GetStaticMeshFromList(PlaceAbleID));
+		else
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Printf(TEXT("Not Enough Gold Print UI here %d"), CurrencyRef->GetCurrency()));
+		}
 	}
 }
 
@@ -134,7 +138,11 @@ void ATD_PlaceableSpawnerActor::SpawnActorFromGhost( int PlaceAbleID)
 
 void ATD_PlaceableSpawnerActor::RemoveGhost()
 {
-	Ghost->SetMaterial(0, nullptr);
+	for (int i =0; i< Ghost->GetNumMaterials(); i++)
+	{
+		Ghost->SetMaterial(i, nullptr);
+	}
+	
 	Ghost->SetStaticMesh(nullptr);
 	bIsRotated = false;
 }
@@ -146,7 +154,7 @@ void ATD_PlaceableSpawnerActor::SetGhostPosition(FVector Location, FRotator Rot=
 	//FQuat TempRot = FQuat(Rot.Quaternion().X,0, Rot.Quaternion().Z,Rot.Quaternion().W);
 	//Temp.SetRotation(Rot.Quaternion());
 	
-	Temp.SetScale3D(FVector(1, 1, 1));
+	Temp.SetScale3D(Ghost->GetComponentScale());
 	Temp.SetRotation(Ghost->GetComponentRotation().Quaternion());
 	Ghost->SetWorldTransform(Temp);
 	
@@ -168,18 +176,25 @@ void ATD_PlaceableSpawnerActor::ChangeColor()
 {
 	if(CanPlace())
 	{
-		Ghost->SetMaterial(0, GreenColor);
+		for(int i =0 ;i< Ghost->GetNumMaterials();i++)
+			Ghost->SetMaterial(i, GreenColor);
 	}
 	else
 	{
-		Ghost->SetMaterial(0, RedColor);
+		for (int i = 0; i < Ghost->GetNumMaterials(); i++)
+			Ghost->SetMaterial(i, RedColor);
+		
 	}
 }
 
 UStaticMesh* ATD_PlaceableSpawnerActor::GetStaticMeshFromList(int PlaceAbleID)
 {
-	const auto temp = PlaceAbleData[PlaceAbleID].ActorRef.GetDefaultObject()->Model->GetStaticMesh();
-	
+	UStaticMesh* temp = PlaceAbleData[PlaceAbleID].TempStaticMesh;
+	if(!temp)
+	{
+		temp = PlaceAbleData[PlaceAbleID].ActorRef.GetDefaultObject()->Model->GetStaticMesh();	
+	}
+	Ghost->SetWorldScale3D(PlaceAbleData[PlaceAbleID].ActorRef.GetDefaultObject()->Model->GetRelativeScale3D());
 	return temp;
 }
 
