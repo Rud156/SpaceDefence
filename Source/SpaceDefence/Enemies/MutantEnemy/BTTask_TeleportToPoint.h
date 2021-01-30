@@ -19,16 +19,13 @@ public:
 #pragma region Properties
 
 	UPROPERTY(Category = "Enemy|AI", EditAnywhere)
-		float TeleportStartTime;
-
-	UPROPERTY(Category = "Enemy|AI", EditAnywhere)
-		float TeleportEndTime;
-
-	UPROPERTY(Category = "Enemy|AI", EditAnywhere)
 		FName MovementPoint;
 
 	UPROPERTY(Category = "Enemy|AI", EditAnywhere)
 		FName TeleportCount;
+
+	UPROPERTY(Category = "Enemy|AI", EditAnywhere)
+		float TeleportNearestDistance;
 
 #pragma endregion
 

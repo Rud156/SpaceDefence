@@ -48,8 +48,13 @@ void UHealthAndDamageComp::TakeDamage(int damageAmount)
 		damageAmount = damageDebuff->TakeDamage(damageAmount);
 	}
 
+	int lastHealth = _currentHealth;
 	_currentHealth -= damageAmount;
-	OnHealthChanged.Broadcast(_currentHealth);
+
+	if (lastHealth != _currentHealth)
+	{
+		OnHealthChanged.Broadcast(_currentHealth);
+	}
 
 	if (_currentHealth <= 0)
 	{

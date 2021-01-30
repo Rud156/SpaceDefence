@@ -9,8 +9,6 @@
 
 UBTTask_TeleportToPoint::UBTTask_TeleportToPoint() : Super()
 {
-	TeleportStartTime = 1.0f;
-	TeleportEndTime = 1.5f;
 	MovementPoint = "Movement Point";
 	TeleportCount = "Teleport Count";
 
@@ -22,9 +20,9 @@ EBTNodeResult::Type UBTTask_TeleportToPoint::ExecuteTask(UBehaviorTreeComponent&
 {
 	auto aiController = OwnerComp.GetAIOwner();
 	auto mutantEnemy = Cast<AMutantEnemy>(aiController->GetPawn());
-	mutantEnemy->TeleportStart();
+	int teleportStartTime = mutantEnemy->TeleportStart();
 
-	_currentTime = TeleportStartTime;
+	_currentTime = teleportStartTime;
 	_isStarting = true;
 
 	return EBTNodeResult::InProgress;
@@ -38,9 +36,6 @@ void UBTTask_TeleportToPoint::TickTask(UBehaviorTreeComponent& OwnerComp, uint8*
 	{
 		if (_isStarting)
 		{
-			_isStarting = false;
-			_currentTime = TeleportEndTime;
-
 			auto blackboard = OwnerComp.GetBlackboardComponent();
 			auto aiController = OwnerComp.GetAIOwner();
 			auto mutantEnemy = Cast<AMutantEnemy>(aiController->GetPawn());
@@ -49,12 +44,16 @@ void UBTTask_TeleportToPoint::TickTask(UBehaviorTreeComponent& OwnerComp, uint8*
 			currentTeleportCount -= 1;
 			blackboard->SetValueAsInt(TeleportCount, currentTeleportCount);
 
+			FVector backVector = -mutantEnemy->GetActorForwardVector();
 			FVector movementPoint = blackboard->GetValueAsVector(MovementPoint);
 
-			mutantEnemy->SetActorLocation(movementPoint);
-			mutantEnemy->TeleportEnd();
+			FVector targetPoint = movementPoint + backVector * TeleportNearestDistance;
 
-			GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Teleporting Complete");
+			mutantEnemy->SetActorLocation(targetPoint);
+			int teleportEndTime = mutantEnemy->TeleportEnd();
+
+			_isStarting = false;
+			_currentTime = teleportEndTime;
 		}
 		else
 		{

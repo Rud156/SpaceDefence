@@ -22,14 +22,11 @@ UBTService_MutantMain::UBTService_MutantMain() : Super()
 
 void UBTService_MutantMain::OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Mutant Main Became Relevant");
-
 	auto blackboard = OwnerComp.GetBlackboardComponent();
 	auto aiController = OwnerComp.GetAIOwner();
 	auto mutantEnemy = Cast<AMutantEnemy>(aiController->GetPawn());
 	int randomTeleportCount = FMath::RandRange(mutantEnemy->TeleportCountMin, mutantEnemy->TeleportCountMax);
 
-	GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Value: " + FString::SanitizeFloat(randomTeleportCount));
 	blackboard->SetValueAsInt(TeleportCount, randomTeleportCount);
 
 }
@@ -39,11 +36,11 @@ void UBTService_MutantMain::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* N
 	auto blackboard = OwnerComp.GetBlackboardComponent();
 
 	int teleportCount = blackboard->GetValueAsInt(TeleportCount);
-	EMutantStates currentState = static_cast<EMutantStates>(blackboard->GetValueAsEnum(EnemyState));
+	EMutantState currentState = static_cast<EMutantState>(blackboard->GetValueAsEnum(EnemyState));
 
-	if (teleportCount <= 0 && currentState == EMutantStates::IdleWander)
+	if (teleportCount <= 0 && currentState == EMutantState::IdleWander)
 	{
-		blackboard->SetValueAsEnum(EnemyState, static_cast<uint8>(EMutantStates::Attack));
+		blackboard->SetValueAsEnum(EnemyState, static_cast<uint8>(EMutantState::Attack));
 	}
 
 	auto aiController = OwnerComp.GetAIOwner();
@@ -51,9 +48,9 @@ void UBTService_MutantMain::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* N
 	bool isAttackingBB = blackboard->GetValueAsBool(IsAttacking);
 	bool isAttackingME = mutantEnemy->GetIsAttacking();
 
-	if (isAttackingBB && !isAttackingME && currentState == EMutantStates::Attack)
+	if (isAttackingBB && !isAttackingME && currentState == EMutantState::Attack)
 	{
-		blackboard->SetValueAsEnum(EnemyState, static_cast<uint8>(EMutantStates::Wait));
+		blackboard->SetValueAsEnum(EnemyState, static_cast<uint8>(EMutantState::Wait));
 	}
 
 	blackboard->SetValueAsBool(IsAttacking, isAttackingME);

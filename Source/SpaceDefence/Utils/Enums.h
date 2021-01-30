@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "Enums.generated.h"
 
+#pragma region Player
+
 UENUM(BlueprintType)
 enum class EPlayerMovementState : uint8
 {
@@ -25,12 +27,19 @@ enum class EPlayerWeapon : uint8
 	Secondary
 };
 
+#pragma endregion
+
+#pragma region Interactibles
+
 UENUM(BlueprintType)
 enum class EInteractibleType : uint8
 {
 	Weapon
 };
 
+#pragma endregion
+
+#pragma region Upgrades
 
 //PlaceAble Actor Upgrades
 UENUM(BlueprintType)
@@ -41,11 +50,26 @@ enum class EPlaceAbleUpgrades : uint8
 	Ability2
 };
 
+#pragma endregion 
+
+#pragma region Enemies
+
 // Mutant Enemy
 UENUM(BlueprintType)
-enum class EMutantStates : uint8
+enum class EMutantState : uint8
 {
 	IdleWander,
 	Attack,
 	Wait
 };
+
+// Mutant Enemy
+UENUM(BlueprintType)
+enum class EMutantTeleportState : uint8
+{
+	None,
+	TeleportStart,
+	TeleportEnd,
+};
+
+#pragma endregion

@@ -29,7 +29,7 @@ void UBTTask_MutantResetWait::TickTask(UBehaviorTreeComponent& OwnerComp, uint8*
 	if (_currentWait <= 0)
 	{
 		auto blackboard = OwnerComp.GetBlackboardComponent();
-		blackboard->SetValueAsEnum(EnemyState, static_cast<uint8>(EMutantStates::IdleWander));
+		blackboard->SetValueAsEnum(EnemyState, static_cast<uint8>(EMutantState::IdleWander));
 
 		auto aiController = OwnerComp.GetAIOwner();
 		auto mutantEnemy = Cast<AMutantEnemy>(aiController->GetPawn());
