@@ -26,9 +26,6 @@ class SPACEDEFENCE_API AFPPlayer : public ACharacter
 private:
 
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
-		class USkeletalMeshComponent* FpMesh;
-
-	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
 		class USceneComponent* GroundCheckPoint;
 
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
@@ -55,6 +52,9 @@ private:
 	void RemovePlayerMovementState(EPlayerMovementState movementState);
 	bool HasPlayerState(EPlayerMovementState movementState);
 	void ApplyChangesToCharacter();
+
+	float _verticalInput;
+	float _horizontalInput;
 
 	float _targetCapsuleHeight;
 	float _targetCapsuleRadius;
@@ -107,6 +107,9 @@ protected:
 
 public:
 #pragma region Parameters
+
+	UPROPERTY(Category = Mesh, BlueprintReadOnly, VisibleDefaultsOnly)
+		class USkeletalMeshComponent* PlayerMesh;
 
 	UPROPERTY(Category = "Player|Movement", EditAnywhere)
 		float WalkSpeed;
@@ -214,6 +217,10 @@ public:
 
 	UFUNCTION(Category = "Debug", BlueprintImplementableEvent)
 		void MovementStatePushed(EPlayerMovementState playerMovementState);
+	UFUNCTION(Category = "PlayerMovementState", BlueprintImplementableEvent)
+		void PlayerJumped();
+	UFUNCTION(Category = "PlayerMovementState", BlueprintImplementableEvent)
+		void PlayerRunJumped();
 
 	UFUNCTION(Category = Weapons, BlueprintCallable, BlueprintPure)
 		EPlayerWeapon GetCurrentWeapon();
@@ -231,6 +238,17 @@ public:
 		ABaseWeapon* GetMeleeWeapon();
 	bool HasMeleeWeapon();
 	void PickupMeleeWeapon(ABaseWeapon* meleeWeapon);
+
+	UFUNCTION(Category = "Player|State", BlueprintCallable, BlueprintPure)
+		bool IsOnGround();
+	UFUNCTION(Category = "Player|State", BlueprintCallable, BlueprintPure)
+		bool IsClimbing();
+	UFUNCTION(Category = "Player|State", BlueprintCallable, BlueprintPure)
+		EPlayerMovementState GetTopPlayerState();
+	UFUNCTION(Category = "Player|Input", BlueprintCallable, BlueprintPure)
+		float GetVerticalInput();
+	UFUNCTION(Category = "Player|Input", BlueprintCallable, BlueprintPure)
+		float GetHorizontalInput();
 
 	AFPPlayer();
 	virtual void Tick(float DeltaTime) override;

@@ -22,7 +22,7 @@
 
 AFPPlayer::AFPPlayer()
 {
-	FpMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CharacterMesh"));
+	PlayerMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("PlayerMesh"));
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBooom"));
 	CharacterCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("CharacterCamera"));
 	GroundCheckPoint = CreateDefaultSubobject<USceneComponent>(TEXT("GroundCheckPoint"));
@@ -36,7 +36,7 @@ AFPPlayer::AFPPlayer()
 	CameraBoom->bUsePawnControlRotation = true;
 
 	CharacterCamera->SetupAttachment(CameraBoom);
-	FpMesh->SetupAttachment(CharacterCamera);
+	PlayerMesh->SetupAttachment(CharacterCamera);
 	GroundCheckPoint->SetupAttachment(GetCapsuleComponent());
 	WallCheckPoint->SetupAttachment(GetCapsuleComponent());
 	WeaponTempShootingPoint->SetupAttachment(CharacterCamera);
@@ -159,8 +159,15 @@ void AFPPlayer::WallClimbCheck(float deltaTime)
 	}
 }
 
+bool AFPPlayer::IsClimbing()
+{
+	return _isClimbing;
+}
+
 void AFPPlayer::MoveForward(float value)
 {
+	_verticalInput = value;
+
 	auto lastState = _movementStack.Last();
 	if (lastState != EPlayerMovementState::Slide)
 	{
@@ -168,8 +175,15 @@ void AFPPlayer::MoveForward(float value)
 	}
 }
 
+float AFPPlayer::GetVerticalInput()
+{
+	return _verticalInput;
+}
+
 void AFPPlayer::MoveRight(float value)
 {
+	_horizontalInput = value;
+
 	if (_currentClimbTime != 0)
 	{
 		return;
@@ -184,6 +198,11 @@ void AFPPlayer::MoveRight(float value)
 	{
 		AddMovementInput(GetActorRightVector(), value);
 	}
+}
+
+float AFPPlayer::GetHorizontalInput()
+{
+	return _horizontalInput;
 }
 
 void AFPPlayer::Turn(float value)
@@ -237,14 +256,17 @@ void AFPPlayer::CharacterJump()
 
 		RemovePlayerMovementState(EPlayerMovementState::Slide);
 		PushPlayerMovementState(EPlayerMovementState::RunJump);
+		PlayerRunJumped();
 	}
 	else if (_movementStack.Last() == EPlayerMovementState::Run)
 	{
 		PushPlayerMovementState(EPlayerMovementState::RunJump);
+		PlayerRunJumped();
 	}
 	else
 	{
 		PushPlayerMovementState(EPlayerMovementState::Jump);
+		PlayerJumped();
 	}
 
 	FTimerHandle unusedHandle;
@@ -412,6 +434,11 @@ void AFPPlayer::UpdateGroundStatus()
 	_isOnGround = hit;
 }
 
+bool AFPPlayer::IsOnGround()
+{
+	return _isOnGround;
+}
+
 void AFPPlayer::PushPlayerMovementState(EPlayerMovementState movementState)
 {
 	if (_movementStack.Num() > 0 && _movementStack.Last() == movementState)
@@ -486,6 +513,16 @@ void AFPPlayer::ApplyChangesToCharacter()
 	}
 }
 
+EPlayerMovementState AFPPlayer::GetTopPlayerState()
+{
+	if (_movementStack.Num() <= 0)
+	{
+		return EPlayerMovementState::None;
+	}
+
+	return _movementStack.Last();
+}
+
 void AFPPlayer::SetCapsuleData(float targetHeight, float targetRadius)
 {
 	_targetCapsuleHeight = targetHeight;
@@ -515,14 +552,17 @@ void AFPPlayer::UpdateCapsuleSize(float deltaTime)
 
 void AFPPlayer::StopCharacterSliding()
 {
-	/*FRotator cameraRotation = CameraBoom->GetRelativeRotation();
+	FRotator cameraRotation = CameraBoom->GetRelativeRotation();
 	auto playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 
-	AddControllerPitchInput(cameraRotation.Pitch / playerController->InputPitchScale);
-	AddControllerYawInput(cameraRotation.Yaw / playerController->InputYawScale);
+	FVector relative = CameraBoom->GetRelativeRotation().Euler();
+	GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Rotation: " + relative.ToString());
 
 	CameraBoom->SetRelativeRotation(FRotator::ZeroRotator);
-	CameraBoom->bUsePawnControlRotation = true;*/
+	AddControllerPitchInput(cameraRotation.Pitch / playerController->InputPitchScale);
+	AddControllerYawInput(cameraRotation.Yaw / playerController->InputYawScale);
+	CameraBoom->bUsePawnControlRotation = true;
+
 	_slideTimer = 0;
 
 	RemovePlayerMovementState(EPlayerMovementState::Slide);
