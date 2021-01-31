@@ -22,7 +22,7 @@
 
 AFPPlayer::AFPPlayer()
 {
-	FpMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mesh"));
+	FpMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CharacterMesh"));
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBooom"));
 	CharacterCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("CharacterCamera"));
 	GroundCheckPoint = CreateDefaultSubobject<USceneComponent>(TEXT("GroundCheckPoint"));
@@ -73,6 +73,8 @@ void AFPPlayer::BeginPlay()
 	AActor* weapon = GetWorld()->SpawnActor(MeleeWeapon, &FVector::ZeroVector, &FRotator::ZeroRotator);
 	ABaseWeapon* meleeWeapon = Cast<ABaseWeapon>(weapon);
 	PickupMeleeWeapon(meleeWeapon);
+
+	SetCapsuleData(DefaultHalfHeight, DefaultRadius);
 }
 
 void AFPPlayer::Tick(float DeltaTime)
@@ -84,6 +86,7 @@ void AFPPlayer::Tick(float DeltaTime)
 
 	FireUpdate(DeltaTime);
 	WallClimbCheck(DeltaTime);
+	UpdateCapsuleSize(DeltaTime);
 }
 
 void AFPPlayer::UpdateCharacterSliding(float deltaTime)
@@ -447,8 +450,7 @@ void AFPPlayer::ApplyChangesToCharacter()
 {
 	MovementStatePushed(_movementStack.Last()); // This is just an event used to display the state being applied
 
-	GetCapsuleComponent()->SetCapsuleHalfHeight(DefaultHalfSize);
-	GetCapsuleComponent()->SetCapsuleRadius(DefaultRadius);
+	SetCapsuleData(DefaultHalfHeight, DefaultRadius);
 
 	switch (_movementStack.Last())
 	{
@@ -471,14 +473,12 @@ void AFPPlayer::ApplyChangesToCharacter()
 
 	case EPlayerMovementState::Crouch:
 		GetCharacterMovement()->MaxWalkSpeed = CrouchSpeed;
-		GetCapsuleComponent()->SetCapsuleHalfHeight(CrouchHalfHeight);
-		GetCapsuleComponent()->SetCapsuleRadius(CrouchRadius);
+		SetCapsuleData(CrouchHalfHeight, CrouchRadius);
 		break;
 
 	case EPlayerMovementState::Slide:
 		GetCharacterMovement()->MaxWalkSpeed = SlideSpeed;
-		GetCapsuleComponent()->SetCapsuleHalfHeight(CrouchHalfHeight);
-		GetCapsuleComponent()->SetCapsuleRadius(CrouchRadius);
+		SetCapsuleData(CrouchHalfHeight, CrouchRadius);
 		break;
 
 	default:
@@ -486,16 +486,43 @@ void AFPPlayer::ApplyChangesToCharacter()
 	}
 }
 
+void AFPPlayer::SetCapsuleData(float targetHeight, float targetRadius)
+{
+	_targetCapsuleHeight = targetHeight;
+	_targetCapsuleRadius = targetRadius;
+
+	_currentCapsuleHeight = GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight();
+	_currentCapsuleRadius = GetCapsuleComponent()->GetUnscaledCapsuleRadius();
+
+	_lerpAmount = 0;
+}
+
+void AFPPlayer::UpdateCapsuleSize(float deltaTime)
+{
+	if (_lerpAmount > 1 || _lerpAmount < 0)
+	{
+		return;
+	}
+
+	float currentHeight = FMath::Lerp(_currentCapsuleHeight, _targetCapsuleHeight, _lerpAmount);
+	float currentRadius = FMath::Lerp(_currentCapsuleRadius, _targetCapsuleRadius, _lerpAmount);
+
+	GetCapsuleComponent()->SetCapsuleHalfHeight(currentHeight);
+	GetCapsuleComponent()->SetCapsuleRadius(currentRadius);
+
+	_lerpAmount += CapsuleSizeLerpRate * deltaTime;
+}
+
 void AFPPlayer::StopCharacterSliding()
 {
-	FRotator cameraRotation = CameraBoom->GetRelativeRotation();
+	/*FRotator cameraRotation = CameraBoom->GetRelativeRotation();
 	auto playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 
 	AddControllerPitchInput(cameraRotation.Pitch / playerController->InputPitchScale);
 	AddControllerYawInput(cameraRotation.Yaw / playerController->InputYawScale);
 
 	CameraBoom->SetRelativeRotation(FRotator::ZeroRotator);
-	CameraBoom->bUsePawnControlRotation = true;
+	CameraBoom->bUsePawnControlRotation = true;*/
 	_slideTimer = 0;
 
 	RemovePlayerMovementState(EPlayerMovementState::Slide);

@@ -56,6 +56,14 @@ private:
 	bool HasPlayerState(EPlayerMovementState movementState);
 	void ApplyChangesToCharacter();
 
+	float _targetCapsuleHeight;
+	float _targetCapsuleRadius;
+	float _currentCapsuleHeight;
+	float _currentCapsuleRadius;
+	float _lerpAmount;
+	void SetCapsuleData(float targetHeight, float targetRadius);
+	void UpdateCapsuleSize(float deltaTime);
+
 	float _currentClimbTime;
 	bool _isClimbing;
 	void WallClimbCheck(float deltaTime);
@@ -152,10 +160,13 @@ public:
 		float CrouchRadius;
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
-		float DefaultHalfSize;
+		float DefaultHalfHeight;
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
 		float DefaultRadius;
+
+	UPROPERTY(Category = "Player|Size", EditAnywhere)
+		float CapsuleSizeLerpRate;
 
 	UPROPERTY(Category = "Player|Interaction", EditAnywhere)
 		float MaxInteractionDistance;
