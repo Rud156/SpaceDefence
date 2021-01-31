@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "Turrent/TD_TurrentProjcetile.h"
 #include "SpaceDefence/Placeables/TD_PlaceablesActors.h"
 
 #include "TD_PlaceAbleTurrent.generated.h"
@@ -28,7 +28,12 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Turret Settings")
 		float Range;
-
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret Settings")
+		float FireRate = 0.5f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Turret Settings")
+		TSubclassOf<ATD_TurrentProjcetile> Projectile;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Spawn Settings")
+		UStaticMeshComponent* Turret;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spawn Settings")
 		float Damage;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spawn Settings")
@@ -37,11 +42,15 @@ public:
 		ABaseEnemy* ClosestTarget = nullptr;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Spawn Settings")
 		TArray<ABaseEnemy*> ListOfTargetsInRange;
-
+		
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Game Settings")
 		float ClosestDistance = 999999.0f;
 
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
 		void FindClosestTarget();
-
+	UFUNCTION(BlueprintCallable)
+		void Fire();
+	
+private:
+	FName BulletSpawnLocationSocketName = "BulletSpawner";
 };
