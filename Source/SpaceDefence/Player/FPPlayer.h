@@ -56,12 +56,11 @@ private:
 	float _verticalInput;
 	float _horizontalInput;
 
-	float _targetCapsuleHeight;
-	float _targetCapsuleRadius;
-	float _currentCapsuleHeight;
-	float _currentCapsuleRadius;
+	FVector2D _capsuleRadius; // X: Target, Y: Current
+	FVector2D _capsuleHeight; // X: Target, Y: Current
+	FVector2D _meshZPosition; // X: Target, Y: Current
 	float _lerpAmount;
-	void SetCapsuleData(float targetHeight, float targetRadius);
+	void SetCapsuleData(float targetHeight, float targetRadius, float targetZPosition);
 	void UpdateCapsuleSize(float deltaTime);
 
 	float _currentClimbTime;
@@ -163,10 +162,16 @@ public:
 		float CrouchRadius;
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
+		float CrouchMeshZPosition;
+
+	UPROPERTY(Category = "Player|Size", EditAnywhere)
 		float DefaultHalfHeight;
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
 		float DefaultRadius;
+	
+	UPROPERTY(Category = "Player|Size", EditAnywhere)
+		float DefaultMeshZPosition;
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
 		float CapsuleSizeLerpRate;

@@ -74,7 +74,7 @@ void AFPPlayer::BeginPlay()
 	ABaseWeapon* meleeWeapon = Cast<ABaseWeapon>(weapon);
 	PickupMeleeWeapon(meleeWeapon);
 
-	SetCapsuleData(DefaultHalfHeight, DefaultRadius);
+	SetCapsuleData(DefaultHalfHeight, DefaultRadius, DefaultMeshZPosition);
 }
 
 void AFPPlayer::Tick(float DeltaTime)
@@ -110,6 +110,7 @@ void AFPPlayer::UpdateCharacterSliding(float deltaTime)
 		if (velocity < MinSlideSpeed)
 		{
 			StopCharacterSliding();
+			RemovePlayerMovementState(EPlayerMovementState::Slide);
 			PushPlayerMovementState(EPlayerMovementState::Crouch);
 			ApplyChangesToCharacter();
 		}
@@ -477,7 +478,7 @@ void AFPPlayer::ApplyChangesToCharacter()
 {
 	MovementStatePushed(_movementStack.Last()); // This is just an event used to display the state being applied
 
-	SetCapsuleData(DefaultHalfHeight, DefaultRadius);
+	SetCapsuleData(DefaultHalfHeight, DefaultRadius, DefaultMeshZPosition);
 
 	switch (_movementStack.Last())
 	{
@@ -500,12 +501,12 @@ void AFPPlayer::ApplyChangesToCharacter()
 
 	case EPlayerMovementState::Crouch:
 		GetCharacterMovement()->MaxWalkSpeed = CrouchSpeed;
-		SetCapsuleData(CrouchHalfHeight, CrouchRadius);
+		SetCapsuleData(CrouchHalfHeight, CrouchRadius, CrouchMeshZPosition);
 		break;
 
 	case EPlayerMovementState::Slide:
 		GetCharacterMovement()->MaxWalkSpeed = SlideSpeed;
-		SetCapsuleData(CrouchHalfHeight, CrouchRadius);
+		SetCapsuleData(CrouchHalfHeight, CrouchRadius, CrouchMeshZPosition);
 		break;
 
 	default:
@@ -523,14 +524,11 @@ EPlayerMovementState AFPPlayer::GetTopPlayerState()
 	return _movementStack.Last();
 }
 
-void AFPPlayer::SetCapsuleData(float targetHeight, float targetRadius)
+void AFPPlayer::SetCapsuleData(float targetHeight, float targetRadius, float targetZPosition)
 {
-	_targetCapsuleHeight = targetHeight;
-	_targetCapsuleRadius = targetRadius;
-
-	_currentCapsuleHeight = GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight();
-	_currentCapsuleRadius = GetCapsuleComponent()->GetUnscaledCapsuleRadius();
-
+	_capsuleHeight = FVector2D(targetHeight, GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight());
+	_capsuleRadius = FVector2D(targetRadius, GetCapsuleComponent()->GetUnscaledCapsuleRadius());
+	_meshZPosition = FVector2D(targetZPosition, PlayerMesh->GetRelativeLocation().Z);
 	_lerpAmount = 0;
 }
 
@@ -541,11 +539,15 @@ void AFPPlayer::UpdateCapsuleSize(float deltaTime)
 		return;
 	}
 
-	float currentHeight = FMath::Lerp(_currentCapsuleHeight, _targetCapsuleHeight, _lerpAmount);
-	float currentRadius = FMath::Lerp(_currentCapsuleRadius, _targetCapsuleRadius, _lerpAmount);
+	float currentHeight = FMath::Lerp(_capsuleHeight.Y, _capsuleHeight.X, _lerpAmount);
+	float currentRadius = FMath::Lerp(_capsuleRadius.Y, _capsuleRadius.X, _lerpAmount);
+	float currentZPosition = FMath::Lerp(_meshZPosition.Y, _meshZPosition.X, _lerpAmount);
 
 	GetCapsuleComponent()->SetCapsuleHalfHeight(currentHeight);
 	GetCapsuleComponent()->SetCapsuleRadius(currentRadius);
+
+	FVector currentMeshPosition = PlayerMesh->GetRelativeLocation();
+	PlayerMesh->SetRelativeLocation(FVector(currentMeshPosition.X, currentMeshPosition.Y, currentZPosition));
 
 	_lerpAmount += CapsuleSizeLerpRate * deltaTime;
 }
