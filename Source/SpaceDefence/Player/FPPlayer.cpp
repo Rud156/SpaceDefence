@@ -17,6 +17,7 @@
 #include "Components/SceneComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 
+#include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -158,6 +159,13 @@ void AFPPlayer::WallClimbCheck(float deltaTime)
 		_isClimbing = false;
 		_currentClimbTime = 0;
 	}
+
+	// So that when climbing the jump state is not pushed
+	if (_isClimbing)
+	{
+		RemovePlayerMovementState(EPlayerMovementState::Jump);
+		RemovePlayerMovementState(EPlayerMovementState::RunJump);
+	}
 }
 
 bool AFPPlayer::IsClimbing()
@@ -185,7 +193,7 @@ void AFPPlayer::MoveRight(float value)
 {
 	_horizontalInput = value;
 
-	if (_currentClimbTime != 0)
+	if (_isClimbing)
 	{
 		return;
 	}
@@ -208,7 +216,7 @@ float AFPPlayer::GetHorizontalInput()
 
 void AFPPlayer::Turn(float value)
 {
-	if (_currentClimbTime != 0)
+	if (_isClimbing)
 	{
 		return;
 	}
@@ -226,7 +234,7 @@ void AFPPlayer::Turn(float value)
 
 void AFPPlayer::LookUp(float value)
 {
-	if (_currentClimbTime != 0)
+	if (_isClimbing)
 	{
 		return;
 	}
@@ -295,12 +303,20 @@ void AFPPlayer::RunPressed()
 	PushPlayerMovementState(EPlayerMovementState::Run);
 
 	ApplyChangesToCharacter();
+	PlayerRunStarted();
 }
 
 void AFPPlayer::RunReleased()
 {
 	RemovePlayerMovementState(EPlayerMovementState::Run);
 	ApplyChangesToCharacter();
+	PlayerRunEnded();
+}
+
+bool AFPPlayer::IsRunning()
+{
+	EPlayerMovementState playerLastState = GetTopPlayerState();
+	return playerLastState == EPlayerMovementState::Run && _verticalInput == 1 && !_isClimbing && _isOnGround;
 }
 
 void AFPPlayer::CrouchPressed()
@@ -440,6 +456,19 @@ bool AFPPlayer::IsOnGround()
 	return _isOnGround;
 }
 
+bool AFPPlayer::IsFalling()
+{
+	FVector velocity = GetVelocity();
+	float zVelocity = velocity.Z;
+
+	if (zVelocity < -FallVelocityThreshold)
+	{
+		return true;
+	}
+
+	return false;
+}
+
 void AFPPlayer::PushPlayerMovementState(EPlayerMovementState movementState)
 {
 	if (_movementStack.Num() > 0 && _movementStack.Last() == movementState)
@@ -558,7 +587,6 @@ void AFPPlayer::StopCharacterSliding()
 	auto playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 
 	FVector relative = CameraBoom->GetRelativeRotation().Euler();
-	GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Rotation: " + relative.ToString());
 
 	CameraBoom->SetRelativeRotation(FRotator::ZeroRotator);
 	AddControllerPitchInput(cameraRotation.Pitch / playerController->InputPitchScale);

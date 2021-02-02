@@ -155,6 +155,9 @@ public:
 	UPROPERTY(Category = "Player|Movement", EditAnywhere)
 		float GroundCheckDistance;
 
+	UPROPERTY(Category = "Player|Movement", EditAnywhere)
+		float FallVelocityThreshold;
+
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
 		float CrouchHalfHeight;
 
@@ -169,7 +172,7 @@ public:
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
 		float DefaultRadius;
-	
+
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
 		float DefaultMeshZPosition;
 
@@ -226,6 +229,10 @@ public:
 		void PlayerJumped();
 	UFUNCTION(Category = "PlayerMovementState", BlueprintImplementableEvent)
 		void PlayerRunJumped();
+	UFUNCTION(Category = "PlayerMovementState", BlueprintImplementableEvent)
+		void PlayerRunStarted();
+	UFUNCTION(Category = "PlayerMovementState", BlueprintImplementableEvent)
+		void PlayerRunEnded();
 
 	UFUNCTION(Category = Weapons, BlueprintCallable, BlueprintPure)
 		EPlayerWeapon GetCurrentWeapon();
@@ -244,16 +251,20 @@ public:
 	bool HasMeleeWeapon();
 	void PickupMeleeWeapon(ABaseWeapon* meleeWeapon);
 
+	UFUNCTION(Category = "Player|Input", BlueprintCallable, BlueprintPure)
+		float GetVerticalInput();
+	UFUNCTION(Category = "Player|Input", BlueprintCallable, BlueprintPure)
+		float GetHorizontalInput();
+	UFUNCTION(Category = "Player|State", BlueprintCallable, BlueprintPure)
+		bool IsRunning(); // This is different from the running state. Probably only used for effects and animation
 	UFUNCTION(Category = "Player|State", BlueprintCallable, BlueprintPure)
 		bool IsOnGround();
 	UFUNCTION(Category = "Player|State", BlueprintCallable, BlueprintPure)
 		bool IsClimbing();
 	UFUNCTION(Category = "Player|State", BlueprintCallable, BlueprintPure)
+		bool IsFalling();
+	UFUNCTION(Category = "Player|State", BlueprintCallable, BlueprintPure)
 		EPlayerMovementState GetTopPlayerState();
-	UFUNCTION(Category = "Player|Input", BlueprintCallable, BlueprintPure)
-		float GetVerticalInput();
-	UFUNCTION(Category = "Player|Input", BlueprintCallable, BlueprintPure)
-		float GetHorizontalInput();
 
 	AFPPlayer();
 	virtual void Tick(float DeltaTime) override;
