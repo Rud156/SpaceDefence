@@ -26,9 +26,6 @@ class SPACEDEFENCE_API AFPPlayer : public ACharacter
 private:
 
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
-		class USkeletalMeshComponent* FpMesh;
-
-	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
 		class USceneComponent* GroundCheckPoint;
 
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
@@ -56,12 +53,14 @@ private:
 	bool HasPlayerState(EPlayerMovementState movementState);
 	void ApplyChangesToCharacter();
 
-	float _targetCapsuleHeight;
-	float _targetCapsuleRadius;
-	float _currentCapsuleHeight;
-	float _currentCapsuleRadius;
+	float _verticalInput;
+	float _horizontalInput;
+
+	FVector2D _capsuleRadius; // X: Target, Y: Current
+	FVector2D _capsuleHeight; // X: Target, Y: Current
+	FVector2D _meshZPosition; // X: Target, Y: Current
 	float _lerpAmount;
-	void SetCapsuleData(float targetHeight, float targetRadius);
+	void SetCapsuleData(float targetHeight, float targetRadius, float targetZPosition);
 	void UpdateCapsuleSize(float deltaTime);
 
 	float _currentClimbTime;
@@ -107,6 +106,9 @@ protected:
 
 public:
 #pragma region Parameters
+
+	UPROPERTY(Category = Mesh, BlueprintReadOnly, VisibleDefaultsOnly)
+		class USkeletalMeshComponent* PlayerMesh;
 
 	UPROPERTY(Category = "Player|Movement", EditAnywhere)
 		float WalkSpeed;
@@ -160,10 +162,16 @@ public:
 		float CrouchRadius;
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
+		float CrouchMeshZPosition;
+
+	UPROPERTY(Category = "Player|Size", EditAnywhere)
 		float DefaultHalfHeight;
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
 		float DefaultRadius;
+	
+	UPROPERTY(Category = "Player|Size", EditAnywhere)
+		float DefaultMeshZPosition;
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
 		float CapsuleSizeLerpRate;
@@ -214,6 +222,10 @@ public:
 
 	UFUNCTION(Category = "Debug", BlueprintImplementableEvent)
 		void MovementStatePushed(EPlayerMovementState playerMovementState);
+	UFUNCTION(Category = "PlayerMovementState", BlueprintImplementableEvent)
+		void PlayerJumped();
+	UFUNCTION(Category = "PlayerMovementState", BlueprintImplementableEvent)
+		void PlayerRunJumped();
 
 	UFUNCTION(Category = Weapons, BlueprintCallable, BlueprintPure)
 		EPlayerWeapon GetCurrentWeapon();
@@ -231,6 +243,17 @@ public:
 		ABaseWeapon* GetMeleeWeapon();
 	bool HasMeleeWeapon();
 	void PickupMeleeWeapon(ABaseWeapon* meleeWeapon);
+
+	UFUNCTION(Category = "Player|State", BlueprintCallable, BlueprintPure)
+		bool IsOnGround();
+	UFUNCTION(Category = "Player|State", BlueprintCallable, BlueprintPure)
+		bool IsClimbing();
+	UFUNCTION(Category = "Player|State", BlueprintCallable, BlueprintPure)
+		EPlayerMovementState GetTopPlayerState();
+	UFUNCTION(Category = "Player|Input", BlueprintCallable, BlueprintPure)
+		float GetVerticalInput();
+	UFUNCTION(Category = "Player|Input", BlueprintCallable, BlueprintPure)
+		float GetHorizontalInput();
 
 	AFPPlayer();
 	virtual void Tick(float DeltaTime) override;
