@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "SpaceDefence/Player/FPPlayer.h"
 #include "SpaceDefence/Utils/Structs.h"
 
 #include "BaseEnemy.generated.h"
@@ -37,6 +38,13 @@ public:
 	
 	UPROPERTY(Category = "Optimization", EditAnywhere)
 		bool bCastShadow = false;
+
+
+
+	UPROPERTY(Category = "AI Settings", VisibleAnywhere, BlueprintReadWrite)
+		TArray<ATD_PlaceablesActors*> ListOfCurrentTargetAbleItems;
+	UPROPERTY(Category = "AI Settings", VisibleAnywhere, BlueprintReadWrite)
+		TArray<AFPPlayer*> ListOfCurrentTargetAblePlayers;
 
 #pragma endregion
 
