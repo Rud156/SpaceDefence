@@ -72,4 +72,18 @@ enum class EMutantTeleportState : uint8
 	TeleportEnd,
 };
 
+//Creepy
+UENUM(BlueprintType)
+enum class ECreepyAnimState : uint8
+{
+	None,
+	Attack,
+	AttackItem,
+	AttackPlayer,
+	Dead,
+	Movement,
+	Run,
+	Walk,
+	Idle
+};
 #pragma endregion

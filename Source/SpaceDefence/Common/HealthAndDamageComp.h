@@ -42,5 +42,5 @@ public:
 
 	void AddHealth(int healthAmount);
 	void TakeDamage(int damageAmount);
-	void AddDamageMultiplier(float damageMultiplier);
+
 };

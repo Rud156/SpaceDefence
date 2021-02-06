@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CurrencyManager/TD_CurrencyManager.h"
 #include "GameFramework/Actor.h"
 #include "SpaceDefence/Utils/Structs.h"
 #include "TD_PlaceablesActors.generated.h"
@@ -32,7 +33,8 @@ public:
 		USceneComponent* RootMeshComponent = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Place Able Settings")
 		UStaticMeshComponent* Model = nullptr;
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Place Able Settings")
+		float MaxEnemiesWhichCanAttackAtATime = 3;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		float LeftSnapPoint;
@@ -44,7 +46,14 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		void ApplyDamage(float Amount);
-
+	UFUNCTION(BlueprintCallable)
+		void IncreaseMaxEnemiesAttackingCount() { CurrentEnemiesAttackingCount++; }
+	UFUNCTION(BlueprintCallable)
+		void RemoveMaxEnemiesAttackingCount() { if(CurrentEnemiesAttackingCount>0)CurrentEnemiesAttackingCount--; }
+	UFUNCTION(BlueprintCallable)
+		bool CanEnemiesAttack() const;
+	UFUNCTION(BlueprintCallable)
+		bool IsActive() { return bIsAlive; }
 	//Non blueprint functions calls
 	void SetData(FPlaceAbleData Data);
 
@@ -53,7 +62,10 @@ public:
 	void RemoveActor();
 	void UpgradeActor();
 private:
+	bool bIsAlive = true;
+	AGameModeBase* GameMode = nullptr;
+	ATD_CurrencyManager* CurrencyManager = nullptr;
+	float CurrentEnemiesAttackingCount = 0;
 	
-
 	void CheckIfAlive();
 };

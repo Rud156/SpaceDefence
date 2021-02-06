@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "SpaceDefence/Placeables/TD_PlaceablesActors.h"
 #include "SpaceDefence/Player/FPPlayer.h"
 #include "SpaceDefence/Utils/Structs.h"
 
@@ -30,21 +31,35 @@ public:
 	UPROPERTY(Category = "Enemy Settings", EditAnywhere)
 		FEnemySettings Settings;
 
-	UPROPERTY(Category = "Optimization", EditAnywhere)
+	UPROPERTY(Category = "Enemy Settings", EditAnywhere, BlueprintReadWrite)
+		bool bIsItemWithinRange = false;
+
+	UPROPERTY(Category = "Enemy Settings", EditAnywhere, BlueprintReadWrite)
+		bool bIsPlayerWithInRange = false;
+
+	UPROPERTY(Category = "Optimization", VisibleAnywhere, BlueprintReadWrite)
 		bool bClothSimulation = false;
+
+
 	
-	UPROPERTY(Category = "Optimization", EditAnywhere)
+	UPROPERTY(Category = "Optimization", EditAnywhere,BlueprintReadWrite)
 		bool bCanAffectNavigation = false;
 	
-	UPROPERTY(Category = "Optimization", EditAnywhere)
+	UPROPERTY(Category = "Optimization", EditAnywhere,BlueprintReadWrite)
 		bool bCastShadow = false;
 
-
-
+	UPROPERTY(Category = "AI Settings", VisibleAnywhere, BlueprintReadWrite)
+		ATD_PlaceablesActors* CurrentAttackingItem = nullptr;
+	UPROPERTY(Category = "AI Settings", VisibleAnywhere, BlueprintReadWrite)
+		AFPPlayer* CurrentAttackingPlayer = nullptr;
 	UPROPERTY(Category = "AI Settings", VisibleAnywhere, BlueprintReadWrite)
 		TArray<ATD_PlaceablesActors*> ListOfCurrentTargetAbleItems;
 	UPROPERTY(Category = "AI Settings", VisibleAnywhere, BlueprintReadWrite)
 		TArray<AFPPlayer*> ListOfCurrentTargetAblePlayers;
+
+
+	UFUNCTION(BlueprintCallable)
+		void RemoveCurrentAttackItem() { if (CurrentAttackingItem)CurrentAttackingItem->RemoveMaxEnemiesAttackingCount(); CurrentAttackingItem = nullptr; }
 
 #pragma endregion
 

@@ -20,7 +20,7 @@
 ATD_PlaceablesActors::ATD_PlaceablesActors()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 	RootMeshComponent  = CreateDefaultSubobject<USceneComponent>("Root");
 	SetRootComponent(RootMeshComponent);
 	Model = CreateDefaultSubobject<UStaticMeshComponent>("Model");
@@ -33,6 +33,8 @@ ATD_PlaceablesActors::ATD_PlaceablesActors()
 void ATD_PlaceablesActors::BeginPlay()
 {
 	Super::BeginPlay();
+	 GameMode = GetWorld()->GetAuthGameMode();
+	CurrencyManager= Cast<ATD_GameModeFPS>(GameMode)->CurrencyManagerRef;
 	if(Model->GetStaticMesh())
 	{
 		
@@ -46,6 +48,8 @@ void ATD_PlaceablesActors::BeginPlay()
 
 void ATD_PlaceablesActors::ApplyDamage(float Amount)
 {
+
+	CheckIfAlive();
 	if(ActorData.Health> ZER0)
 	{
 		ActorData.Health -= Amount;
@@ -54,6 +58,12 @@ void ATD_PlaceablesActors::ApplyDamage(float Amount)
 			RemoveActor();
 		}
 	}
+}
+
+bool ATD_PlaceablesActors::CanEnemiesAttack() const
+{
+	return (CurrentEnemiesAttackingCount + 1 <= MaxEnemiesWhichCanAttackAtATime);
+	
 }
 
 void ATD_PlaceablesActors::SetData(FPlaceAbleData Data)
@@ -82,24 +92,30 @@ void ATD_PlaceablesActors::RemoveActor()
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, ActorData.DestructionSound, this->GetActorLocation());
 	}
-	auto GameMode = GetWorld()->GetAuthGameMode();
+	
 	if(GameMode)
 	{
-		auto tempCurrency = Cast<ATD_GameModeFPS>(GameMode)->CurrencyManagerRef;
-		if(tempCurrency)
+		bIsAlive = false;
+		if(CurrencyManager)
 		{
-			tempCurrency->AddCurrency(GetDestructionCost());
+			CurrencyManager->AddCurrency(GetDestructionCost());
 		}
 		
 	}
+	this->SetActorHiddenInGame(true);
+	this->SetActorEnableCollision(false);
+	this->SetActorTickEnabled(false);
 	
-	this->Destroy();
+	this->SetActorLocation(FVector(1000,1000,-300));
+	//this->BeginDestroy();
 	
 }
 
 void ATD_PlaceablesActors::UpgradeActor()
 {
 	PrintToScreen_Color("Upgrade pressed!", FColor::Blue);
+
+	CheckIfAlive();
 	if (ActorData.UpgradeSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, ActorData.UpgradeSound, this->GetActorLocation());
@@ -121,6 +137,5 @@ void ATD_PlaceablesActors::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 
-	CheckIfAlive();
 }
 
