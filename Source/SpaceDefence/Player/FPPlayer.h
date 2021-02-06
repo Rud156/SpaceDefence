@@ -12,7 +12,7 @@
 
 class ABasePlayerProjectile;
 class ABaseWeapon;
-class IIntfBaseInteractible;
+class UInteractionComponent;
 class AInteractionDisplayManager;
 class AWorldPingMarker;
 
@@ -84,10 +84,9 @@ private:
 	UFUNCTION()
 		void SpawnWeaponProjectile(TSubclassOf<class AActor> projectile, FVector spawnPoint);
 
-	IIntfBaseInteractible* _currentInteractable;
+	UInteractionComponent* _currentInteractionComponent;
 	AInteractionDisplayManager* _interactionManager;
 	void UpdateInteractibleCollection(float deltaTime);
-	void SetInteractableObject(IIntfBaseInteractible* callingObject);
 	void ClearInteractableObject();
 
 	ABaseWeapon* _meleeWeapon;
@@ -240,10 +239,12 @@ public:
 		ABaseWeapon* GetPrimaryWeapon();
 	void PickupPrimaryWeapon(ABaseWeapon* primaryWeapon);
 	ABaseWeapon* DropPrimaryWeapon();
-	bool HasPrimaryWeapon();
+	UFUNCTION(Category = Weapons, BlueprintCallable, BlueprintPure)
+		bool HasPrimaryWeapon();
 	UFUNCTION(Category = Weapons, BlueprintCallable, BlueprintPure)
 		ABaseWeapon* GetSecondaryWeapon();
-	bool HasSecondaryWeapon();
+	UFUNCTION(Category = Weapons, BlueprintCallable, BlueprintPure)
+		bool HasSecondaryWeapon();
 	void PickupSecondaryWeapon(ABaseWeapon* secondaryWeapon);
 	ABaseWeapon* DropSecondaryWeapon();
 	UFUNCTION(Category = Weapons, BlueprintCallable, BlueprintPure)

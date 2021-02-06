@@ -3,31 +3,30 @@
 #pragma once
 
 #include "CoreMinimal.h"
-
 #include "BaseWeapon.h"
-#include "../../Interactibles/IntfBaseInteractible.h"
-
+#include "../Interactibles/IntfBaseInteractible.h"
 #include "PrimaryWeapon.generated.h"
 
 class ABasePlayerProjectile;
+class UInteractionComponent;
 
 UCLASS()
 class SPACEDEFENCE_API APrimaryWeapon : public ABaseWeapon, public IIntfBaseInteractible
 {
 	GENERATED_BODY()
 
-	float _currentInteractionTime;
+		float _currentInteractionTime;
 	float _interactionDuration;
 	bool _interactionStarted;
 
 protected:
+	UPROPERTY(Category = Interaction, VisibleAnywhere, BlueprintReadOnly)
+		class UInteractionComponent* InteractionComponent;
+
 	virtual void BeginPlay() override;
 
 public:
 #pragma region Properties
-
-	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
-		float WeaponInteractionTime;
 
 	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
 		TSubclassOf<class ABasePlayerProjectile> Projectile;
@@ -36,15 +35,7 @@ public:
 
 	APrimaryWeapon();
 	virtual void Tick(float DeltaTime) override;
-	
-	virtual TSubclassOf<AActor> GetProjectile() override;
 
-	virtual EInteractibleType GetInteractibleType_Implementation() override;
-	virtual bool InteractUpdate_Implementation(float DeltaTime) override;
-	virtual void CancelInteraction_Implementation() override;
-	virtual bool InteractionStarted_Implementation() override;
-	virtual float GetCurrentInteractionTime_Implementation() override;
-	virtual float GetBaseInteractionTime_Implementation() override;
-	virtual float GetInteractionProgress_Implementation() override;
-	virtual void SetInteractionTime_Implementation(float DurationMultiplier) override;
+	virtual TSubclassOf<AActor> GetProjectile() override;
+	virtual UInteractionComponent* GetInteractionComponent_Implementation() override;
 };

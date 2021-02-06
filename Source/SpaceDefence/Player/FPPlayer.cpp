@@ -3,7 +3,7 @@
 
 #include "FPPlayer.h"
 #include "./Projectiles/BasePlayerProjectile.h"
-#include "../Interactibles/IntfBaseInteractible.h"
+#include "../Common/InteractionComponent.h"
 #include "./Weapons/BaseWeapon.h"
 #include "../Interactibles/InteractionDisplayManager.h"
 #include "../Markers/WorldPingComponent.h"
@@ -353,9 +353,9 @@ void AFPPlayer::PlayerLanded()
 
 void AFPPlayer::UpdateInteractibleCollection(float deltaTime)
 {
-	if (_currentInteractable != nullptr && _currentInteractable->InteractionStarted_Implementation())
+	if (_currentInteractionComponent != nullptr && _currentInteractionComponent->IsInteractionActive())
 	{
-		auto actor = Cast<AActor>(_currentInteractable);
+		auto actor = _currentInteractionComponent->GetOwner();
 		float distance = FVector::Distance(actor->GetActorLocation(), GetActorLocation());
 		if (distance > MaxInteractionDistance)
 		{
@@ -363,13 +363,13 @@ void AFPPlayer::UpdateInteractibleCollection(float deltaTime)
 			return;
 		}
 
-		bool interactionComplete = _currentInteractable->InteractUpdate_Implementation(deltaTime);
+		bool interactionComplete = _currentInteractionComponent->InteractionUpdate(deltaTime);
 		if (interactionComplete)
 		{
-			switch (_currentInteractable->GetInteractibleType_Implementation())
+			switch (_currentInteractionComponent->GetInteractibleType())
 			{
 			case EInteractibleType::Weapon:
-				PickupWeapon(Cast<ABaseWeapon>(_currentInteractable));
+				PickupWeapon(Cast<ABaseWeapon>(_currentInteractionComponent->GetOwner()));
 				break;
 			}
 
@@ -378,7 +378,7 @@ void AFPPlayer::UpdateInteractibleCollection(float deltaTime)
 		}
 		else
 		{
-			_interactionManager->SetInteractionBarProgress(_currentInteractable->GetInteractionProgress_Implementation());
+			_interactionManager->SetInteractionBarProgress(_currentInteractionComponent->GetInteractionProgress());
 		}
 	}
 	else
@@ -391,9 +391,10 @@ void AFPPlayer::UpdateInteractibleCollection(float deltaTime)
 		if (hit && hitResult.GetActor() != nullptr)
 		{
 			AActor* tempActor = hitResult.GetActor();
+			UActorComponent* actorComponent = tempActor->GetComponentByClass(UInteractionComponent::StaticClass());
+			UInteractionComponent* interactionComponent = Cast<UInteractionComponent>(actorComponent);
 
-			_currentInteractable = Cast<IIntfBaseInteractible>(tempActor);
-			if (_currentInteractable != nullptr)
+			if (interactionComponent != nullptr)
 			{
 				_interactionManager->ShowInteractionBar();
 			}
@@ -405,30 +406,26 @@ void AFPPlayer::UpdateInteractibleCollection(float deltaTime)
 	}
 }
 
-void AFPPlayer::SetInteractableObject(IIntfBaseInteractible* callingObject)
-{
-	_currentInteractable = callingObject;
-}
-
 void AFPPlayer::ClearInteractableObject()
 {
-	_currentInteractable = nullptr;
+	_currentInteractionComponent = nullptr;
 }
 
 void AFPPlayer::HandleInteractPressed()
 {
-	if (_currentInteractable != nullptr)
+	if (_currentInteractionComponent != nullptr)
 	{
-		_currentInteractable->SetInteractionTime_Implementation(1);
+		_currentInteractionComponent->SetInteractionTime();
+		_currentInteractionComponent->StartInteraction();
 	}
 }
 
 void AFPPlayer::HandleInteractReleased()
 {
-	if (_currentInteractable != nullptr)
+	if (_currentInteractionComponent != nullptr)
 	{
 		_interactionManager->SetInteractionBarProgress(0);
-		_currentInteractable->CancelInteraction_Implementation();
+		_currentInteractionComponent->CancelInteraction();
 
 		ClearInteractableObject();
 	}
@@ -810,6 +807,7 @@ ABaseWeapon* AFPPlayer::DropPrimaryWeapon()
 bool AFPPlayer::HasPrimaryWeapon()
 {
 	return _primaryWeapon != nullptr;
+	//return true;
 }
 
 ABaseWeapon* AFPPlayer::GetSecondaryWeapon()
