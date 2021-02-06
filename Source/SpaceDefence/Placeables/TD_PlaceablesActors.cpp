@@ -102,11 +102,12 @@ void ATD_PlaceablesActors::RemoveActor()
 		}
 		
 	}
-	this->SetActorHiddenInGame(true);
+	this->Destroy();
+	/*this->SetActorHiddenInGame(true);
 	this->SetActorEnableCollision(false);
 	this->SetActorTickEnabled(false);
 	
-	this->SetActorLocation(FVector(1000,1000,-300));
+	this->SetActorLocation(FVector(1000,1000,-300));*/
 	//this->BeginDestroy();
 	
 }
