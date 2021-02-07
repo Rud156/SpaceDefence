@@ -25,11 +25,9 @@ class SPACEDEFENCE_API ABaseWeapon : public AActor
 {
 	GENERATED_BODY()
 
-	float BASE_RECOIL_MULTIPLIER = 0.1f;
+		float BASE_RECOIL_MULTIPLIER = 0.1f;
 
 protected:
-	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
-		class USceneComponent* WeaponRoot;
 
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
 		class UStaticMeshComponent* StaticWeaponMesh;
@@ -64,6 +62,9 @@ public:
 	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
 		float FireRate;
 
+	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
+		bool HasRecoil;
+
 	UPROPERTY(Category = "Weapon|Data", BlueprintReadOnly, EditAnywhere)
 		UTextAsset* RecoilData;
 
@@ -86,6 +87,9 @@ public:
 
 	virtual void HideWeapon();
 	virtual void ShowWeapon();
+
+	virtual void PickupWeapon();
+	virtual void DropWeapon();
 
 	virtual bool ShootTick(float DeltaTime);
 	virtual TSubclassOf<class AActor> GetProjectile();

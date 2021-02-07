@@ -32,9 +32,6 @@ private:
 		class USceneComponent* WallCheckPoint;
 
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
-		class USceneComponent* WeaponTempShootingPoint;
-
-	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
 		class USceneComponent* InteractionCastPoint;
 
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly)
@@ -184,6 +181,12 @@ public:
 	UPROPERTY(Category = "Player|Weapon", EditAnywhere)
 		TSubclassOf<class ABaseWeapon> MeleeWeapon;
 
+	UPROPERTY(Category = "Player|Weapon", EditAnywhere)
+		FVector AttachRelativeLocation;
+
+	UPROPERTY(Category = "Player|Weapon", EditAnywhere)
+		FRotator AttachRelativeRotation;
+
 	UPROPERTY(Category = "Player|Ping", EditAnywhere)
 		TSubclassOf<class AWorldPingMarker> PingMarker;
 
@@ -249,7 +252,8 @@ public:
 	ABaseWeapon* DropSecondaryWeapon();
 	UFUNCTION(Category = Weapons, BlueprintCallable, BlueprintPure)
 		ABaseWeapon* GetMeleeWeapon();
-	bool HasMeleeWeapon();
+	UFUNCTION(Category = Weapons, BlueprintCallable, BlueprintPure)
+		bool HasMeleeWeapon();
 	void PickupMeleeWeapon(ABaseWeapon* meleeWeapon);
 
 	UFUNCTION(Category = "Player|Input", BlueprintCallable, BlueprintPure)

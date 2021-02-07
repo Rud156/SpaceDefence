@@ -28,7 +28,6 @@ AFPPlayer::AFPPlayer()
 	CharacterCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("CharacterCamera"));
 	GroundCheckPoint = CreateDefaultSubobject<USceneComponent>(TEXT("GroundCheckPoint"));
 	WallCheckPoint = CreateDefaultSubobject<USceneComponent>(TEXT("WallCheckPoint"));
-	WeaponTempShootingPoint = CreateDefaultSubobject<USceneComponent>(TEXT("WeaponTempShootingPoint"));
 	InteractionCastPoint = CreateDefaultSubobject<USceneComponent>(TEXT("InteractionCastPoint"));
 	WeaponAttachPoint = CreateDefaultSubobject<USceneComponent>(TEXT("WeaponAttachPoint"));
 	HealthAndDamage = CreateDefaultSubobject<UHealthAndDamageComp>(TEXT("HealthAndDamage"));
@@ -40,7 +39,6 @@ AFPPlayer::AFPPlayer()
 	PlayerMesh->SetupAttachment(CharacterCamera);
 	GroundCheckPoint->SetupAttachment(GetCapsuleComponent());
 	WallCheckPoint->SetupAttachment(GetCapsuleComponent());
-	WeaponTempShootingPoint->SetupAttachment(CharacterCamera);
 	InteractionCastPoint->SetupAttachment(CharacterCamera);
 	WeaponAttachPoint->SetupAttachment(CharacterCamera);
 
@@ -53,6 +51,10 @@ AFPPlayer::AFPPlayer()
 void AFPPlayer::BeginPlay()
 {
 	Super::BeginPlay();
+
+	WeaponAttachPoint->AttachToComponent(PlayerMesh, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
+	WeaponAttachPoint->SetRelativeLocation(AttachRelativeLocation);
+	WeaponAttachPoint->SetRelativeRotation(AttachRelativeRotation);
 
 	OnPlayerLanded.AddDynamic(this, &AFPPlayer::PlayerLanded);
 	auto interactionActor = UGameplayStatics::GetActorOfClass(GetWorld(), AInteractionDisplayManager::StaticClass());
@@ -396,6 +398,7 @@ void AFPPlayer::UpdateInteractibleCollection(float deltaTime)
 
 			if (interactionComponent != nullptr)
 			{
+				_currentInteractionComponent = interactionComponent;
 				_interactionManager->ShowInteractionBar();
 			}
 		}
@@ -731,12 +734,18 @@ void AFPPlayer::PickupWeapon(ABaseWeapon* weapon)
 		break;
 
 	case EPlayerWeapon::Primary:
+	{
+		weapon->PickupWeapon();
 		PickupPrimaryWeapon(weapon);
-		break;
+	}
+	break;
 
 	case EPlayerWeapon::Secondary:
+	{
+		weapon->PickupWeapon();
 		PickupSecondaryWeapon(weapon);
-		break;
+	}
+	break;
 	}
 }
 
@@ -783,11 +792,7 @@ void AFPPlayer::PickupPrimaryWeapon(ABaseWeapon* primaryWeapon)
 
 ABaseWeapon* AFPPlayer::DropPrimaryWeapon()
 {
-	FDetachmentTransformRules detachRules = FDetachmentTransformRules(EDetachmentRule::KeepWorld,
-		EDetachmentRule::KeepWorld,
-		EDetachmentRule::KeepWorld,
-		true);
-	_primaryWeapon->DetachFromActor(detachRules);
+	_primaryWeapon->DropWeapon();
 
 	auto weaponCopy = _primaryWeapon;
 	_primaryWeapon = nullptr;
@@ -807,7 +812,6 @@ ABaseWeapon* AFPPlayer::DropPrimaryWeapon()
 bool AFPPlayer::HasPrimaryWeapon()
 {
 	return _primaryWeapon != nullptr;
-	//return true;
 }
 
 ABaseWeapon* AFPPlayer::GetSecondaryWeapon()
@@ -834,11 +838,7 @@ void AFPPlayer::PickupSecondaryWeapon(ABaseWeapon* secondaryWeapon)
 
 ABaseWeapon* AFPPlayer::DropSecondaryWeapon()
 {
-	FDetachmentTransformRules detachRules = FDetachmentTransformRules(EDetachmentRule::KeepWorld,
-		EDetachmentRule::KeepWorld,
-		EDetachmentRule::KeepWorld,
-		true);
-	_secondaryWeapon->DetachFromActor(detachRules);
+	_secondaryWeapon->DropWeapon();
 
 	auto weaponCopy = _secondaryWeapon;
 	_secondaryWeapon = nullptr;

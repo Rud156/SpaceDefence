@@ -13,18 +13,17 @@
 
 ABaseWeapon::ABaseWeapon()
 {
-	WeaponRoot = CreateDefaultSubobject<USceneComponent>(TEXT("WeaponRoot"));
+	WeaponCollider = CreateDefaultSubobject<UBoxComponent>(TEXT("WeaponCollider"));
 	StaticWeaponMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaitcWeaponMesh"));
 	SkeletalWeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalWeaponMesh"));
 	ShootingPoint = CreateDefaultSubobject<USceneComponent>(TEXT("ShootingPoint"));
-	WeaponCollider = CreateDefaultSubobject<UBoxComponent>(TEXT("WeaponCollider"));
 
-	RootComponent = WeaponRoot;
-	StaticWeaponMesh->SetupAttachment(WeaponRoot);
-	SkeletalWeaponMesh->SetupAttachment(WeaponRoot);
-	ShootingPoint->SetupAttachment(WeaponRoot);
-	WeaponCollider->SetupAttachment(WeaponRoot);
+	RootComponent = WeaponCollider;
+	StaticWeaponMesh->SetupAttachment(WeaponCollider);
+	SkeletalWeaponMesh->SetupAttachment(WeaponCollider);
+	ShootingPoint->SetupAttachment(WeaponCollider);
 
+	HasRecoil = true;
 	PrimaryActorTick.bCanEverTick = true;
 }
 
@@ -36,11 +35,20 @@ void ABaseWeapon::BeginPlay()
 void ABaseWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	RecoilTick(DeltaTime);
+
+	if (HasRecoil)
+	{
+		RecoilTick(DeltaTime);
+	}
 }
 
 void ABaseWeapon::LoadRecoilData(FText recoilText)
 {
+	if (!HasRecoil)
+	{
+		return;
+	}
+
 	_recoilOffsets = TArray<FRecoilOffset>();
 	FString recoilString = recoilText.ToString();
 	FString currentNumberString = "";
@@ -153,6 +161,17 @@ TSubclassOf<AActor> ABaseWeapon::GetProjectile()
 
 FRecoilOffset ABaseWeapon::GetCurrentRecoilData()
 {
+	if (!HasRecoil)
+	{
+		FRecoilOffset recoilData;
+		recoilData.columnIndex = 0;
+		recoilData.rowIndex = 0;
+		recoilData.index = 0;
+		recoilData.offset = FVector2D(0, 0);
+
+		return recoilData;
+	}
+
 	FRecoilOffset recoilData;
 	if (_currentRecoilIndex >= _recoilOffsets.Num())
 	{
@@ -215,6 +234,11 @@ FRecoilOffset ABaseWeapon::GetCurrentRecoilData()
 
 int ABaseWeapon::GetMaxRecoilCount()
 {
+	if (!HasRecoil)
+	{
+		return 0;
+	}
+
 	return _recoilOffsets.Num();
 }
 
@@ -230,4 +254,22 @@ void ABaseWeapon::ShowWeapon()
 	SetActorHiddenInGame(false);
 	SetActorEnableCollision(true);
 	SetActorTickEnabled(true);
+}
+
+void ABaseWeapon::PickupWeapon()
+{
+	WeaponCollider->SetSimulatePhysics(false);
+	WeaponCollider->SetCollisionProfileName(TEXT("NoCollision"));
+}
+
+void ABaseWeapon::DropWeapon()
+{
+	FDetachmentTransformRules detachRules = FDetachmentTransformRules(EDetachmentRule::KeepWorld,
+		EDetachmentRule::KeepWorld,
+		EDetachmentRule::KeepWorld,
+		true);
+	DetachFromActor(detachRules);
+
+	WeaponCollider->SetCollisionProfileName(TEXT("Weapons"));
+	WeaponCollider->SetSimulatePhysics(true);
 }
