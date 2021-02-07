@@ -36,6 +36,11 @@ void ABaseWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (UseSkeletonMesh)
+	{
+		ShootingPoint->AttachToComponent(SkeletalWeaponMesh, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("ShootingPoint"));
+	}
+
 	if (HasRecoil)
 	{
 		RecoilTick(DeltaTime);

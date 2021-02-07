@@ -586,8 +586,6 @@ void AFPPlayer::StopCharacterSliding()
 	FRotator cameraRotation = CameraBoom->GetRelativeRotation();
 	auto playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 
-	FVector relative = CameraBoom->GetRelativeRotation().Euler();
-
 	CameraBoom->SetRelativeRotation(FRotator::ZeroRotator);
 	AddControllerPitchInput(cameraRotation.Pitch / playerController->InputPitchScale);
 	AddControllerYawInput(cameraRotation.Yaw / playerController->InputYawScale);

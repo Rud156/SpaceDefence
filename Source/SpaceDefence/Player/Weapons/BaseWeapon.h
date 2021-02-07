@@ -63,6 +63,9 @@ public:
 		float FireRate;
 
 	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
+		bool UseSkeletonMesh;
+
+	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
 		bool HasRecoil;
 
 	UPROPERTY(Category = "Weapon|Data", BlueprintReadOnly, EditAnywhere)
