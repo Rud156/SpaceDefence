@@ -30,6 +30,8 @@ ABaseWeapon::ABaseWeapon()
 void ABaseWeapon::BeginPlay()
 {
 	Super::BeginPlay();
+
+	_currentRandomIndex = 0;
 }
 
 void ABaseWeapon::Tick(float DeltaTime)
@@ -114,7 +116,7 @@ void ABaseWeapon::LoadRecoilData(FText recoilText)
 		int rowDiff = centerRow - recoilData.rowIndex;
 		int columnDiff = centerColumn - recoilData.columnIndex;
 
-		FVector2D offset = FVector2D(columnDiff * BASE_RECOIL_MULTIPLIER, rowDiff * BASE_RECOIL_MULTIPLIER);
+		FVector2D offset = FVector2D(columnDiff, rowDiff);
 		recoilData.offset = offset;
 
 		_recoilOffsets[j] = recoilData;
@@ -145,6 +147,8 @@ void ABaseWeapon::RecoilTick(float deltaTime)
 		if (_currentRecoilTime <= 0)
 		{
 			_currentRecoilIndex = 0;
+			_currentRandomIndex = 0;
+			_currentRandomShotCount = 0;
 		}
 	}
 }
@@ -183,11 +187,9 @@ FRecoilOffset ABaseWeapon::GetCurrentRecoilData()
 		recoilData.columnIndex = -1;
 		recoilData.rowIndex = -1;
 		recoilData.index = -1;
-		recoilData.offset = FVector2D(_currentRandomIndex * BASE_RECOIL_MULTIPLIER, 0);
 
 		if (_isLeft)
 		{
-			_currentRandomIndex -= 1;
 			if (_currentRandomIndex <= -RandomXOffset)
 			{
 				_currentRandomShotCount += 1;
@@ -199,14 +201,18 @@ FRecoilOffset ABaseWeapon::GetCurrentRecoilData()
 				}
 				else
 				{
-					float randomOffset = FMath::RandRange(-1.5f, 1.5f);
-					recoilData.offset = FVector2D(randomOffset * BASE_RECOIL_MULTIPLIER, randomOffset * BASE_RECOIL_MULTIPLIER);
+					float randomOffset = FMath::RandRange(-RandomStopDelta, RandomStopDelta);
+					recoilData.offset = FVector2D(randomOffset, 0);
 				}
+			}
+			else
+			{
+				recoilData.offset = FVector2D(-FMath::Abs(_currentRandomIndex), 0);
+				_currentRandomIndex -= RandomRecoilXDelta;
 			}
 		}
 		else
 		{
-			_currentRandomIndex += 1;
 			if (_currentRandomIndex >= RandomXOffset)
 			{
 				_currentRandomShotCount += 1;
@@ -218,9 +224,14 @@ FRecoilOffset ABaseWeapon::GetCurrentRecoilData()
 				}
 				else
 				{
-					float randomOffset = FMath::RandRange(-1.5f, 1.5f);
-					recoilData.offset = FVector2D(randomOffset * BASE_RECOIL_MULTIPLIER, randomOffset * BASE_RECOIL_MULTIPLIER);
+					float randomOffset = FMath::RandRange(-RandomStopDelta, RandomStopDelta);
+					recoilData.offset = FVector2D(randomOffset, 0);
 				}
+			}
+			else
+			{
+				recoilData.offset = FVector2D(FMath::Abs(_currentRandomIndex), 0);
+				_currentRandomIndex += RandomRecoilXDelta;
 			}
 		}
 
@@ -229,6 +240,8 @@ FRecoilOffset ABaseWeapon::GetCurrentRecoilData()
 	else
 	{
 		recoilData = _recoilOffsets[_currentRecoilIndex];
+		recoilData.offset.X *= RecoilOffsetMultiplier;
+		recoilData.offset.Y *= RecoilOffsetMultiplier;
 	}
 
 	_currentRecoilIndex += 1;

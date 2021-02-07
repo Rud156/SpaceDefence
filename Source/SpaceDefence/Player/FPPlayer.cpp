@@ -13,6 +13,7 @@
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/PlayerController.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/SceneComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -565,9 +566,11 @@ void AFPPlayer::UpdateCapsuleSize(float deltaTime)
 {
 	if (_lerpAmount > 1 || _lerpAmount < 0)
 	{
+		CameraBoom->bEnableCameraRotationLag = false;
 		return;
 	}
 
+	CameraBoom->bEnableCameraRotationLag = true;
 	float currentHeight = FMath::Lerp(_capsuleHeight.Y, _capsuleHeight.X, _lerpAmount);
 	float currentRadius = FMath::Lerp(_capsuleRadius.Y, _capsuleRadius.X, _lerpAmount);
 	float currentZPosition = FMath::Lerp(_meshZPosition.Y, _meshZPosition.X, _lerpAmount);
@@ -587,8 +590,8 @@ void AFPPlayer::StopCharacterSliding()
 	auto playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 
 	CameraBoom->SetRelativeRotation(FRotator::ZeroRotator);
-	AddControllerPitchInput(cameraRotation.Pitch / playerController->InputPitchScale);
-	AddControllerYawInput(cameraRotation.Yaw / playerController->InputYawScale);
+	FRotator currentRotation = playerController->GetControlRotation();
+	playerController->SetControlRotation(currentRotation + cameraRotation);
 	CameraBoom->bUsePawnControlRotation = true;
 
 	_slideTimer = 0;
@@ -670,8 +673,11 @@ void AFPPlayer::UpdateRecoilCamera(FRecoilOffset recoilOffset, int maxRecoilCoun
 	else
 	{
 		FVector2D offset = recoilOffset.offset;
-		AddControllerYawInput(offset.X);
-		AddControllerPitchInput(-offset.Y);
+		GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Red, "Recoil Offset: " + offset.ToString());
+
+		auto playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+		FRotator currentRotation = playerController->GetControlRotation();
+		playerController->SetControlRotation(currentRotation + FRotator(offset.Y, offset.X, 0));
 	}
 }
 

@@ -25,8 +25,6 @@ class SPACEDEFENCE_API ABaseWeapon : public AActor
 {
 	GENERATED_BODY()
 
-		float BASE_RECOIL_MULTIPLIER = 0.1f;
-
 protected:
 
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
@@ -50,7 +48,7 @@ protected:
 	void RecoilTick(float deltaTime);
 
 	bool _isLeft;
-	int _currentRandomIndex;
+	float _currentRandomIndex;
 	int _currentRandomShotCount;
 
 public:
@@ -72,10 +70,19 @@ public:
 		UTextAsset* RecoilData;
 
 	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
-		int RandomXOffset;
+		float RecoilOffsetMultiplier;
+
+	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
+		float RandomRecoilXDelta;
+
+	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
+		float RandomXOffset;
 
 	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
 		int RandomXStopCount;
+
+	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
+		float RandomStopDelta;
 
 	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
 		float RecoilResetTime;
