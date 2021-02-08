@@ -673,7 +673,6 @@ void AFPPlayer::UpdateRecoilCamera(FRecoilOffset recoilOffset, int maxRecoilCoun
 	else
 	{
 		FVector2D offset = recoilOffset.offset;
-		GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Red, "Recoil Offset: " + offset.ToString());
 
 		auto playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 		FRotator currentRotation = playerController->GetControlRotation();
