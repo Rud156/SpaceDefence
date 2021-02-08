@@ -155,6 +155,12 @@ public:
 		float FallVelocityThreshold;
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
+		FVector2D DefaultMeshPosition;
+
+	UPROPERTY(Category = "Player|Size", EditAnywhere)
+		FVector2D WeaponMeshPosition;
+
+	UPROPERTY(Category = "Player|Size", EditAnywhere)
 		float CrouchHalfHeight;
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)

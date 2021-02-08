@@ -791,11 +791,17 @@ void AFPPlayer::PickupPrimaryWeapon(ABaseWeapon* primaryWeapon)
 		EAttachmentRule::KeepWorld,
 		false);
 	_primaryWeapon->AttachToComponent(WeaponAttachPoint, attachmentRules);
+
+	float currentZPosition = PlayerMesh->GetRelativeLocation().Z;
+	PlayerMesh->SetRelativeLocation(FVector(WeaponMeshPosition.X, WeaponMeshPosition.Y, currentZPosition));
 }
 
 ABaseWeapon* AFPPlayer::DropPrimaryWeapon()
 {
 	_primaryWeapon->DropWeapon();
+
+	float currentZPosition = PlayerMesh->GetRelativeLocation().Z;
+	PlayerMesh->SetRelativeLocation(FVector(DefaultMeshPosition.X, DefaultMeshPosition.Y, currentZPosition));
 
 	auto weaponCopy = _primaryWeapon;
 	_primaryWeapon = nullptr;
@@ -837,11 +843,17 @@ void AFPPlayer::PickupSecondaryWeapon(ABaseWeapon* secondaryWeapon)
 		EAttachmentRule::KeepRelative,
 		true);
 	_secondaryWeapon->AttachToComponent(WeaponAttachPoint, attachmentRules);
+
+	float currentZPosition = PlayerMesh->GetRelativeLocation().Z;
+	PlayerMesh->SetRelativeLocation(FVector(WeaponMeshPosition.X, WeaponMeshPosition.Y, currentZPosition));
 }
 
 ABaseWeapon* AFPPlayer::DropSecondaryWeapon()
 {
 	_secondaryWeapon->DropWeapon();
+
+	float currentZPosition = PlayerMesh->GetRelativeLocation().Z;
+	PlayerMesh->SetRelativeLocation(FVector(DefaultMeshPosition.X, DefaultMeshPosition.Y, currentZPosition));
 
 	auto weaponCopy = _secondaryWeapon;
 	_secondaryWeapon = nullptr;
