@@ -12,7 +12,7 @@
 
 class ABasePlayerProjectile;
 class ABaseWeapon;
-class IIntfBaseInteractible;
+class UInteractionComponent;
 class AInteractionDisplayManager;
 class AWorldPingMarker;
 
@@ -30,9 +30,6 @@ private:
 
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
 		class USceneComponent* WallCheckPoint;
-
-	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
-		class USceneComponent* WeaponTempShootingPoint;
 
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
 		class USceneComponent* InteractionCastPoint;
@@ -84,10 +81,9 @@ private:
 	UFUNCTION()
 		void SpawnWeaponProjectile(TSubclassOf<class AActor> projectile, FVector spawnPoint);
 
-	IIntfBaseInteractible* _currentInteractable;
+	UInteractionComponent* _currentInteractionComponent;
 	AInteractionDisplayManager* _interactionManager;
 	void UpdateInteractibleCollection(float deltaTime);
-	void SetInteractableObject(IIntfBaseInteractible* callingObject);
 	void ClearInteractableObject();
 
 	ABaseWeapon* _meleeWeapon;
@@ -159,6 +155,12 @@ public:
 		float FallVelocityThreshold;
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
+		FVector2D DefaultMeshPosition;
+
+	UPROPERTY(Category = "Player|Size", EditAnywhere)
+		FVector2D WeaponMeshPosition;
+
+	UPROPERTY(Category = "Player|Size", EditAnywhere)
 		float CrouchHalfHeight;
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
@@ -184,6 +186,12 @@ public:
 
 	UPROPERTY(Category = "Player|Weapon", EditAnywhere)
 		TSubclassOf<class ABaseWeapon> MeleeWeapon;
+
+	UPROPERTY(Category = "Player|Weapon", EditAnywhere)
+		FVector AttachRelativeLocation;
+
+	UPROPERTY(Category = "Player|Weapon", EditAnywhere)
+		FRotator AttachRelativeRotation;
 
 	UPROPERTY(Category = "Player|Ping", EditAnywhere)
 		TSubclassOf<class AWorldPingMarker> PingMarker;
@@ -240,15 +248,18 @@ public:
 		ABaseWeapon* GetPrimaryWeapon();
 	void PickupPrimaryWeapon(ABaseWeapon* primaryWeapon);
 	ABaseWeapon* DropPrimaryWeapon();
-	bool HasPrimaryWeapon();
+	UFUNCTION(Category = Weapons, BlueprintCallable, BlueprintPure)
+		bool HasPrimaryWeapon();
 	UFUNCTION(Category = Weapons, BlueprintCallable, BlueprintPure)
 		ABaseWeapon* GetSecondaryWeapon();
-	bool HasSecondaryWeapon();
+	UFUNCTION(Category = Weapons, BlueprintCallable, BlueprintPure)
+		bool HasSecondaryWeapon();
 	void PickupSecondaryWeapon(ABaseWeapon* secondaryWeapon);
 	ABaseWeapon* DropSecondaryWeapon();
 	UFUNCTION(Category = Weapons, BlueprintCallable, BlueprintPure)
 		ABaseWeapon* GetMeleeWeapon();
-	bool HasMeleeWeapon();
+	UFUNCTION(Category = Weapons, BlueprintCallable, BlueprintPure)
+		bool HasMeleeWeapon();
 	void PickupMeleeWeapon(ABaseWeapon* meleeWeapon);
 
 	UFUNCTION(Category = "Player|Input", BlueprintCallable, BlueprintPure)

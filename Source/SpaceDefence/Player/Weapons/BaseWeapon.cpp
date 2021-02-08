@@ -13,34 +13,49 @@
 
 ABaseWeapon::ABaseWeapon()
 {
-	WeaponRoot = CreateDefaultSubobject<USceneComponent>(TEXT("WeaponRoot"));
+	WeaponCollider = CreateDefaultSubobject<UBoxComponent>(TEXT("WeaponCollider"));
 	StaticWeaponMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaitcWeaponMesh"));
 	SkeletalWeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalWeaponMesh"));
 	ShootingPoint = CreateDefaultSubobject<USceneComponent>(TEXT("ShootingPoint"));
-	WeaponCollider = CreateDefaultSubobject<UBoxComponent>(TEXT("WeaponCollider"));
 
-	RootComponent = WeaponRoot;
-	StaticWeaponMesh->SetupAttachment(WeaponRoot);
-	SkeletalWeaponMesh->SetupAttachment(WeaponRoot);
-	ShootingPoint->SetupAttachment(WeaponRoot);
-	WeaponCollider->SetupAttachment(WeaponRoot);
+	RootComponent = WeaponCollider;
+	StaticWeaponMesh->SetupAttachment(WeaponCollider);
+	SkeletalWeaponMesh->SetupAttachment(WeaponCollider);
+	ShootingPoint->SetupAttachment(WeaponCollider);
 
+	HasRecoil = true;
 	PrimaryActorTick.bCanEverTick = true;
 }
 
 void ABaseWeapon::BeginPlay()
 {
 	Super::BeginPlay();
+
+	_currentRandomIndex = 0;
 }
 
 void ABaseWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	RecoilTick(DeltaTime);
+
+	if (UseSkeletonMesh)
+	{
+		ShootingPoint->AttachToComponent(SkeletalWeaponMesh, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("ShootingPoint"));
+	}
+
+	if (HasRecoil)
+	{
+		RecoilTick(DeltaTime);
+	}
 }
 
 void ABaseWeapon::LoadRecoilData(FText recoilText)
 {
+	if (!HasRecoil)
+	{
+		return;
+	}
+
 	_recoilOffsets = TArray<FRecoilOffset>();
 	FString recoilString = recoilText.ToString();
 	FString currentNumberString = "";
@@ -101,7 +116,7 @@ void ABaseWeapon::LoadRecoilData(FText recoilText)
 		int rowDiff = centerRow - recoilData.rowIndex;
 		int columnDiff = centerColumn - recoilData.columnIndex;
 
-		FVector2D offset = FVector2D(columnDiff * BASE_RECOIL_MULTIPLIER, rowDiff * BASE_RECOIL_MULTIPLIER);
+		FVector2D offset = FVector2D(columnDiff, rowDiff);
 		recoilData.offset = offset;
 
 		_recoilOffsets[j] = recoilData;
@@ -132,6 +147,8 @@ void ABaseWeapon::RecoilTick(float deltaTime)
 		if (_currentRecoilTime <= 0)
 		{
 			_currentRecoilIndex = 0;
+			_currentRandomIndex = 0;
+			_currentRandomShotCount = 0;
 		}
 	}
 }
@@ -153,17 +170,26 @@ TSubclassOf<AActor> ABaseWeapon::GetProjectile()
 
 FRecoilOffset ABaseWeapon::GetCurrentRecoilData()
 {
+	if (!HasRecoil)
+	{
+		FRecoilOffset recoilData;
+		recoilData.columnIndex = 0;
+		recoilData.rowIndex = 0;
+		recoilData.index = 0;
+		recoilData.offset = FVector2D(0, 0);
+
+		return recoilData;
+	}
+
 	FRecoilOffset recoilData;
 	if (_currentRecoilIndex >= _recoilOffsets.Num())
 	{
 		recoilData.columnIndex = -1;
 		recoilData.rowIndex = -1;
 		recoilData.index = -1;
-		recoilData.offset = FVector2D(_currentRandomIndex * BASE_RECOIL_MULTIPLIER, 0);
 
 		if (_isLeft)
 		{
-			_currentRandomIndex -= 1;
 			if (_currentRandomIndex <= -RandomXOffset)
 			{
 				_currentRandomShotCount += 1;
@@ -175,14 +201,18 @@ FRecoilOffset ABaseWeapon::GetCurrentRecoilData()
 				}
 				else
 				{
-					float randomOffset = FMath::RandRange(-1.5f, 1.5f);
-					recoilData.offset = FVector2D(randomOffset * BASE_RECOIL_MULTIPLIER, randomOffset * BASE_RECOIL_MULTIPLIER);
+					float randomOffset = FMath::RandRange(-RandomStopDelta, RandomStopDelta);
+					recoilData.offset = FVector2D(randomOffset, 0);
 				}
+			}
+			else
+			{
+				recoilData.offset = FVector2D(-FMath::Abs(_currentRandomIndex), 0);
+				_currentRandomIndex -= RandomRecoilXDelta;
 			}
 		}
 		else
 		{
-			_currentRandomIndex += 1;
 			if (_currentRandomIndex >= RandomXOffset)
 			{
 				_currentRandomShotCount += 1;
@@ -194,9 +224,14 @@ FRecoilOffset ABaseWeapon::GetCurrentRecoilData()
 				}
 				else
 				{
-					float randomOffset = FMath::RandRange(-1.5f, 1.5f);
-					recoilData.offset = FVector2D(randomOffset * BASE_RECOIL_MULTIPLIER, randomOffset * BASE_RECOIL_MULTIPLIER);
+					float randomOffset = FMath::RandRange(-RandomStopDelta, RandomStopDelta);
+					recoilData.offset = FVector2D(randomOffset, 0);
 				}
+			}
+			else
+			{
+				recoilData.offset = FVector2D(FMath::Abs(_currentRandomIndex), 0);
+				_currentRandomIndex += RandomRecoilXDelta;
 			}
 		}
 
@@ -205,6 +240,8 @@ FRecoilOffset ABaseWeapon::GetCurrentRecoilData()
 	else
 	{
 		recoilData = _recoilOffsets[_currentRecoilIndex];
+		recoilData.offset.X *= RecoilOffsetMultiplier;
+		recoilData.offset.Y *= RecoilOffsetMultiplier;
 	}
 
 	_currentRecoilIndex += 1;
@@ -215,6 +252,11 @@ FRecoilOffset ABaseWeapon::GetCurrentRecoilData()
 
 int ABaseWeapon::GetMaxRecoilCount()
 {
+	if (!HasRecoil)
+	{
+		return 0;
+	}
+
 	return _recoilOffsets.Num();
 }
 
@@ -230,4 +272,22 @@ void ABaseWeapon::ShowWeapon()
 	SetActorHiddenInGame(false);
 	SetActorEnableCollision(true);
 	SetActorTickEnabled(true);
+}
+
+void ABaseWeapon::PickupWeapon()
+{
+	WeaponCollider->SetSimulatePhysics(false);
+	WeaponCollider->SetCollisionProfileName(TEXT("NoCollision"));
+}
+
+void ABaseWeapon::DropWeapon()
+{
+	FDetachmentTransformRules detachRules = FDetachmentTransformRules(EDetachmentRule::KeepWorld,
+		EDetachmentRule::KeepWorld,
+		EDetachmentRule::KeepWorld,
+		true);
+	DetachFromActor(detachRules);
+
+	WeaponCollider->SetCollisionProfileName(TEXT("Weapons"));
+	WeaponCollider->SetSimulatePhysics(true);
 }

@@ -10,7 +10,20 @@ UCLASS()
 class SPACEDEFENCE_API ABasePlayerProjectile : public AActor
 {
 	GENERATED_BODY()
-	
+
+private:
+	UPROPERTY(Category = Projectile, VisibleDefaultsOnly)
+		class UProjectileMovementComponent* ProjectileMovement;
+
+	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
+		class USceneComponent* ProjectileRoot;
+
+	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
+		class UStaticMeshComponent* ProjectileMesh;
+
+	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
+		class USphereComponent* ProjectileCollider;
+
 protected:
 	virtual void BeginPlay() override;
 

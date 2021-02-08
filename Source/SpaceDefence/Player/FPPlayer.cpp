@@ -3,7 +3,7 @@
 
 #include "FPPlayer.h"
 #include "./Projectiles/BasePlayerProjectile.h"
-#include "../Interactibles/IntfBaseInteractible.h"
+#include "../Common/InteractionComponent.h"
 #include "./Weapons/BaseWeapon.h"
 #include "../Interactibles/InteractionDisplayManager.h"
 #include "../Markers/WorldPingComponent.h"
@@ -13,6 +13,7 @@
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/PlayerController.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/SceneComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -28,7 +29,6 @@ AFPPlayer::AFPPlayer()
 	CharacterCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("CharacterCamera"));
 	GroundCheckPoint = CreateDefaultSubobject<USceneComponent>(TEXT("GroundCheckPoint"));
 	WallCheckPoint = CreateDefaultSubobject<USceneComponent>(TEXT("WallCheckPoint"));
-	WeaponTempShootingPoint = CreateDefaultSubobject<USceneComponent>(TEXT("WeaponTempShootingPoint"));
 	InteractionCastPoint = CreateDefaultSubobject<USceneComponent>(TEXT("InteractionCastPoint"));
 	WeaponAttachPoint = CreateDefaultSubobject<USceneComponent>(TEXT("WeaponAttachPoint"));
 	HealthAndDamage = CreateDefaultSubobject<UHealthAndDamageComp>(TEXT("HealthAndDamage"));
@@ -40,7 +40,6 @@ AFPPlayer::AFPPlayer()
 	PlayerMesh->SetupAttachment(CharacterCamera);
 	GroundCheckPoint->SetupAttachment(GetCapsuleComponent());
 	WallCheckPoint->SetupAttachment(GetCapsuleComponent());
-	WeaponTempShootingPoint->SetupAttachment(CharacterCamera);
 	InteractionCastPoint->SetupAttachment(CharacterCamera);
 	WeaponAttachPoint->SetupAttachment(CharacterCamera);
 
@@ -53,6 +52,10 @@ AFPPlayer::AFPPlayer()
 void AFPPlayer::BeginPlay()
 {
 	Super::BeginPlay();
+
+	WeaponAttachPoint->AttachToComponent(PlayerMesh, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
+	WeaponAttachPoint->SetRelativeLocation(AttachRelativeLocation);
+	WeaponAttachPoint->SetRelativeRotation(AttachRelativeRotation);
 
 	OnPlayerLanded.AddDynamic(this, &AFPPlayer::PlayerLanded);
 	auto interactionActor = UGameplayStatics::GetActorOfClass(GetWorld(), AInteractionDisplayManager::StaticClass());
@@ -353,9 +356,9 @@ void AFPPlayer::PlayerLanded()
 
 void AFPPlayer::UpdateInteractibleCollection(float deltaTime)
 {
-	if (_currentInteractable != nullptr && _currentInteractable->InteractionStarted_Implementation())
+	if (_currentInteractionComponent != nullptr && _currentInteractionComponent->IsInteractionActive())
 	{
-		auto actor = Cast<AActor>(_currentInteractable);
+		auto actor = _currentInteractionComponent->GetOwner();
 		float distance = FVector::Distance(actor->GetActorLocation(), GetActorLocation());
 		if (distance > MaxInteractionDistance)
 		{
@@ -363,13 +366,13 @@ void AFPPlayer::UpdateInteractibleCollection(float deltaTime)
 			return;
 		}
 
-		bool interactionComplete = _currentInteractable->InteractUpdate_Implementation(deltaTime);
+		bool interactionComplete = _currentInteractionComponent->InteractionUpdate(deltaTime);
 		if (interactionComplete)
 		{
-			switch (_currentInteractable->GetInteractibleType_Implementation())
+			switch (_currentInteractionComponent->GetInteractibleType())
 			{
 			case EInteractibleType::Weapon:
-				PickupWeapon(Cast<ABaseWeapon>(_currentInteractable));
+				PickupWeapon(Cast<ABaseWeapon>(_currentInteractionComponent->GetOwner()));
 				break;
 			}
 
@@ -378,7 +381,7 @@ void AFPPlayer::UpdateInteractibleCollection(float deltaTime)
 		}
 		else
 		{
-			_interactionManager->SetInteractionBarProgress(_currentInteractable->GetInteractionProgress_Implementation());
+			_interactionManager->SetInteractionBarProgress(_currentInteractionComponent->GetInteractionProgress());
 		}
 	}
 	else
@@ -391,10 +394,12 @@ void AFPPlayer::UpdateInteractibleCollection(float deltaTime)
 		if (hit && hitResult.GetActor() != nullptr)
 		{
 			AActor* tempActor = hitResult.GetActor();
+			UActorComponent* actorComponent = tempActor->GetComponentByClass(UInteractionComponent::StaticClass());
+			UInteractionComponent* interactionComponent = Cast<UInteractionComponent>(actorComponent);
 
-			_currentInteractable = Cast<IIntfBaseInteractible>(tempActor);
-			if (_currentInteractable != nullptr)
+			if (interactionComponent != nullptr)
 			{
+				_currentInteractionComponent = interactionComponent;
 				_interactionManager->ShowInteractionBar();
 			}
 		}
@@ -405,30 +410,26 @@ void AFPPlayer::UpdateInteractibleCollection(float deltaTime)
 	}
 }
 
-void AFPPlayer::SetInteractableObject(IIntfBaseInteractible* callingObject)
-{
-	_currentInteractable = callingObject;
-}
-
 void AFPPlayer::ClearInteractableObject()
 {
-	_currentInteractable = nullptr;
+	_currentInteractionComponent = nullptr;
 }
 
 void AFPPlayer::HandleInteractPressed()
 {
-	if (_currentInteractable != nullptr)
+	if (_currentInteractionComponent != nullptr)
 	{
-		_currentInteractable->SetInteractionTime_Implementation(1);
+		_currentInteractionComponent->SetInteractionTime();
+		_currentInteractionComponent->StartInteraction();
 	}
 }
 
 void AFPPlayer::HandleInteractReleased()
 {
-	if (_currentInteractable != nullptr)
+	if (_currentInteractionComponent != nullptr)
 	{
 		_interactionManager->SetInteractionBarProgress(0);
-		_currentInteractable->CancelInteraction_Implementation();
+		_currentInteractionComponent->CancelInteraction();
 
 		ClearInteractableObject();
 	}
@@ -565,9 +566,11 @@ void AFPPlayer::UpdateCapsuleSize(float deltaTime)
 {
 	if (_lerpAmount > 1 || _lerpAmount < 0)
 	{
+		CameraBoom->bEnableCameraRotationLag = false;
 		return;
 	}
 
+	CameraBoom->bEnableCameraRotationLag = true;
 	float currentHeight = FMath::Lerp(_capsuleHeight.Y, _capsuleHeight.X, _lerpAmount);
 	float currentRadius = FMath::Lerp(_capsuleRadius.Y, _capsuleRadius.X, _lerpAmount);
 	float currentZPosition = FMath::Lerp(_meshZPosition.Y, _meshZPosition.X, _lerpAmount);
@@ -586,11 +589,9 @@ void AFPPlayer::StopCharacterSliding()
 	FRotator cameraRotation = CameraBoom->GetRelativeRotation();
 	auto playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 
-	FVector relative = CameraBoom->GetRelativeRotation().Euler();
-
 	CameraBoom->SetRelativeRotation(FRotator::ZeroRotator);
-	AddControllerPitchInput(cameraRotation.Pitch / playerController->InputPitchScale);
-	AddControllerYawInput(cameraRotation.Yaw / playerController->InputYawScale);
+	FRotator currentRotation = playerController->GetControlRotation();
+	playerController->SetControlRotation(currentRotation + cameraRotation);
 	CameraBoom->bUsePawnControlRotation = true;
 
 	_slideTimer = 0;
@@ -672,8 +673,10 @@ void AFPPlayer::UpdateRecoilCamera(FRecoilOffset recoilOffset, int maxRecoilCoun
 	else
 	{
 		FVector2D offset = recoilOffset.offset;
-		AddControllerYawInput(offset.X);
-		AddControllerPitchInput(-offset.Y);
+
+		auto playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+		FRotator currentRotation = playerController->GetControlRotation();
+		playerController->SetControlRotation(currentRotation + FRotator(offset.Y, offset.X, 0));
 	}
 }
 
@@ -734,12 +737,18 @@ void AFPPlayer::PickupWeapon(ABaseWeapon* weapon)
 		break;
 
 	case EPlayerWeapon::Primary:
+	{
+		weapon->PickupWeapon();
 		PickupPrimaryWeapon(weapon);
-		break;
+	}
+	break;
 
 	case EPlayerWeapon::Secondary:
+	{
+		weapon->PickupWeapon();
 		PickupSecondaryWeapon(weapon);
-		break;
+	}
+	break;
 	}
 }
 
@@ -782,15 +791,17 @@ void AFPPlayer::PickupPrimaryWeapon(ABaseWeapon* primaryWeapon)
 		EAttachmentRule::KeepWorld,
 		false);
 	_primaryWeapon->AttachToComponent(WeaponAttachPoint, attachmentRules);
+
+	float currentZPosition = PlayerMesh->GetRelativeLocation().Z;
+	PlayerMesh->SetRelativeLocation(FVector(WeaponMeshPosition.X, WeaponMeshPosition.Y, currentZPosition));
 }
 
 ABaseWeapon* AFPPlayer::DropPrimaryWeapon()
 {
-	FDetachmentTransformRules detachRules = FDetachmentTransformRules(EDetachmentRule::KeepWorld,
-		EDetachmentRule::KeepWorld,
-		EDetachmentRule::KeepWorld,
-		true);
-	_primaryWeapon->DetachFromActor(detachRules);
+	_primaryWeapon->DropWeapon();
+
+	float currentZPosition = PlayerMesh->GetRelativeLocation().Z;
+	PlayerMesh->SetRelativeLocation(FVector(DefaultMeshPosition.X, DefaultMeshPosition.Y, currentZPosition));
 
 	auto weaponCopy = _primaryWeapon;
 	_primaryWeapon = nullptr;
@@ -832,15 +843,17 @@ void AFPPlayer::PickupSecondaryWeapon(ABaseWeapon* secondaryWeapon)
 		EAttachmentRule::KeepRelative,
 		true);
 	_secondaryWeapon->AttachToComponent(WeaponAttachPoint, attachmentRules);
+
+	float currentZPosition = PlayerMesh->GetRelativeLocation().Z;
+	PlayerMesh->SetRelativeLocation(FVector(WeaponMeshPosition.X, WeaponMeshPosition.Y, currentZPosition));
 }
 
 ABaseWeapon* AFPPlayer::DropSecondaryWeapon()
 {
-	FDetachmentTransformRules detachRules = FDetachmentTransformRules(EDetachmentRule::KeepWorld,
-		EDetachmentRule::KeepWorld,
-		EDetachmentRule::KeepWorld,
-		true);
-	_secondaryWeapon->DetachFromActor(detachRules);
+	_secondaryWeapon->DropWeapon();
+
+	float currentZPosition = PlayerMesh->GetRelativeLocation().Z;
+	PlayerMesh->SetRelativeLocation(FVector(DefaultMeshPosition.X, DefaultMeshPosition.Y, currentZPosition));
 
 	auto weaponCopy = _secondaryWeapon;
 	_secondaryWeapon = nullptr;
