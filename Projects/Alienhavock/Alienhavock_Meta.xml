@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<StudioProjectMetaData xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" PresetVersion="1">
+  <StudioAssetMetas>
+    <StudioAssetMeta>
+      <Name>Ground</Name>
+      <MixerXMLPath>E:\SpaceDefence\Projects\Alienhavock\Ground\Ground.xml</MixerXMLPath>
+      <MixerVersion>2020.1.6</MixerVersion>
+      <MixPresetVersion>12</MixPresetVersion>
+      <SaveTime>2021-02-07T14:26:15.6037188-07:00</SaveTime>
+    </StudioAssetMeta>
+    <StudioAssetMeta>
+      <Name>Rock</Name>
+      <MixerXMLPath>E:\SpaceDefence\Projects\Alienhavock\Rock\Rock.xml</MixerXMLPath>
+      <MixerVersion>2020.1.6</MixerVersion>
+      <MixPresetVersion>12</MixPresetVersion>
+      <SaveTime>2021-02-06T15:22:08.1832243-07:00</SaveTime>
+    </StudioAssetMeta>
+  </StudioAssetMetas>
+</StudioProjectMetaData>

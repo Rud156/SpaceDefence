@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <MixerProject xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" PresetVersion="12">
   <MixerVersion>2020.1.6</MixerVersion>
-  <SaveTime>2021-02-06T12:45:22.7925564-07:00</SaveTime>
+  <SaveTime>2021-02-07T14:26:15.6037188-07:00</SaveTime>
   <AutoSave>false</AutoSave>
   <ExportResolution>4</ExportResolution>
-  <ExportPath>E:\MixerExports</ExportPath>
+  <ExportPath>E:\MegaScans\Downloaded</ExportPath>
   <ExportToSubfolder>true</ExportToSubfolder>
   <OpenFolderAfterExport>false</OpenFolderAfterExport>
   <PutResolutionInNames>true</PutResolutionInNames>
@@ -459,7 +459,7 @@
           <Source>
             <ContentID>Albedo</ContentID>
             <AssetPackID>vbzoecbdy</AssetPackID>
-            <SubID>cS_oR1UUv0a_g-B7n6FD3A</SubID>
+            <SubID>FkRqtjqX4EO7lp_o-Muq4g</SubID>
             <OriginalName>vbzoecbdy_4k_albedo</OriginalName>
             <CurrentFilePath>E:\mixerDownloads\Downloaded\surface\Coal_Debris_vbzoecbdy\vbzoecbdy_4k_albedo.jpg</CurrentFilePath>
             <AssetID>vbzoecbdy</AssetID>
@@ -505,7 +505,7 @@
           <Source>
             <ContentID>Metalness</ContentID>
             <AssetPackID>vbzoecbdy</AssetPackID>
-            <SubID>cS_oR1UUv0a_g-B7n6FD3A</SubID>
+            <SubID>FkRqtjqX4EO7lp_o-Muq4g</SubID>
             <AssetID>vbzoecbdy</AssetID>
             <LoadedFromLibrary>true</LoadedFromLibrary>
             <InvertedPostLoading>false</InvertedPostLoading>
@@ -548,14 +548,14 @@
           <Source>
             <ContentID>Roughness</ContentID>
             <AssetPackID>vbzoecbdy</AssetPackID>
-            <SubID>cS_oR1UUv0a_g-B7n6FD3A</SubID>
+            <SubID>FkRqtjqX4EO7lp_o-Muq4g</SubID>
             <OriginalName>vbzoecbdy_4k_roughness</OriginalName>
             <CurrentFilePath>E:\mixerDownloads\Downloaded\surface\Coal_Debris_vbzoecbdy\vbzoecbdy_4k_roughness.jpg</CurrentFilePath>
             <AssetID>vbzoecbdy</AssetID>
             <LoadedFromLibrary>true</LoadedFromLibrary>
             <InvertedPostLoading>false</InvertedPostLoading>
             <PremultipliedAlpha>false</PremultipliedAlpha>
-            <IsGenerated>true</IsGenerated>
+            <IsGenerated>false</IsGenerated>
             <TexContent>Roughness</TexContent>
             <FilePath>E:\mixerDownloads\Downloaded\surface\Coal_Debris_vbzoecbdy\vbzoecbdy_4k_roughness.jpg</FilePath>
           </Source>
@@ -594,7 +594,7 @@
           <Source>
             <ContentID>AO</ContentID>
             <AssetPackID>vbzoecbdy</AssetPackID>
-            <SubID>cS_oR1UUv0a_g-B7n6FD3A</SubID>
+            <SubID>FkRqtjqX4EO7lp_o-Muq4g</SubID>
             <OriginalName>vbzoecbdy_4k_ao</OriginalName>
             <CurrentFilePath>E:\mixerDownloads\Downloaded\surface\Coal_Debris_vbzoecbdy\vbzoecbdy_4k_ao.jpg</CurrentFilePath>
             <AssetID>vbzoecbdy</AssetID>
@@ -640,7 +640,7 @@
           <Source>
             <ContentID>Displacement</ContentID>
             <AssetPackID>vbzoecbdy</AssetPackID>
-            <SubID>cS_oR1UUv0a_g-B7n6FD3A</SubID>
+            <SubID>FkRqtjqX4EO7lp_o-Muq4g</SubID>
             <OriginalName>vbzoecbdy_4k_displacement</OriginalName>
             <CurrentFilePath>E:\mixerDownloads\Downloaded\surface\Coal_Debris_vbzoecbdy\vbzoecbdy_4k_displacement.exr</CurrentFilePath>
             <AssetID>vbzoecbdy</AssetID>
@@ -686,7 +686,7 @@
           <Source>
             <ContentID>Normal</ContentID>
             <AssetPackID>vbzoecbdy</AssetPackID>
-            <SubID>cS_oR1UUv0a_g-B7n6FD3A</SubID>
+            <SubID>FkRqtjqX4EO7lp_o-Muq4g</SubID>
             <OriginalName>vbzoecbdy_4k_normal</OriginalName>
             <CurrentFilePath>E:\mixerDownloads\Downloaded\surface\Coal_Debris_vbzoecbdy\vbzoecbdy_4k_normal.jpg</CurrentFilePath>
             <AssetID>vbzoecbdy</AssetID>
@@ -868,7 +868,7 @@
           <Source>
             <ContentID>Albedo</ContentID>
             <AssetPackID>umphfdgdy</AssetPackID>
-            <SubID>FSPS7J8gxkuneIaCTOSwSw</SubID>
+            <SubID>fezR2Mu7xUa6RDpz_wAkSA</SubID>
             <OriginalName>umphfdgdy_4k_albedo</OriginalName>
             <CurrentFilePath>E:\mixerDownloads\Downloaded\surface\Moss_Ground_umphfdgdy\umphfdgdy_4k_albedo.jpg</CurrentFilePath>
             <AssetID>umphfdgdy</AssetID>
@@ -914,7 +914,7 @@
           <Source>
             <ContentID>Metalness</ContentID>
             <AssetPackID>umphfdgdy</AssetPackID>
-            <SubID>FSPS7J8gxkuneIaCTOSwSw</SubID>
+            <SubID>fezR2Mu7xUa6RDpz_wAkSA</SubID>
             <AssetID>umphfdgdy</AssetID>
             <LoadedFromLibrary>true</LoadedFromLibrary>
             <InvertedPostLoading>false</InvertedPostLoading>
@@ -957,7 +957,7 @@
           <Source>
             <ContentID>Roughness</ContentID>
             <AssetPackID>umphfdgdy</AssetPackID>
-            <SubID>FSPS7J8gxkuneIaCTOSwSw</SubID>
+            <SubID>fezR2Mu7xUa6RDpz_wAkSA</SubID>
             <OriginalName>umphfdgdy_4k_roughness</OriginalName>
             <CurrentFilePath>E:\mixerDownloads\Downloaded\surface\Moss_Ground_umphfdgdy\umphfdgdy_4k_roughness.jpg</CurrentFilePath>
             <AssetID>umphfdgdy</AssetID>
@@ -1003,7 +1003,7 @@
           <Source>
             <ContentID>AO</ContentID>
             <AssetPackID>umphfdgdy</AssetPackID>
-            <SubID>FSPS7J8gxkuneIaCTOSwSw</SubID>
+            <SubID>fezR2Mu7xUa6RDpz_wAkSA</SubID>
             <OriginalName>umphfdgdy_4k_ao</OriginalName>
             <CurrentFilePath>E:\mixerDownloads\Downloaded\surface\Moss_Ground_umphfdgdy\umphfdgdy_4k_ao.jpg</CurrentFilePath>
             <AssetID>umphfdgdy</AssetID>
@@ -1049,7 +1049,7 @@
           <Source>
             <ContentID>Displacement</ContentID>
             <AssetPackID>umphfdgdy</AssetPackID>
-            <SubID>FSPS7J8gxkuneIaCTOSwSw</SubID>
+            <SubID>fezR2Mu7xUa6RDpz_wAkSA</SubID>
             <OriginalName>umphfdgdy_4k_displacement</OriginalName>
             <CurrentFilePath>E:\mixerDownloads\Downloaded\surface\Moss_Ground_umphfdgdy\umphfdgdy_4k_displacement.exr</CurrentFilePath>
             <AssetID>umphfdgdy</AssetID>
@@ -1095,7 +1095,7 @@
           <Source>
             <ContentID>Normal</ContentID>
             <AssetPackID>umphfdgdy</AssetPackID>
-            <SubID>FSPS7J8gxkuneIaCTOSwSw</SubID>
+            <SubID>fezR2Mu7xUa6RDpz_wAkSA</SubID>
             <OriginalName>umphfdgdy_4k_normal</OriginalName>
             <CurrentFilePath>E:\mixerDownloads\Downloaded\surface\Moss_Ground_umphfdgdy\umphfdgdy_4k_normal.jpg</CurrentFilePath>
             <AssetID>umphfdgdy</AssetID>
@@ -1277,7 +1277,7 @@
           <Source>
             <ContentID>Albedo</ContentID>
             <AssetPackID>umkmcfdg</AssetPackID>
-            <SubID>wOgYjmYXdku1IzKGD_Q87Q</SubID>
+            <SubID>FhiIU82oS0-aty6XtOO8TQ</SubID>
             <OriginalName>umkmcfdg_4k_albedo</OriginalName>
             <CurrentFilePath>E:\mixerDownloads\Downloaded\surface\Rock_Rough_umkmcfdg\umkmcfdg_4k_albedo.jpg</CurrentFilePath>
             <AssetID>umkmcfdg</AssetID>
@@ -1323,7 +1323,7 @@
           <Source>
             <ContentID>Metalness</ContentID>
             <AssetPackID>umkmcfdg</AssetPackID>
-            <SubID>wOgYjmYXdku1IzKGD_Q87Q</SubID>
+            <SubID>FhiIU82oS0-aty6XtOO8TQ</SubID>
             <AssetID>umkmcfdg</AssetID>
             <LoadedFromLibrary>true</LoadedFromLibrary>
             <InvertedPostLoading>false</InvertedPostLoading>
@@ -1366,7 +1366,7 @@
           <Source>
             <ContentID>Roughness</ContentID>
             <AssetPackID>umkmcfdg</AssetPackID>
-            <SubID>wOgYjmYXdku1IzKGD_Q87Q</SubID>
+            <SubID>FhiIU82oS0-aty6XtOO8TQ</SubID>
             <OriginalName>umkmcfdg_4k_roughness</OriginalName>
             <CurrentFilePath>E:\mixerDownloads\Downloaded\surface\Rock_Rough_umkmcfdg\umkmcfdg_4k_roughness.jpg</CurrentFilePath>
             <AssetID>umkmcfdg</AssetID>
@@ -1412,7 +1412,7 @@
           <Source>
             <ContentID>AO</ContentID>
             <AssetPackID>umkmcfdg</AssetPackID>
-            <SubID>wOgYjmYXdku1IzKGD_Q87Q</SubID>
+            <SubID>FhiIU82oS0-aty6XtOO8TQ</SubID>
             <OriginalName>umkmcfdg_4k_ao</OriginalName>
             <CurrentFilePath>E:\mixerDownloads\Downloaded\surface\Rock_Rough_umkmcfdg\umkmcfdg_4k_ao.jpg</CurrentFilePath>
             <AssetID>umkmcfdg</AssetID>
@@ -1458,7 +1458,7 @@
           <Source>
             <ContentID>Displacement</ContentID>
             <AssetPackID>umkmcfdg</AssetPackID>
-            <SubID>wOgYjmYXdku1IzKGD_Q87Q</SubID>
+            <SubID>FhiIU82oS0-aty6XtOO8TQ</SubID>
             <OriginalName>umkmcfdg_4k_displacement</OriginalName>
             <CurrentFilePath>E:\mixerDownloads\Downloaded\surface\Rock_Rough_umkmcfdg\umkmcfdg_4k_displacement.exr</CurrentFilePath>
             <AssetID>umkmcfdg</AssetID>
@@ -1504,7 +1504,7 @@
           <Source>
             <ContentID>Normal</ContentID>
             <AssetPackID>umkmcfdg</AssetPackID>
-            <SubID>wOgYjmYXdku1IzKGD_Q87Q</SubID>
+            <SubID>FhiIU82oS0-aty6XtOO8TQ</SubID>
             <OriginalName>umkmcfdg_4k_normal</OriginalName>
             <CurrentFilePath>E:\mixerDownloads\Downloaded\surface\Rock_Rough_umkmcfdg\umkmcfdg_4k_normal.jpg</CurrentFilePath>
             <AssetID>umkmcfdg</AssetID>
@@ -2044,6 +2044,7 @@
     </Children>
     <Level>0</Level>
     <Depth>1</Depth>
+    <Layers />
   </LayerStack>
   <CustomExportChannelStack>
     <Children />
@@ -2238,31 +2239,11 @@
           <GammaSelection>0</GammaSelection>
         </BlueChannel>
       </ExportMapPreset>
-      <ExportMapPreset>
-        <MapName>Metalness</MapName>
-        <Active>false</Active>
-        <Foldout>false</Foldout>
-        <FileFormatName>PNG</FileFormatName>
-        <BitDepthName>8-bit</BitDepthName>
-        <UsedChannels>RGB</UsedChannels>
-        <RedChannel>
-          <ContentName>Metalness</ContentName>
-          <GammaSelection>1</GammaSelection>
-        </RedChannel>
-        <GreenChannel>
-          <ContentName>Metalness</ContentName>
-          <GammaSelection>1</GammaSelection>
-        </GreenChannel>
-        <BlueChannel>
-          <ContentName>Metalness</ContentName>
-          <GammaSelection>1</GammaSelection>
-        </BlueChannel>
-      </ExportMapPreset>
     </Maps>
   </ExportMaps>
   <SASPreset>
     <Name>AlienGround</Name>
-    <AssetID>w7Q6yDLaFUOMDzzMSM9SYQ</AssetID>
+    <AssetID>pvIDK0A830eGuiOWqmFlLw</AssetID>
     <Material>Custom</Material>
     <Resolution>4096</Resolution>
     <Tags />
@@ -2484,6 +2465,7 @@
       <FoldOutOpen>false</FoldOutOpen>
       <MaterialIDData />
       <UnassignedMaterialIDData />
+      <AvailableColors />
     </MaterialIDMap>
     <MeshUIContext>
       <ConstrainScaleAspect>true</ConstrainScaleAspect>
