@@ -57,6 +57,10 @@ private:
 	FVector2D _capsuleHeight; // X: Target, Y: Current
 	FVector2D _meshZPosition; // X: Target, Y: Current
 	float _lerpAmount;
+	float _currentCrouchZPosition;
+	float _currentDefaultZPosition;
+	void ResetMeshNonWeaponState();
+	void ResetMeshWeaponState();
 	void SetCapsuleData(float targetHeight, float targetRadius, float targetZPosition);
 	void UpdateCapsuleSize(float deltaTime);
 
@@ -170,6 +174,9 @@ public:
 		float CrouchMeshZPosition;
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
+		float CrouchMeshZPositionWeapon;
+
+	UPROPERTY(Category = "Player|Size", EditAnywhere)
 		float DefaultHalfHeight;
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
@@ -177,6 +184,15 @@ public:
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
 		float DefaultMeshZPosition;
+
+	UPROPERTY(Category = "Player|Size", EditAnywhere)
+		float DefaultMeshZPositionWeapon;
+
+	UPROPERTY(Category = "Player|Size", EditAnywhere)
+		float CameraDefaultZPosition;
+
+	UPROPERTY(Category = "Player|Size", EditAnywhere)
+		float CameraZPositionWeapon;
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
 		float CapsuleSizeLerpRate;
