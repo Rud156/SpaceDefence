@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Camera/CameraShake.h"
 
 #include "../Utils/Enums.h"
 #include "../Utils/Structs.h"
@@ -24,6 +25,8 @@ class SPACEDEFENCE_API AFPPlayer : public ACharacter
 	GENERATED_BODY()
 
 private:
+
+	const float RECOIL_CAMERA_DELAY = 0.05f;
 
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
 		class USceneComponent* GroundCheckPoint;
@@ -57,6 +60,10 @@ private:
 	FVector2D _capsuleHeight; // X: Target, Y: Current
 	FVector2D _meshZPosition; // X: Target, Y: Current
 	float _lerpAmount;
+	float _currentCrouchZPosition;
+	float _currentDefaultZPosition;
+	void ResetMeshNonWeaponState();
+	void ResetMeshWeaponState();
 	void SetCapsuleData(float targetHeight, float targetRadius, float targetZPosition);
 	void UpdateCapsuleSize(float deltaTime);
 
@@ -78,8 +85,9 @@ private:
 	bool _firePressed;
 	void FireUpdate(float deltaTime);
 	void UpdateRecoilCamera(FRecoilOffset recoilOffset, int maxRecoilCount);
+	void SpawnWeaponProjectile(TSubclassOf<class AActor> projectile, FVector spawnPoint);
 	UFUNCTION()
-		void SpawnWeaponProjectile(TSubclassOf<class AActor> projectile, FVector spawnPoint);
+		void DelayedCameraMovement(ABaseWeapon* baseWeapon, FRecoilOffset recoilOffset, int maxRecoilCount);
 
 	UInteractionComponent* _currentInteractionComponent;
 	AInteractionDisplayManager* _interactionManager;
@@ -170,6 +178,9 @@ public:
 		float CrouchMeshZPosition;
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
+		float CrouchMeshZPositionWeapon;
+
+	UPROPERTY(Category = "Player|Size", EditAnywhere)
 		float DefaultHalfHeight;
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
@@ -177,6 +188,15 @@ public:
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
 		float DefaultMeshZPosition;
+
+	UPROPERTY(Category = "Player|Size", EditAnywhere)
+		float DefaultMeshZPositionWeapon;
+
+	UPROPERTY(Category = "Player|Size", EditAnywhere)
+		float CameraDefaultZPosition;
+
+	UPROPERTY(Category = "Player|Size", EditAnywhere)
+		float CameraZPositionWeapon;
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
 		float CapsuleSizeLerpRate;
@@ -241,6 +261,8 @@ public:
 		void PlayerRunStarted();
 	UFUNCTION(Category = "PlayerMovementState", BlueprintImplementableEvent)
 		void PlayerRunEnded();
+	UFUNCTION(Category = "PlayerMovementState", BlueprintImplementableEvent)
+		void WeaponShotCameraShake(TSubclassOf<UMatineeCameraShake> CameraShake);
 
 	UFUNCTION(Category = Weapons, BlueprintCallable, BlueprintPure)
 		EPlayerWeapon GetCurrentWeapon();
