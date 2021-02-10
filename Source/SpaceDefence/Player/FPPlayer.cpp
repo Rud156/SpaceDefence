@@ -52,7 +52,7 @@ AFPPlayer::AFPPlayer()
 void AFPPlayer::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	WeaponAttachPoint->AttachToComponent(PlayerMesh, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
 	WeaponAttachPoint->SetRelativeLocation(AttachRelativeLocation);
 	WeaponAttachPoint->SetRelativeRotation(AttachRelativeRotation);
@@ -667,14 +667,15 @@ void AFPPlayer::FireUpdate(float deltaTime)
 			{
 				_primaryWeapon->Shoot();
 
+				SpawnWeaponProjectile(_primaryWeapon->GetProjectile(), _primaryWeapon->GetShootingPoint());
+
 				FRecoilOffset recoilOffset = _primaryWeapon->GetCurrentRecoilData();
 				int maxRecoilCount = _primaryWeapon->GetMaxRecoilCount();
-				UpdateRecoilCamera(recoilOffset, maxRecoilCount);
 
 				FTimerDelegate timerHandle;
 				FTimerHandle unusedHandle;
-				timerHandle.BindUFunction(this, FName("SpawnWeaponProjectile"), _primaryWeapon->GetProjectile(), _primaryWeapon->GetShootingPoint());
-				GetWorldTimerManager().SetTimer(unusedHandle, timerHandle, GetWorld()->GetDeltaSeconds(), false);
+				timerHandle.BindUFunction(this, FName("DelayedCameraMovement"), _primaryWeapon, recoilOffset, maxRecoilCount);
+				GetWorldTimerManager().SetTimer(unusedHandle, timerHandle, 0.05f, false);
 			}
 		}
 		break;
@@ -685,19 +686,26 @@ void AFPPlayer::FireUpdate(float deltaTime)
 			{
 				_secondaryWeapon->Shoot();
 
+				SpawnWeaponProjectile(_secondaryWeapon->GetProjectile(), _secondaryWeapon->GetShootingPoint());
+
 				FRecoilOffset recoilOffset = _secondaryWeapon->GetCurrentRecoilData();
 				int maxRecoilCount = _secondaryWeapon->GetMaxRecoilCount();
-				UpdateRecoilCamera(recoilOffset, maxRecoilCount);
 
 				FTimerDelegate timerHandle;
 				FTimerHandle unusedHandle;
-				timerHandle.BindUFunction(this, FName("SpawnWeaponProjectile"), _secondaryWeapon->GetProjectile(), _secondaryWeapon->GetShootingPoint());
-				GetWorldTimerManager().SetTimer(unusedHandle, timerHandle, GetWorld()->GetDeltaSeconds(), false);
+				timerHandle.BindUFunction(this, FName("DelayedCameraMovement"), _secondaryWeapon, recoilOffset, maxRecoilCount);
+				GetWorldTimerManager().SetTimer(unusedHandle, timerHandle, 0.05f, false);
 			}
 		}
 		break;
 		}
 	}
+}
+
+void AFPPlayer::DelayedCameraMovement(ABaseWeapon* baseWeapon, FRecoilOffset recoilOffset, int maxRecoilCount)
+{
+	WeaponShotCameraShake(baseWeapon->CameraShake);
+	UpdateRecoilCamera(recoilOffset, maxRecoilCount);
 }
 
 void AFPPlayer::UpdateRecoilCamera(FRecoilOffset recoilOffset, int maxRecoilCount)

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Camera/CameraShake.h"
 
 #include "../Utils/Enums.h"
 #include "../Utils/Structs.h"
@@ -82,8 +83,9 @@ private:
 	bool _firePressed;
 	void FireUpdate(float deltaTime);
 	void UpdateRecoilCamera(FRecoilOffset recoilOffset, int maxRecoilCount);
+	void SpawnWeaponProjectile(TSubclassOf<class AActor> projectile, FVector spawnPoint);
 	UFUNCTION()
-		void SpawnWeaponProjectile(TSubclassOf<class AActor> projectile, FVector spawnPoint);
+		void DelayedCameraMovement(ABaseWeapon* baseWeapon, FRecoilOffset recoilOffset, int maxRecoilCount);
 
 	UInteractionComponent* _currentInteractionComponent;
 	AInteractionDisplayManager* _interactionManager;
@@ -257,6 +259,8 @@ public:
 		void PlayerRunStarted();
 	UFUNCTION(Category = "PlayerMovementState", BlueprintImplementableEvent)
 		void PlayerRunEnded();
+	UFUNCTION(Category = "PlayerMovementState", BlueprintImplementableEvent)
+		void WeaponShotCameraShake(TSubclassOf<UMatineeCameraShake> CameraShake);
 
 	UFUNCTION(Category = Weapons, BlueprintCallable, BlueprintPure)
 		EPlayerWeapon GetCurrentWeapon();
