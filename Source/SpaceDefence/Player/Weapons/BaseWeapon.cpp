@@ -200,12 +200,10 @@ FRecoilOffset ABaseWeapon::GetCurrentRecoilData()
 						_isLeft = false;
 						_currentRandomXPosition += RandomRecoilXDelta;
 					}
-					else
-					{
-						float randomXOffset = FMath::RandRange(-RandomStopXDelta, RandomStopXDelta);
-						float randomYOffset = FMath::RandRange(-RandomStopYDelta, RandomStopYDelta);
-						recoilData.offset = FVector2D(randomXOffset, randomYOffset);
-					}
+
+					float randomXOffset = FMath::RandRange(-RandomStopXDelta, RandomStopXDelta);
+					float randomYOffset = FMath::RandRange(-RandomStopYDelta, RandomStopYDelta);
+					recoilData.offset = FVector2D(randomXOffset, randomYOffset);
 				}
 				else
 				{
@@ -230,12 +228,10 @@ FRecoilOffset ABaseWeapon::GetCurrentRecoilData()
 						_isLeft = true;
 						_currentRandomXPosition -= RandomRecoilXDelta;
 					}
-					else
-					{
-						float randomXOffset = FMath::RandRange(-RandomStopXDelta, RandomStopXDelta);
-						float randomYOffset = FMath::RandRange(-RandomStopYDelta, RandomStopYDelta);
-						recoilData.offset = FVector2D(randomXOffset, randomYOffset);
-					}
+
+					float randomXOffset = FMath::RandRange(-RandomStopXDelta, RandomStopXDelta);
+					float randomYOffset = FMath::RandRange(-RandomStopYDelta, RandomStopYDelta);
+					recoilData.offset = FVector2D(randomXOffset, randomYOffset);
 				}
 				else
 				{
@@ -263,12 +259,10 @@ FRecoilOffset ABaseWeapon::GetCurrentRecoilData()
 						_isLeft = false;
 						_currentRandomXPosition += RandomRecoilXDelta;
 					}
-					else
-					{
-						float randomXOffset = FMath::RandRange(-RandomStopXDelta, RandomStopXDelta);
-						float randomYOffset = FMath::RandRange(-RandomStopYDelta, RandomStopYDelta);
-						recoilData.offset = FVector2D(randomXOffset, randomYOffset);
-					}
+
+					float randomXOffset = FMath::RandRange(-RandomStopXDelta, RandomStopXDelta);
+					float randomYOffset = FMath::RandRange(-RandomStopYDelta, RandomStopYDelta);
+					recoilData.offset = FVector2D(randomXOffset, randomYOffset);
 				}
 				else
 				{
@@ -293,12 +287,10 @@ FRecoilOffset ABaseWeapon::GetCurrentRecoilData()
 						_isLeft = true;
 						_currentRandomXPosition -= RandomRecoilXDelta;
 					}
-					else
-					{
-						float randomXOffset = FMath::RandRange(-RandomStopXDelta, RandomStopXDelta);
-						float randomYOffset = FMath::RandRange(-RandomStopYDelta, RandomStopYDelta);
-						recoilData.offset = FVector2D(randomXOffset, randomYOffset);
-					}
+
+					float randomXOffset = FMath::RandRange(-RandomStopXDelta, RandomStopXDelta);
+					float randomYOffset = FMath::RandRange(-RandomStopYDelta, RandomStopYDelta);
+					recoilData.offset = FVector2D(randomXOffset, randomYOffset);
 				}
 				else
 				{

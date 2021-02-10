@@ -26,6 +26,8 @@ class SPACEDEFENCE_API AFPPlayer : public ACharacter
 
 private:
 
+	const float RECOIL_CAMERA_DELAY = 0.05f;
+
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
 		class USceneComponent* GroundCheckPoint;
 

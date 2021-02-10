@@ -675,7 +675,7 @@ void AFPPlayer::FireUpdate(float deltaTime)
 				FTimerDelegate timerHandle;
 				FTimerHandle unusedHandle;
 				timerHandle.BindUFunction(this, FName("DelayedCameraMovement"), _primaryWeapon, recoilOffset, maxRecoilCount);
-				GetWorldTimerManager().SetTimer(unusedHandle, timerHandle, 0.05f, false);
+				GetWorldTimerManager().SetTimer(unusedHandle, timerHandle, RECOIL_CAMERA_DELAY, false);
 			}
 		}
 		break;
@@ -694,7 +694,7 @@ void AFPPlayer::FireUpdate(float deltaTime)
 				FTimerDelegate timerHandle;
 				FTimerHandle unusedHandle;
 				timerHandle.BindUFunction(this, FName("DelayedCameraMovement"), _secondaryWeapon, recoilOffset, maxRecoilCount);
-				GetWorldTimerManager().SetTimer(unusedHandle, timerHandle, 0.05f, false);
+				GetWorldTimerManager().SetTimer(unusedHandle, timerHandle, RECOIL_CAMERA_DELAY, false);
 			}
 		}
 		break;
@@ -720,7 +720,10 @@ void AFPPlayer::UpdateRecoilCamera(FRecoilOffset recoilOffset, int maxRecoilCoun
 
 		auto playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 		FRotator currentRotation = playerController->GetControlRotation();
-		playerController->SetControlRotation(currentRotation + FRotator(offset.Y, offset.X, 0));
+		FRotator newRotation = FRotator(offset.Y, offset.X, 0);
+		FRotator targetRotation = currentRotation + newRotation;
+
+		playerController->SetControlRotation(targetRotation);
 	}
 }
 
