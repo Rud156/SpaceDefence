@@ -850,6 +850,7 @@ void AFPPlayer::PickupSecondaryWeapon(ABaseWeapon* secondaryWeapon)
 
 ABaseWeapon* AFPPlayer::DropSecondaryWeapon()
 {
+	
 	_secondaryWeapon->DropWeapon();
 
 	float currentZPosition = PlayerMesh->GetRelativeLocation().Z;
