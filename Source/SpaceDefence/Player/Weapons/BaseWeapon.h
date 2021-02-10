@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Camera/CameraShake.h"
 
 #include "../../Utils/Enums.h"
 #include "../../Utils/Structs.h"
@@ -48,7 +49,7 @@ protected:
 	void RecoilTick(float deltaTime);
 
 	bool _isLeft;
-	float _currentRandomIndex;
+	float _currentRandomXPosition;
 	int _currentRandomShotCount;
 
 public:
@@ -70,7 +71,13 @@ public:
 		UTextAsset* RecoilData;
 
 	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
+		TSubclassOf<UMatineeCameraShake> CameraShake;
+
+	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
 		float RecoilOffsetMultiplier;
+
+	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
+		bool IsLeftRandomRecoil;
 
 	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
 		float RandomRecoilXDelta;
@@ -79,10 +86,13 @@ public:
 		float RandomXOffset;
 
 	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
-		int RandomXStopCount;
+		int RandomEdgeStopCount;
 
 	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
-		float RandomStopDelta;
+		float RandomStopXDelta;
+
+	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
+		float RandomStopYDelta;
 
 	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
 		float RecoilResetTime;
@@ -105,6 +115,8 @@ public:
 	virtual TSubclassOf<class AActor> GetProjectile();
 	virtual FRecoilOffset GetCurrentRecoilData();
 	virtual int GetMaxRecoilCount();
+
+	float GetFireRate();
 
 	UFUNCTION(Category = Weapon, BlueprintCallable)
 		void LoadRecoilData(FText recoilText);

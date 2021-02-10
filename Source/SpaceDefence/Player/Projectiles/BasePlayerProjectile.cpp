@@ -2,6 +2,7 @@
 
 
 #include "BasePlayerProjectile.h"
+#include "../Common/HealthAndDamageComp.h"
 
 #include "Components/SceneComponent.h"
 #include "Components/SphereComponent.h"
@@ -26,9 +27,31 @@ ABasePlayerProjectile::ABasePlayerProjectile()
 void ABasePlayerProjectile::BeginPlay()
 {
 	Super::BeginPlay();
+
+	ProjectileCollider->OnComponentBeginOverlap.AddDynamic(this, &ABasePlayerProjectile::HandlePotionCollisionEnter);
+	_destroyTime = ProjectileDestroyTime;
 }
 
 void ABasePlayerProjectile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	_destroyTime -= DeltaTime;
+	if (_destroyTime <= 0)
+	{
+		Destroy();
+	}
+}
+
+void ABasePlayerProjectile::HandlePotionCollisionEnter(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	UActorComponent* actorComponent = OtherActor->GetComponentByClass(UHealthAndDamageComp::StaticClass());
+	UHealthAndDamageComp* healthAndDamage = Cast<UHealthAndDamageComp>(actorComponent);
+
+	if (healthAndDamage != nullptr)
+	{
+		healthAndDamage->TakeDamage(ProjectileDamage);
+	}
+
+	Destroy();
 }
