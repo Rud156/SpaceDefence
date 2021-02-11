@@ -8,6 +8,8 @@
 
 #include "../Utils/Enums.h"
 #include "../Utils/Structs.h"
+#include "SpaceDefence/Placeables/TD_PlaceableSpawnerActor.h"
+
 
 #include "FPPlayer.generated.h"
 
@@ -238,6 +240,8 @@ public:
 	UPROPERTY(Category = "Player|Delegates", BlueprintAssignable)
 		FPlayerLanded OnPlayerLanded;
 
+	UPROPERTY(Category = "Spawner Settings", BlueprintReadWrite)
+		ATD_PlaceableSpawnerActor* PlaceAbleSpawnerActorRef = nullptr;
 #pragma endregion
 
 #pragma region Inputs
