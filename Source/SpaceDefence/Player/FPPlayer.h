@@ -202,6 +202,12 @@ public:
 		float CameraZPositionWeapon;
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
+		float CameraCrouchZPosition;
+
+	UPROPERTY(Category = "Player|Size", EditAnywhere)
+		float CameraCrouchZPositionWeapon;
+
+	UPROPERTY(Category = "Player|Size", EditAnywhere)
 		float CapsuleSizeLerpRate;
 
 	UPROPERTY(Category = "Player|Interaction", EditAnywhere)
