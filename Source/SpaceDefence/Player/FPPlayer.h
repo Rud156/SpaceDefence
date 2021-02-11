@@ -59,7 +59,7 @@ private:
 	FVector2D _capsuleRadius; // X: Target, Y: Current
 	FVector2D _capsuleHeight; // X: Target, Y: Current
 	FVector2D _meshZPosition; // X: Target, Y: Current
-	float _lerpAmount;
+	float _capsuleLerpAmount;
 	float _currentCrouchZPosition;
 	float _currentDefaultZPosition;
 	void ResetMeshNonWeaponState();
@@ -83,8 +83,11 @@ private:
 	void StopCharacterSliding();
 
 	bool _firePressed;
+	FVector _targetRecoilRotation;
+	float _recoilLerpAmount;
+	void UpdateRecoilRotation(float deltaTime);
 	void FireUpdate(float deltaTime);
-	void UpdateRecoilCamera(FRecoilOffset recoilOffset, int maxRecoilCount);
+	void SetRecoilCameraPosition(FRecoilOffset recoilOffset, int maxRecoilCount);
 	void SpawnWeaponProjectile(TSubclassOf<class AActor> projectile, FVector spawnPoint);
 	UFUNCTION()
 		void DelayedCameraMovement(ABaseWeapon* baseWeapon, FRecoilOffset recoilOffset, int maxRecoilCount);
@@ -221,6 +224,9 @@ public:
 
 	UPROPERTY(Category = "Player|Weapon", EditAnywhere)
 		float MaxShootRayCastRange;
+
+	UPROPERTY(Category = "Player|Weapon", EditAnywhere)
+		float RecoilRotationLerpRate;
 
 	UPROPERTY(Category = "Player|Delegates", BlueprintAssignable)
 		FPlayerLanded OnPlayerLanded;

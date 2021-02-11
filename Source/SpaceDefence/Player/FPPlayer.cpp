@@ -70,6 +70,7 @@ void AFPPlayer::BeginPlay()
 	}
 
 	_slideTimer = 0;
+	_targetRecoilRotation = FVector::ZeroVector;
 
 	PushPlayerMovementState(EPlayerMovementState::Walk);
 	ApplyChangesToCharacter();
@@ -90,6 +91,7 @@ void AFPPlayer::Tick(float DeltaTime)
 	UpdateInteractibleCollection(DeltaTime);
 
 	FireUpdate(DeltaTime);
+	UpdateRecoilRotation(DeltaTime);
 	WallClimbCheck(DeltaTime);
 	UpdateCapsuleSize(DeltaTime);
 }
@@ -588,21 +590,21 @@ void AFPPlayer::SetCapsuleData(float targetHeight, float targetRadius, float tar
 	_capsuleHeight = FVector2D(targetHeight, GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight());
 	_capsuleRadius = FVector2D(targetRadius, GetCapsuleComponent()->GetUnscaledCapsuleRadius());
 	_meshZPosition = FVector2D(targetZPosition, PlayerMesh->GetRelativeLocation().Z);
-	_lerpAmount = 0;
+	_capsuleLerpAmount = 0;
 }
 
 void AFPPlayer::UpdateCapsuleSize(float deltaTime)
 {
-	if (_lerpAmount > 1 || _lerpAmount < 0)
+	if (_capsuleLerpAmount > 1 || _capsuleLerpAmount < 0)
 	{
 		CameraBoom->bEnableCameraRotationLag = false;
 		return;
 	}
 
 	CameraBoom->bEnableCameraRotationLag = true;
-	float currentHeight = FMath::Lerp(_capsuleHeight.Y, _capsuleHeight.X, _lerpAmount);
-	float currentRadius = FMath::Lerp(_capsuleRadius.Y, _capsuleRadius.X, _lerpAmount);
-	float currentZPosition = FMath::Lerp(_meshZPosition.Y, _meshZPosition.X, _lerpAmount);
+	float currentHeight = FMath::Lerp(_capsuleHeight.Y, _capsuleHeight.X, _capsuleLerpAmount);
+	float currentRadius = FMath::Lerp(_capsuleRadius.Y, _capsuleRadius.X, _capsuleLerpAmount);
+	float currentZPosition = FMath::Lerp(_meshZPosition.Y, _meshZPosition.X, _capsuleLerpAmount);
 
 	GetCapsuleComponent()->SetCapsuleHalfHeight(currentHeight);
 	GetCapsuleComponent()->SetCapsuleRadius(currentRadius);
@@ -610,8 +612,8 @@ void AFPPlayer::UpdateCapsuleSize(float deltaTime)
 	FVector currentMeshPosition = PlayerMesh->GetRelativeLocation();
 	PlayerMesh->SetRelativeLocation(FVector(currentMeshPosition.X, currentMeshPosition.Y, currentZPosition));
 
-	_lerpAmount += CapsuleSizeLerpRate * deltaTime;
-	if (_lerpAmount > 1)
+	_capsuleLerpAmount += CapsuleSizeLerpRate * deltaTime;
+	if (_capsuleLerpAmount > 1)
 	{
 		GetCapsuleComponent()->SetCapsuleHalfHeight(_capsuleHeight.X);
 		GetCapsuleComponent()->SetCapsuleRadius(_capsuleRadius.X);
@@ -702,13 +704,39 @@ void AFPPlayer::FireUpdate(float deltaTime)
 	}
 }
 
+void AFPPlayer::UpdateRecoilRotation(float deltaTime)
+{
+	if (_recoilLerpAmount > 1 || _recoilLerpAmount < 0)
+	{
+		return;
+	}
+
+	auto playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	FRotator currentRotation = playerController->GetControlRotation();
+
+	float startLerp = _recoilLerpAmount;
+	_recoilLerpAmount += RecoilRotationLerpRate * deltaTime;
+	float endLerp = _recoilLerpAmount;
+	float difference = endLerp - startLerp;
+
+	FVector targetVector = _targetRecoilRotation * difference;
+	FRotator targetRotation = currentRotation + FRotator(targetVector.Y, targetVector.X, 0);
+
+	playerController->SetControlRotation(targetRotation);
+
+	if (_recoilLerpAmount > 1)
+	{
+		_targetRecoilRotation = FVector::ZeroVector;
+	}
+}
+
 void AFPPlayer::DelayedCameraMovement(ABaseWeapon* baseWeapon, FRecoilOffset recoilOffset, int maxRecoilCount)
 {
 	WeaponShotCameraShake(baseWeapon->CameraShake);
-	UpdateRecoilCamera(recoilOffset, maxRecoilCount);
+	SetRecoilCameraPosition(recoilOffset, maxRecoilCount);
 }
 
-void AFPPlayer::UpdateRecoilCamera(FRecoilOffset recoilOffset, int maxRecoilCount)
+void AFPPlayer::SetRecoilCameraPosition(FRecoilOffset recoilOffset, int maxRecoilCount)
 {
 	if (recoilOffset.index == maxRecoilCount - 1)
 	{
@@ -717,13 +745,8 @@ void AFPPlayer::UpdateRecoilCamera(FRecoilOffset recoilOffset, int maxRecoilCoun
 	else
 	{
 		FVector2D offset = recoilOffset.offset;
-
-		auto playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-		FRotator currentRotation = playerController->GetControlRotation();
-		FRotator newRotation = FRotator(offset.Y, offset.X, 0);
-		FRotator targetRotation = currentRotation + newRotation;
-
-		playerController->SetControlRotation(targetRotation);
+		_targetRecoilRotation = _targetRecoilRotation * (1 - _recoilLerpAmount) + FVector(offset.X, offset.Y, 0);
+		_recoilLerpAmount = 0;
 	}
 }
 
@@ -893,7 +916,7 @@ void AFPPlayer::PickupSecondaryWeapon(ABaseWeapon* secondaryWeapon)
 
 ABaseWeapon* AFPPlayer::DropSecondaryWeapon()
 {
-	
+
 	_secondaryWeapon->DropWeapon();
 	ResetMeshNonWeaponState();
 
