@@ -93,7 +93,6 @@ private:
 		void DelayedCameraMovement(ABaseWeapon* baseWeapon, FRecoilOffset recoilOffset, int maxRecoilCount);
 
 	UInteractionComponent* _currentInteractionComponent;
-	AInteractionDisplayManager* _interactionManager;
 	void UpdateInteractibleCollection(float deltaTime);
 	void ClearInteractableObject();
 

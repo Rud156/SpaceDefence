@@ -6,32 +6,24 @@
 #include "GameFramework/GameModeBase.h"
 #include "TD_GameModeFPS.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class ATD_GameModeFPS : public AGameModeBase
 {
 	GENERATED_BODY()
 
-
-		
 public:
-
-
-public:
-	UPROPERTY(VisibleAnywhere, Category="References",BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, Category = "References", BlueprintReadWrite)
 		class UUserWidget* InventoryBPRef;
+
 	UPROPERTY(Category = "References", BlueprintReadWrite)
 		class UTD_MainHUD* MainHUDRef;
+
 	UPROPERTY(Category = "References", BlueprintReadWrite)
 		class ATD_CurrencyManager* CurrencyManagerRef;
+
 	UPROPERTY(Category = "References", BlueprintReadWrite)
 		class ATD_WaveController* WaveControllerRef;
-	
 
-protected:
-	
-
-	
+	UPROPERTY(Category = "References", BlueprintReadWrite)
+		class AInteractionDisplayManager* InteractionDisplayManagerRef;
 };

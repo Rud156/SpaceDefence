@@ -9,6 +9,7 @@
 #include "../Markers/WorldPingComponent.h"
 #include "../Markers/WorldPingMarker.h"
 #include "../Common/HealthAndDamageComp.h"
+#include "../Public/TD_GameModeFPS.h"
 
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -58,16 +59,6 @@ void AFPPlayer::BeginPlay()
 	WeaponAttachPoint->SetRelativeRotation(AttachRelativeRotation);
 
 	OnPlayerLanded.AddDynamic(this, &AFPPlayer::PlayerLanded);
-	auto interactionActor = UGameplayStatics::GetActorOfClass(GetWorld(), AInteractionDisplayManager::StaticClass());
-	AInteractionDisplayManager* interactionDisplayInstance = Cast<AInteractionDisplayManager>(interactionActor);
-	if (interactionDisplayInstance != nullptr)
-	{
-		_interactionManager = interactionDisplayInstance;
-	}
-	else
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Interaction Display Not Found!!!");
-	}
 
 	_slideTimer = 0;
 	_targetRecoilRotation = FVector::ZeroVector;
@@ -379,12 +370,15 @@ void AFPPlayer::UpdateInteractibleCollection(float deltaTime)
 				break;
 			}
 
-			_interactionManager->HideInteractionBar();
+			ATD_GameModeFPS* gameMode = Cast<ATD_GameModeFPS>(GetWorld()->GetAuthGameMode());
+			gameMode->InteractionDisplayManagerRef->HideInteractionBar();
+
 			ClearInteractableObject();
 		}
 		else
 		{
-			_interactionManager->SetInteractionBarProgress(_currentInteractionComponent->GetInteractionProgress());
+			ATD_GameModeFPS* gameMode = Cast<ATD_GameModeFPS>(GetWorld()->GetAuthGameMode());
+			gameMode->InteractionDisplayManagerRef->SetInteractionBarProgress(_currentInteractionComponent->GetInteractionProgress());
 		}
 	}
 	else
@@ -403,12 +397,15 @@ void AFPPlayer::UpdateInteractibleCollection(float deltaTime)
 			if (interactionComponent != nullptr)
 			{
 				_currentInteractionComponent = interactionComponent;
-				_interactionManager->ShowInteractionBar();
+
+				ATD_GameModeFPS* gameMode = Cast<ATD_GameModeFPS>(GetWorld()->GetAuthGameMode());
+				gameMode->InteractionDisplayManagerRef->ShowInteractionBar();
 			}
 		}
 		else
 		{
-			_interactionManager->HideInteractionBar();
+			ATD_GameModeFPS* gameMode = Cast<ATD_GameModeFPS>(GetWorld()->GetAuthGameMode());
+			gameMode->InteractionDisplayManagerRef->HideInteractionBar();
 		}
 	}
 }
@@ -431,7 +428,8 @@ void AFPPlayer::HandleInteractReleased()
 {
 	if (_currentInteractionComponent != nullptr)
 	{
-		_interactionManager->SetInteractionBarProgress(0);
+		ATD_GameModeFPS* gameMode = Cast<ATD_GameModeFPS>(GetWorld()->GetAuthGameMode());
+		gameMode->InteractionDisplayManagerRef->SetInteractionBarProgress(0);
 		_currentInteractionComponent->CancelInteraction();
 
 		ClearInteractableObject();

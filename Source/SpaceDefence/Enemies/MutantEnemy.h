@@ -41,10 +41,10 @@ protected:
 public:
 #pragma region Properties
 
-	UPROPERTY(Category = "Enemy|Teleport", EditAnywhere)
+	UPROPERTY(Category = "Enemy|Teleport", EditAnywhere, BlueprintReadOnly)
 		int TeleportCountMin;
 
-	UPROPERTY(Category = "Enemy|Teleport", EditAnywhere)
+	UPROPERTY(Category = "Enemy|Teleport", EditAnywhere, BlueprintReadOnly)
 		int TeleportCountMax;
 
 	UPROPERTY(Category = "Enemy|Teleport", EditAnywhere)

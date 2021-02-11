@@ -8,7 +8,7 @@
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
-UBTService_MutantMain::UBTService_MutantMain() : Super()
+UBTService_MutantMain::UBTService_MutantMain()
 {
 	EnemyState = "Enemy State";
 	TeleportCount = "Teleport Count";
@@ -28,7 +28,6 @@ void UBTService_MutantMain::OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, 
 	int randomTeleportCount = FMath::RandRange(mutantEnemy->TeleportCountMin, mutantEnemy->TeleportCountMax);
 
 	blackboard->SetValueAsInt(TeleportCount, randomTeleportCount);
-
 }
 
 void UBTService_MutantMain::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
