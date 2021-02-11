@@ -6,7 +6,7 @@
 #include "TD_GameModeFPS.h"
 #include "SpaceDefence/Public/DevelopmentTools/TD_DevelopmentTools.h"
 #include "CurrencyManager/TD_CurrencyManager.h"
-
+#include "Kismet/GameplayStatics.h"
 
 
 // Sets default values
@@ -249,7 +249,6 @@ bool ATD_PlaceableSpawnerActor::CheckIsOnGround()
 void ATD_PlaceableSpawnerActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 	
 	
 }

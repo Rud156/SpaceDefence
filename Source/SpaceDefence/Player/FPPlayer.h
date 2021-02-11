@@ -37,8 +37,7 @@ private:
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
 		class USceneComponent* InteractionCastPoint;
 
-	UPROPERTY(Category = Camera, VisibleDefaultsOnly)
-		class UCameraComponent* CharacterCamera;
+	
 
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly)
 		class USpringArmComponent* CameraBoom;
@@ -113,6 +112,9 @@ protected:
 public:
 #pragma region Parameters
 
+	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadWrite)
+		class UCameraComponent* CharacterCamera;
+	
 	UPROPERTY(Category = Mesh, BlueprintReadOnly, VisibleDefaultsOnly)
 		class USkeletalMeshComponent* PlayerMesh;
 
