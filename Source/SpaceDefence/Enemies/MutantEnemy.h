@@ -62,8 +62,6 @@ public:
 	UPROPERTY(Category = "Enemy|Attack", EditAnywhere)
 		float MaxAttackCount;
 
-	UPROPERTY(Category = "Enemy|Attack", EditAnywhere)
-		int DamageAmount;
 
 #pragma endregion 
 

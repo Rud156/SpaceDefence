@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "CurrencyManager/TD_CurrencyManager.h"
 #include "GameFramework/Actor.h"
+#include "SpaceDefence/Common/HealthAndDamageComp.h"
 #include "SpaceDefence/Utils/Structs.h"
 #include "TD_PlaceablesActors.generated.h"
 
@@ -25,7 +26,9 @@ protected:
 public:	
 	//Game play variables.
 	bool bCanPlace = false;
-
+	
+	UPROPERTY(Category = Health, EditAnywhere, BlueprintReadWrite)
+		 UHealthAndDamageComp* HealthAndDamage;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawn Settings")
 		FPlaceAbleData ActorData;
@@ -43,9 +46,8 @@ public:
 		float RightSnapPoint;
 	
 	//Game play functions
-
 	UFUNCTION(BlueprintCallable)
-		void ApplyDamage(float Amount);
+		void TakeDamage(float Amount);
 	UFUNCTION(BlueprintCallable)
 		void IncreaseMaxEnemiesAttackingCount() { CurrentEnemiesAttackingCount++; }
 	UFUNCTION(BlueprintCallable)
@@ -58,8 +60,8 @@ public:
 	void SetData(FPlaceAbleData Data);
 
 	int GetDestructionCost() const;
-
-	void RemoveActor();
+	UFUNCTION()
+	void RemoveActor(AActor* Actor);
 	void UpgradeActor();
 private:
 	bool bIsAlive = true;

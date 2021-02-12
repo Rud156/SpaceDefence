@@ -26,13 +26,20 @@ ATD_PlaceablesActors::ATD_PlaceablesActors()
 	Model = CreateDefaultSubobject<UStaticMeshComponent>("Model");
 	Model->SetupAttachment(GetRootComponent());
 	Model->SetCollisionProfileName(TEXT("InteractionPreset"));
-
+	HealthAndDamage = CreateDefaultSubobject<UHealthAndDamageComp>("Health and Damage comp");
+	
 }
 
 // Called when the game starts or when spawned
 void ATD_PlaceablesActors::BeginPlay()
 {
 	Super::BeginPlay();
+	if(HealthAndDamage)
+	{
+		HealthAndDamage->OnUnitDied.AddDynamic(this, &ATD_PlaceablesActors::RemoveActor);
+		HealthAndDamage->AddHealth(ActorData.Health);
+		
+	}
 	 GameMode = GetWorld()->GetAuthGameMode();
 	CurrencyManager= Cast<ATD_GameModeFPS>(GameMode)->CurrencyManagerRef;
 	if(Model->GetStaticMesh())
@@ -46,17 +53,17 @@ void ATD_PlaceablesActors::BeginPlay()
 
 }
 
-void ATD_PlaceablesActors::ApplyDamage(float Amount)
+void ATD_PlaceablesActors::TakeDamage(float Amount)
 {
 
 	CheckIfAlive();
-	if(ActorData.Health> ZER0)
+	
+	if(HealthAndDamage->GetCurrentHealth() > ZER0)
 	{
-		ActorData.Health -= Amount;
-		if(ActorData.Health < ZER0)
-		{
-			RemoveActor();
-		}
+		HealthAndDamage->TakeDamage(Amount);
+		ActorData.Health = HealthAndDamage->GetCurrentHealth();
+		
+		
 	}
 }
 
@@ -71,6 +78,12 @@ void ATD_PlaceablesActors::SetData(FPlaceAbleData Data)
 	ActorData = Data;
 	if (ActorData.PlacementSound)
 	{
+
+		if (HealthAndDamage)
+		{
+			HealthAndDamage->AddHealth(ActorData.Health);
+
+		}
 		UGameplayStatics::PlaySoundAtLocation(this,ActorData.PlacementSound,this->GetActorLocation());
 
 	}
@@ -85,7 +98,7 @@ int ATD_PlaceablesActors::GetDestructionCost() const
 	return 0;
 }
 
-void ATD_PlaceablesActors::RemoveActor()
+void ATD_PlaceablesActors::RemoveActor(AActor* Actor)
 {
 	//TODO do stuff here;
 	if(ActorData.DestructionSound)
@@ -112,6 +125,7 @@ void ATD_PlaceablesActors::RemoveActor()
 	
 }
 
+
 void ATD_PlaceablesActors::UpgradeActor()
 {
 	PrintToScreen_Color("Upgrade pressed!", FColor::Blue);
@@ -127,7 +141,7 @@ void ATD_PlaceablesActors::CheckIfAlive()
 {
 	if (ActorData.GoldCost < ZER0)
 	{
-		RemoveActor();
+		RemoveActor(nullptr);
 	}
 }
 

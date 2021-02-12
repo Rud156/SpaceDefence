@@ -36,7 +36,12 @@ public:
 
 	UPROPERTY(Category = "Enemy Settings", EditAnywhere, BlueprintReadWrite)
 		bool bIsPlayerWithInRange = false;
+	UPROPERTY(Category = "Enemy Settings", EditAnywhere, BlueprintReadWrite)
+		float DamageAmount = 10;
 
+	UPROPERTY(Category = "Enemy Settings", EditAnywhere, BlueprintReadWrite)
+		int Health = 10;
+	
 	UPROPERTY(Category = "Optimization", VisibleAnywhere, BlueprintReadWrite)
 		bool bClothSimulation = false;
 

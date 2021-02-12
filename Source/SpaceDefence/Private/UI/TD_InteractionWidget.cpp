@@ -15,6 +15,6 @@ void UTD_InteractionWidget::OnRemovePressed()
 {
 	if (CurrentInteractingActor)
 	{
-		CurrentInteractingActor->RemoveActor();
+		CurrentInteractingActor->RemoveActor(nullptr);
 	}
 }
