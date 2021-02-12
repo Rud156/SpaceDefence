@@ -2,6 +2,8 @@
 
 
 #include "BaseEnemy.h"
+
+#include "TD_GameModeFPS.h"
 #include "../Common/HealthAndDamageComp.h"
 
 #include "Components/CapsuleComponent.h"
@@ -49,6 +51,7 @@ void ABaseEnemy::BeginPlay()
 	Super::BeginPlay();
 	float InitalTime = FMath::RandRange(1.0f, 10.0f);
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ABaseEnemy::PlayRandomSoundWhenMoving, InitalTime, false);
+	CurrencyManagerRef = Cast<ATD_GameModeFPS>(GetWorld()->GetAuthGameMode())->CurrencyManagerRef;
 }
 
 void ABaseEnemy::Tick(float DeltaTime)

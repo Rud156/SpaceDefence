@@ -23,6 +23,9 @@ protected:
 	UPROPERTY(Category = EnemyHealth, VisibleAnywhere, BlueprintReadOnly)
 		class UHealthAndDamageComp* HealthAndDamage;
 
+	UPROPERTY(Category = "Mesh", VisibleDefaultsOnly)
+		class UBoxComponent* HeadColliderComponent;
+
 	virtual void BeginPlay() override;
 
 public:
@@ -38,13 +41,21 @@ public:
 		bool bIsPlayerWithInRange = false;
 	UPROPERTY(Category = "Enemy Settings", EditAnywhere, BlueprintReadWrite)
 		float DamageAmount = 10;
-
 	UPROPERTY(Category = "Enemy Settings", EditAnywhere, BlueprintReadWrite)
-		int Health = 10;
+		float HeadShotMultiplier = 1.5;
+	UPROPERTY(Category = "Enemy Settings", EditAnywhere, BlueprintReadWrite)
+		float AmountToGive = 20;
+	UPROPERTY(Category = "Enemy Settings", EditAnywhere, BlueprintReadWrite)
+		bool bDeathBodyNeedsToBeRemoved = true;
+	UPROPERTY(Category = "Enemy Settings", EditAnywhere, BlueprintReadWrite)
+		float DeadBodyTimer = 5;
+
+
 	
 	UPROPERTY(Category = "Optimization", VisibleAnywhere, BlueprintReadWrite)
 		bool bClothSimulation = false;
 
+	ATD_CurrencyManager* CurrencyManagerRef = nullptr;
 
 	
 	UPROPERTY(Category = "Optimization", EditAnywhere,BlueprintReadWrite)
@@ -65,7 +76,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		void RemoveCurrentAttackItem() { if (CurrentAttackingItem)CurrentAttackingItem->RemoveMaxEnemiesAttackingCount(); CurrentAttackingItem = nullptr; }
-
+	
 #pragma endregion
 
 	ABaseEnemy();
@@ -73,4 +84,8 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	void PlayRandomSoundWhenMoving();
+
+
+protected:
+	bool bIsAlive = true;
 };

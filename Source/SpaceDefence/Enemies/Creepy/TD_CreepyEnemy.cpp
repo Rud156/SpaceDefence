@@ -8,9 +8,10 @@
 ATD_CreepyEnemy::ATD_CreepyEnemy()
 {
 	HandCollider = CreateDefaultSubobject<UBoxComponent>(TEXT("HandCollider"));
-	HandCollider->SetupAttachment(GetMesh(), HandBoxCollisionLocation);
+	HandCollider->SetupAttachment(GetMesh(),HandBoxCollisionLocation);
+	HeadColliderComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("HeadCollision"));
+	HeadColliderComponent->SetupAttachment(GetMesh(), HeadCollisionLocation);
 	HandCollider->SetGenerateOverlapEvents(true);
-	HealthAndDamage->AddHealth(Health);
 
 }
 
@@ -21,10 +22,14 @@ void ATD_CreepyEnemy::BeginPlay()
 	{
 
 		HandCollider->OnComponentBeginOverlap.AddDynamic(this, &ATD_CreepyEnemy::OnHandColliderOverlapBegin);
+		HealthAndDamage->OnUnitDied.AddDynamic(this, &ATD_CreepyEnemy::Death);
 
 	}
+	if(HeadColliderComponent)
+	{
+		HeadColliderComponent->OnComponentHit.AddDynamic(this, &ATD_CreepyEnemy::OnCompHitHead);
+	}
 	GetMesh()->OnComponentHit.AddDynamic(this, &ATD_CreepyEnemy::OnCompHit);
-
 }
 
 void ATD_CreepyEnemy::OnHandColliderOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -46,12 +51,33 @@ void ATD_CreepyEnemy::OnCompHit(UPrimitiveComponent* HitComp, AActor* OtherActor
 {
 	auto CastState = Cast<ATD_BaseProjectile>(OtherActor);
 
-	if (CastState)
+	if (CastState && bIsAlive)
 	{
-		PrintToScreen_Color("Creepy Taking damage", FColor::Red);
-		HealthAndDamage->TakeDamage(10);
+		
+		HealthAndDamage->TakeDamage(DamageAmount);
 
 	}
 	//else
 	//	PrintToScreen_1("Huh? %s", *OtherActor->GetName());
 }
+
+void ATD_CreepyEnemy::OnCompHitHead(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+	FVector NormalImpulse, const FHitResult& Hit)
+{
+	auto CastState = Cast<ATD_BaseProjectile>(OtherActor);
+
+	if (CastState && bIsAlive)
+	{
+		HealthAndDamage->TakeDamage(DamageAmount*HeadShotMultiplier);
+
+	}
+}
+
+void ATD_CreepyEnemy::Death(AActor* Actor)
+{
+	CurrentAnimationState = ECreepyAnimState::Dead;
+	bIsAlive = false;
+	CurrencyManagerRef->AddCurrency(AmountToGive);
+	GetWorld()->GetTimerManager().SetTimer(DeathTimerHandle, this, &ATD_CreepyEnemy::RemoveDeadBody, DeadBodyTimer,false,-1);
+}
+

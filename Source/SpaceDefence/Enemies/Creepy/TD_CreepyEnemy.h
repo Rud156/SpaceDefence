@@ -30,8 +30,19 @@ public:
 		void OnHandColliderOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	UFUNCTION()
 		void OnCompHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
-	
+
+
+	UFUNCTION()
+		void OnCompHitHead(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
+	UFUNCTION()
+		void Death(AActor* Actor);
+
+	void RemoveDeadBody() { this->Destroy(); }
 
 private:
 	FName HandBoxCollisionLocation = "HandBoxCollision";
+	FName HeadCollisionLocation = "HeadCollider";
+
+	FTimerHandle DeathTimerHandle;
 };
