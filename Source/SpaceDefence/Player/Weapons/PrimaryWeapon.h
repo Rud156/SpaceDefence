@@ -7,7 +7,7 @@
 #include "../Interactibles/IntfBaseInteractible.h"
 #include "PrimaryWeapon.generated.h"
 
-class ABasePlayerProjectile;
+class ATD_BaseProjectile;
 class UInteractionComponent;
 
 UCLASS()
@@ -29,7 +29,7 @@ public:
 #pragma region Properties
 
 	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
-		TSubclassOf<class ABasePlayerProjectile> Projectile;
+		TSubclassOf<class ATD_BaseProjectile> Projectile;
 
 #pragma endregion
 

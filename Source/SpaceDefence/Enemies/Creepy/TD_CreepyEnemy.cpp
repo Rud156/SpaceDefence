@@ -3,12 +3,12 @@
 
 #include "TD_CreepyEnemy.h"
 #include "DevelopmentTools/TD_DevelopmentTools.h"
-#include "SpaceDefence/Player/Projectiles/BasePlayerProjectile.h"
+#include "SpaceDefence/Public/Projectile/TD_BaseProjectile.h"
 #include "Components/BoxComponent.h"
 ATD_CreepyEnemy::ATD_CreepyEnemy()
 {
 	HandCollider = CreateDefaultSubobject<UBoxComponent>(TEXT("HandCollider"));
-	HandCollider->SetupAttachment(GetMesh(),HandBoxCollisionLocation);
+	HandCollider->SetupAttachment(GetMesh(), HandBoxCollisionLocation);
 	HandCollider->SetGenerateOverlapEvents(true);
 	HealthAndDamage->AddHealth(Health);
 
@@ -17,11 +17,11 @@ ATD_CreepyEnemy::ATD_CreepyEnemy()
 void ATD_CreepyEnemy::BeginPlay()
 {
 	Super::BeginPlay();
-	if(HandCollider)
+	if (HandCollider)
 	{
-		
+
 		HandCollider->OnComponentBeginOverlap.AddDynamic(this, &ATD_CreepyEnemy::OnHandColliderOverlapBegin);
-		
+
 	}
 	GetMesh()->OnComponentHit.AddDynamic(this, &ATD_CreepyEnemy::OnCompHit);
 
@@ -44,7 +44,7 @@ void ATD_CreepyEnemy::OnHandColliderOverlapBegin(UPrimitiveComponent* Overlapped
 void ATD_CreepyEnemy::OnCompHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 	FVector NormalImpulse, const FHitResult& Hit)
 {
-	auto CastState = Cast<ABasePlayerProjectile>(OtherActor);
+	auto CastState = Cast<ATD_BaseProjectile>(OtherActor);
 
 	if (CastState)
 	{

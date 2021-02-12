@@ -2,7 +2,7 @@
 
 
 #include "FPPlayer.h"
-#include "./Projectiles/BasePlayerProjectile.h"
+#include "../Public/Projectile/TD_BaseProjectile.h"
 #include "../Common/InteractionComponent.h"
 #include "./Weapons/BaseWeapon.h"
 #include "../Interactibles/InteractionDisplayManager.h"
@@ -801,7 +801,7 @@ void AFPPlayer::SpawnWeaponProjectile(TSubclassOf<class AActor> projectile, FVec
 	spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
 
 	FRotator spawnRotation = UKismetMathLibrary::FindLookAtRotation(spawnPoint, targetPoint);
-	GetWorld()->SpawnActor<ABasePlayerProjectile>(projectile, spawnPoint, spawnRotation, spawnParams);
+	GetWorld()->SpawnActor<ATD_BaseProjectile>(projectile, spawnPoint, spawnRotation, spawnParams);
 }
 
 EPlayerWeapon AFPPlayer::GetCurrentWeapon()

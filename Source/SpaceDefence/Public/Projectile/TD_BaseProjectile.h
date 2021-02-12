@@ -11,28 +11,25 @@ class SPACEDEFENCE_API ATD_BaseProjectile : public AActor
 {
 	GENERATED_BODY()
 
-
-
-		/** Sphere collision component */
-		UPROPERTY(VisibleDefaultsOnly, Category = Projectile)
+private:
+	UPROPERTY(VisibleDefaultsOnly, Category = Projectile)
 		class USphereComponent* CollisionComp;
 
-	/** Projectile movement component */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 		class UProjectileMovementComponent* ProjectileMovement;
 
 public:
-	// Sets default values for this actor's properties
+#pragma region Properties
+
+	UPROPERTY(Category = "Projectile|Data", EditAnywhere)
+		float DamageAmount;
+
+#pragma endregion
+
 	ATD_BaseProjectile();
-
-	/** called when projectile hits something */
-	UFUNCTION()
-		void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
-
-	/** Returns CollisionComp subobject **/
 	FORCEINLINE class USphereComponent* GetCollisionComp() const { return CollisionComp; }
-	/** Returns ProjectileMovement subobject **/
 	FORCEINLINE class UProjectileMovementComponent* GetProjectileMovement() const { return ProjectileMovement; }
 
-
+	UFUNCTION()
+		void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 };

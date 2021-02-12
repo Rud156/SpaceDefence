@@ -2,7 +2,7 @@
 
 
 #include "PrimaryWeapon.h"
-#include "../Projectiles/BasePlayerProjectile.h"
+#include "../Public/Projectile/TD_BaseProjectile.h"
 #include "../Common/InteractionComponent.h"
 
 APrimaryWeapon::APrimaryWeapon() : Super()

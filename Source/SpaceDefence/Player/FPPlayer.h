@@ -13,7 +13,6 @@
 
 #include "FPPlayer.generated.h"
 
-class ABasePlayerProjectile;
 class ABaseWeapon;
 class UInteractionComponent;
 class AInteractionDisplayManager;
