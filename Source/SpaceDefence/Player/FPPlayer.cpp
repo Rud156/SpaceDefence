@@ -282,11 +282,12 @@ void AFPPlayer::CharacterJump()
 
 void AFPPlayer::FrameDelayedJump()
 {
-	FVector directionVector = GetActorForwardVector();
-	float velocity = GetVelocity().Size();
+	FVector directionVector = GetActorForwardVector() * _verticalInput;
+	FVector velocityDirection = GetVelocity();
+	float velocityMag = velocityDirection.Size();
 
-	directionVector.X *= JumpVelocity.X * velocity;
-	directionVector.Y *= JumpVelocity.Y * velocity;
+	directionVector.X *= JumpVelocity.X * velocityMag;
+	directionVector.Y *= JumpVelocity.Y * velocityMag;
 	directionVector.Z = JumpVelocity.Z;
 
 	LaunchCharacter(directionVector, true, true);
@@ -698,6 +699,7 @@ void AFPPlayer::FireUpdate(float deltaTime)
 			{
 				_primaryWeapon->Shoot();
 
+				_receoilDelay = true;
 				SpawnWeaponProjectile(_primaryWeapon->GetProjectile(), _primaryWeapon->GetShootingPoint());
 
 				FRecoilOffset recoilOffset = _primaryWeapon->GetCurrentRecoilData();
@@ -717,6 +719,7 @@ void AFPPlayer::FireUpdate(float deltaTime)
 			{
 				_secondaryWeapon->Shoot();
 
+				_receoilDelay = true;
 				SpawnWeaponProjectile(_secondaryWeapon->GetProjectile(), _secondaryWeapon->GetShootingPoint());
 
 				FRecoilOffset recoilOffset = _secondaryWeapon->GetCurrentRecoilData();
@@ -735,7 +738,7 @@ void AFPPlayer::FireUpdate(float deltaTime)
 
 void AFPPlayer::UpdateRecoilRotation(float deltaTime)
 {
-	if (_recoilLerpAmount > 1 || _recoilLerpAmount < 0)
+	if (_recoilLerpAmount > 1 || _recoilLerpAmount < 0 || _receoilDelay)
 	{
 		return;
 	}
@@ -746,6 +749,10 @@ void AFPPlayer::UpdateRecoilRotation(float deltaTime)
 	float startLerp = _recoilLerpAmount;
 	_recoilLerpAmount += RecoilRotationLerpRate * deltaTime;
 	float endLerp = _recoilLerpAmount;
+	if (endLerp > 1)
+	{
+		endLerp = 1;
+	}
 	float difference = endLerp - startLerp;
 
 	FVector targetVector = _targetRecoilRotation * difference;
@@ -763,6 +770,8 @@ void AFPPlayer::DelayedCameraMovement(ABaseWeapon* baseWeapon, FRecoilOffset rec
 {
 	WeaponShotCameraShake(baseWeapon->CameraShake);
 	SetRecoilCameraPosition(recoilOffset, maxRecoilCount);
+
+	_receoilDelay = false;
 }
 
 void AFPPlayer::SetRecoilCameraPosition(FRecoilOffset recoilOffset, int maxRecoilCount)

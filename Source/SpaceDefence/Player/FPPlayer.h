@@ -38,7 +38,7 @@ private:
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
 		class USceneComponent* InteractionCastPoint;
 
-	
+
 
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly)
 		class USpringArmComponent* CameraBoom;
@@ -85,6 +85,7 @@ private:
 	bool _firePressed;
 	FVector _targetRecoilRotation;
 	float _recoilLerpAmount;
+	bool _receoilDelay;
 	void UpdateRecoilRotation(float deltaTime);
 	void FireUpdate(float deltaTime);
 	void SetRecoilCameraPosition(FRecoilOffset recoilOffset, int maxRecoilCount);
@@ -115,7 +116,7 @@ public:
 
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadWrite)
 		class UCameraComponent* CharacterCamera;
-	
+
 	UPROPERTY(Category = Mesh, BlueprintReadOnly, VisibleDefaultsOnly)
 		class USkeletalMeshComponent* PlayerMesh;
 

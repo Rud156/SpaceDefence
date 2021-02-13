@@ -64,37 +64,37 @@ public:
 	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
 		bool UseSkeletonMesh;
 
-	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
+	UPROPERTY(Category = "Weapon|Recoil", EditAnywhere)
 		bool HasRecoil;
 
-	UPROPERTY(Category = "Weapon|Data", BlueprintReadOnly, EditAnywhere)
+	UPROPERTY(Category = "Weapon|Recoil", BlueprintReadOnly, EditAnywhere)
 		UTextAsset* RecoilData;
 
-	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
+	UPROPERTY(Category = "Weapon|Recoil", EditAnywhere)
 		TSubclassOf<UMatineeCameraShake> CameraShake;
 
-	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
+	UPROPERTY(Category = "Weapon|Recoil", EditAnywhere)
 		float RecoilOffsetMultiplier;
 
-	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
+	UPROPERTY(Category = "Weapon|Recoil", EditAnywhere)
 		bool IsLeftRandomRecoil;
 
-	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
+	UPROPERTY(Category = "Weapon|Recoil", EditAnywhere)
 		float RandomRecoilXDelta;
 
-	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
+	UPROPERTY(Category = "Weapon|Recoil", EditAnywhere)
 		float RandomXOffset;
 
-	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
+	UPROPERTY(Category = "Weapon|Recoil", EditAnywhere)
 		int RandomEdgeStopCount;
 
-	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
+	UPROPERTY(Category = "Weapon|Recoil", EditAnywhere)
 		float RandomStopXDelta;
 
-	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
+	UPROPERTY(Category = "Weapon|Recoil", EditAnywhere)
 		float RandomStopYDelta;
 
-	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
+	UPROPERTY(Category = "Weapon|Recoil", EditAnywhere)
 		float RecoilResetTime;
 
 #pragma endregion
