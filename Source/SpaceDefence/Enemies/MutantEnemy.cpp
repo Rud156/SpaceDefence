@@ -12,7 +12,7 @@ AMutantEnemy::AMutantEnemy() : Super()
 	TeleportEndTime = 1.5f;
 
 	HandCollider = CreateDefaultSubobject<UBoxComponent>(TEXT("HandCollider"));
-	HandCollider->SetupAttachment(GetMesh(), "WeaponHitBox");
+	HandCollider->SetupAttachment(GetMesh(), WeaponHitBox);
 
 	PrimaryActorTick.bCanEverTick = true;
 }

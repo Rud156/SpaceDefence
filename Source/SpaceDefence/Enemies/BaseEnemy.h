@@ -16,6 +16,8 @@ class SPACEDEFENCE_API ABaseEnemy : public ACharacter
 	GENERATED_BODY()
 
 private:
+	FName HeadCollisionLocation = "HeadCollider";
+	
 	FTimerHandle TimerHandle;
 	virtual void Attack();
 

@@ -4,15 +4,14 @@
 #include "TD_CreepyEnemy.h"
 #include "DevelopmentTools/TD_DevelopmentTools.h"
 #include "SpaceDefence/Public/Projectile/TD_BaseProjectile.h"
+
 #include "Components/BoxComponent.h"
-ATD_CreepyEnemy::ATD_CreepyEnemy()
+
+ATD_CreepyEnemy::ATD_CreepyEnemy() : Super()
 {
 	HandCollider = CreateDefaultSubobject<UBoxComponent>(TEXT("HandCollider"));
-	HandCollider->SetupAttachment(GetMesh(),HandBoxCollisionLocation);
-	HeadColliderComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("HeadCollision"));
-	HeadColliderComponent->SetupAttachment(GetMesh(), HeadCollisionLocation);
+	HandCollider->SetupAttachment(GetMesh(), HandBoxCollisionLocation);
 	HandCollider->SetGenerateOverlapEvents(true);
-
 }
 
 void ATD_CreepyEnemy::BeginPlay()
@@ -25,7 +24,7 @@ void ATD_CreepyEnemy::BeginPlay()
 		HealthAndDamage->OnUnitDied.AddDynamic(this, &ATD_CreepyEnemy::Death);
 
 	}
-	if(HeadColliderComponent)
+	if (HeadColliderComponent)
 	{
 		HeadColliderComponent->OnComponentHit.AddDynamic(this, &ATD_CreepyEnemy::OnCompHitHead);
 	}
@@ -53,7 +52,7 @@ void ATD_CreepyEnemy::OnCompHit(UPrimitiveComponent* HitComp, AActor* OtherActor
 
 	if (CastState && bIsAlive)
 	{
-		
+
 		HealthAndDamage->TakeDamage(DamageAmount);
 
 	}
@@ -68,7 +67,7 @@ void ATD_CreepyEnemy::OnCompHitHead(UPrimitiveComponent* HitComp, AActor* OtherA
 
 	if (CastState && bIsAlive)
 	{
-		HealthAndDamage->TakeDamage(DamageAmount*HeadShotMultiplier);
+		HealthAndDamage->TakeDamage(DamageAmount * HeadShotMultiplier);
 
 	}
 }
@@ -78,6 +77,6 @@ void ATD_CreepyEnemy::Death(AActor* Actor)
 	CurrentAnimationState = ECreepyAnimState::Dead;
 	bIsAlive = false;
 	CurrencyManagerRef->AddCurrency(AmountToGive);
-	GetWorld()->GetTimerManager().SetTimer(DeathTimerHandle, this, &ATD_CreepyEnemy::RemoveDeadBody, DeadBodyTimer,false,-1);
+	GetWorld()->GetTimerManager().SetTimer(DeathTimerHandle, this, &ATD_CreepyEnemy::RemoveDeadBody, DeadBodyTimer, false, -1);
 }
 

@@ -8,7 +8,7 @@
 #include "TD_CreepyEnemy.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class SPACEDEFENCE_API ATD_CreepyEnemy : public ABaseEnemy
@@ -16,18 +16,21 @@ class SPACEDEFENCE_API ATD_CreepyEnemy : public ABaseEnemy
 	GENERATED_BODY()
 public:
 	ATD_CreepyEnemy();
+	void BeginPlay() override;
+
 	UPROPERTY(Category = "Mesh", VisibleDefaultsOnly)
 		class UBoxComponent* HandCollider;
-	
-	void BeginPlay() override;
+
 	UPROPERTY(Category = "Creepy Settings", BlueprintReadWrite, EditAnywhere)
 		ECreepyAnimState CurrentAnimationState = ECreepyAnimState::Idle;
+
 	UPROPERTY(Category = "Creepy Settings", BlueprintReadWrite, VisibleAnywhere)
-	bool bIsAlive = true;
+		bool bIsAlive = true;
 
 
 	UFUNCTION()
 		void OnHandColliderOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
 	UFUNCTION()
 		void OnCompHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
@@ -42,7 +45,5 @@ public:
 
 private:
 	FName HandBoxCollisionLocation = "HandBoxCollision";
-	FName HeadCollisionLocation = "HeadCollider";
-
 	FTimerHandle DeathTimerHandle;
 };

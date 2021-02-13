@@ -16,6 +16,8 @@ class SPACEDEFENCE_API AMutantEnemy : public ABaseEnemy
 	GENERATED_BODY()
 
 private:
+	FName WeaponHitBox = "WeaponHitBox";
+
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
 		class UBoxComponent* HandCollider;
 
