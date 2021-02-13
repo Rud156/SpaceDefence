@@ -38,13 +38,14 @@ private:
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
 		class USceneComponent* InteractionCastPoint;
 
-
-
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly)
 		class USpringArmComponent* CameraBoom;
 
 	UPROPERTY(Category = Weapon, VisibleDefaultsOnly)
 		class USceneComponent* WeaponAttachPoint;
+
+	// Top Level Initialization for MultiPlayer
+	bool _initialized;
 
 	TArray<EPlayerMovementState> _movementStack;
 	float _slideTimer;

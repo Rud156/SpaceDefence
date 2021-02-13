@@ -72,6 +72,8 @@ void AFPPlayer::BeginPlay()
 
 	SetCapsuleData(DefaultHalfHeight, DefaultRadius, _currentDefaultZPosition);
 	ResetMeshNonWeaponState();
+
+	_initialized = true;
 }
 
 void AFPPlayer::Tick(float DeltaTime)
@@ -172,9 +174,14 @@ bool AFPPlayer::IsClimbing()
 
 void AFPPlayer::MoveForward(float value)
 {
+	if (!_initialized) 
+	{
+		return;
+	}
+
 	_verticalInput = value;
 
-	auto lastState = _movementStack.Last();
+	auto lastState = GetTopPlayerState();
 	if (lastState != EPlayerMovementState::Slide)
 	{
 		AddMovementInput(GetActorForwardVector(), value);
@@ -188,6 +195,11 @@ float AFPPlayer::GetVerticalInput()
 
 void AFPPlayer::MoveRight(float value)
 {
+	if (!_initialized) 
+	{
+		return;
+	}
+
 	_horizontalInput = value;
 
 	if (_isClimbing)
@@ -195,7 +207,7 @@ void AFPPlayer::MoveRight(float value)
 		return;
 	}
 
-	if (_movementStack.Last() != EPlayerMovementState::Walk && _movementStack.Last() != EPlayerMovementState::Crouch)
+	if (GetTopPlayerState() != EPlayerMovementState::Walk && GetTopPlayerState() != EPlayerMovementState::Crouch)
 	{
 		return;
 	}
@@ -213,6 +225,11 @@ float AFPPlayer::GetHorizontalInput()
 
 void AFPPlayer::Turn(float value)
 {
+	if (!_initialized) 
+	{
+		return;
+	}
+
 	if (_isClimbing)
 	{
 		return;
@@ -231,6 +248,11 @@ void AFPPlayer::Turn(float value)
 
 void AFPPlayer::LookUp(float value)
 {
+	if (!_initialized) 
+	{
+		return;
+	}
+
 	if (_isClimbing)
 	{
 		return;
@@ -256,7 +278,7 @@ void AFPPlayer::CharacterJump()
 
 	RemovePlayerMovementState(EPlayerMovementState::Crouch);
 
-	if (_movementStack.Last() == EPlayerMovementState::Slide)
+	if (GetTopPlayerState() == EPlayerMovementState::Slide)
 	{
 		StopCharacterSliding();
 
@@ -264,7 +286,7 @@ void AFPPlayer::CharacterJump()
 		PushPlayerMovementState(EPlayerMovementState::RunJump);
 		PlayerRunJumped();
 	}
-	else if (_movementStack.Last() == EPlayerMovementState::Run)
+	else if (GetTopPlayerState() == EPlayerMovementState::Run)
 	{
 		PushPlayerMovementState(EPlayerMovementState::RunJump);
 		PlayerRunJumped();
@@ -474,7 +496,7 @@ bool AFPPlayer::IsFalling()
 
 void AFPPlayer::PushPlayerMovementState(EPlayerMovementState movementState)
 {
-	if (_movementStack.Num() > 0 && _movementStack.Last() == movementState)
+	if (_movementStack.Num() > 0 && GetTopPlayerState() == movementState)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Movement: Previous State And Last State Is Same");
 	}
@@ -508,7 +530,7 @@ bool AFPPlayer::HasPlayerState(EPlayerMovementState movementState)
 
 void AFPPlayer::ApplyChangesToCharacter()
 {
-	MovementStatePushed(_movementStack.Last()); // This is just an event used to display the state being applied
+	MovementStatePushed(GetTopPlayerState()); // This is just an event used to display the state being applied
 
 	SetCapsuleData(DefaultHalfHeight, DefaultRadius, _currentDefaultZPosition);
 
@@ -523,7 +545,7 @@ void AFPPlayer::ApplyChangesToCharacter()
 		CharacterCamera->SetRelativeLocation(FVector(currentCameraPosition.X, currentCameraPosition.Y, CameraDefaultZPosition));
 	}
 
-	switch (_movementStack.Last())
+	switch (GetTopPlayerState())
 	{
 	case EPlayerMovementState::None:
 		break;

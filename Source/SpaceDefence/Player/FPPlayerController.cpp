@@ -131,26 +131,42 @@ void AFPPlayerController::MoveForward(float input)
 {
 	AActor* pawn = GetPawn();
 	AFPPlayer* playerPawn = Cast<AFPPlayer>(pawn);
-	playerPawn->MoveForward(input);
+
+	if (playerPawn != nullptr) 
+	{
+		playerPawn->MoveForward(input);
+	}
 }
 
 void AFPPlayerController::MoveRight(float input)
 {
 	AActor* pawn = GetPawn();
 	AFPPlayer* playerPawn = Cast<AFPPlayer>(pawn);
-	playerPawn->MoveRight(input);
+
+	if (playerPawn != nullptr) 
+	{
+		playerPawn->MoveRight(input);
+	}
 }
 
 void AFPPlayerController::Turn(float input)
 {
 	AActor* pawn = GetPawn();
 	AFPPlayer* playerPawn = Cast<AFPPlayer>(pawn);
-	playerPawn->Turn(input);
+
+	if (playerPawn != nullptr) 
+	{
+		playerPawn->Turn(input);
+	}
 }
 
 void AFPPlayerController::LookUp(float input)
 {
 	AActor* pawn = GetPawn();
 	AFPPlayer* playerPawn = Cast<AFPPlayer>(pawn);
-	playerPawn->LookUp(input);
+
+	if (playerPawn != nullptr) 
+	{
+		playerPawn->LookUp(input);
+	}
 }
