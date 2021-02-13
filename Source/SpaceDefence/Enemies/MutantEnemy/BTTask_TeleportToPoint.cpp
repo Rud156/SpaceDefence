@@ -49,7 +49,14 @@ void UBTTask_TeleportToPoint::TickTask(UBehaviorTreeComponent& OwnerComp, uint8*
 
 			FVector targetPoint = movementPoint + backVector * TeleportNearestDistance;
 
-			mutantEnemy->SetActorLocation(targetPoint);
+			FRotator currentRotation = mutantEnemy->GetActorRotation();
+			bool success = mutantEnemy->TeleportTo(targetPoint, currentRotation);
+
+			if (!success)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Teleport Failed...");
+			}
+
 			int teleportEndTime = mutantEnemy->TeleportEnd();
 
 			_isStarting = false;
