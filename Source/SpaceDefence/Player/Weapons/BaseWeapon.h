@@ -71,6 +71,9 @@ public:
 		UTextAsset* RecoilData;
 
 	UPROPERTY(Category = "Weapon|Recoil", EditAnywhere)
+		float FastMovementRecoilMultiplier;
+
+	UPROPERTY(Category = "Weapon|Recoil", EditAnywhere)
 		TSubclassOf<UMatineeCameraShake> CameraShake;
 
 	UPROPERTY(Category = "Weapon|Recoil", EditAnywhere)

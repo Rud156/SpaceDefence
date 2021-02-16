@@ -174,7 +174,7 @@ bool AFPPlayer::IsClimbing()
 
 void AFPPlayer::MoveForward(float value)
 {
-	if (!_initialized) 
+	if (!_initialized)
 	{
 		return;
 	}
@@ -195,7 +195,7 @@ float AFPPlayer::GetVerticalInput()
 
 void AFPPlayer::MoveRight(float value)
 {
-	if (!_initialized) 
+	if (!_initialized)
 	{
 		return;
 	}
@@ -225,7 +225,7 @@ float AFPPlayer::GetHorizontalInput()
 
 void AFPPlayer::Turn(float value)
 {
-	if (!_initialized) 
+	if (!_initialized)
 	{
 		return;
 	}
@@ -248,7 +248,7 @@ void AFPPlayer::Turn(float value)
 
 void AFPPlayer::LookUp(float value)
 {
-	if (!_initialized) 
+	if (!_initialized)
 	{
 		return;
 	}
@@ -494,6 +494,28 @@ bool AFPPlayer::IsFalling()
 	return false;
 }
 
+bool AFPPlayer::IsInFastMovementState()
+{
+	EPlayerMovementState movementState = GetTopPlayerState();
+
+	switch (movementState)
+	{
+	case EPlayerMovementState::None:
+	case EPlayerMovementState::Walk:
+	case EPlayerMovementState::Crouch:
+		return false;
+
+	case EPlayerMovementState::Run:
+	case EPlayerMovementState::Jump:
+	case EPlayerMovementState::RunJump:
+	case EPlayerMovementState::Slide:
+		return true;
+
+	default:
+		return false;
+	}
+}
+
 void AFPPlayer::PushPlayerMovementState(EPlayerMovementState movementState)
 {
 	if (_movementStack.Num() > 0 && GetTopPlayerState() == movementState)
@@ -725,6 +747,10 @@ void AFPPlayer::FireUpdate(float deltaTime)
 				SpawnWeaponProjectile(_primaryWeapon->GetProjectile(), _primaryWeapon->GetShootingPoint());
 
 				FRecoilOffset recoilOffset = _primaryWeapon->GetCurrentRecoilData();
+				if (IsInFastMovementState())
+				{
+					recoilOffset.offset *= _primaryWeapon->FastMovementRecoilMultiplier;
+				}
 				int maxRecoilCount = _primaryWeapon->GetMaxRecoilCount();
 
 				FTimerDelegate timerHandle;
@@ -745,6 +771,10 @@ void AFPPlayer::FireUpdate(float deltaTime)
 				SpawnWeaponProjectile(_secondaryWeapon->GetProjectile(), _secondaryWeapon->GetShootingPoint());
 
 				FRecoilOffset recoilOffset = _secondaryWeapon->GetCurrentRecoilData();
+				if (IsInFastMovementState())
+				{
+					recoilOffset.offset *= _secondaryWeapon->FastMovementRecoilMultiplier;
+				}
 				int maxRecoilCount = _secondaryWeapon->GetMaxRecoilCount();
 
 				FTimerDelegate timerHandle;

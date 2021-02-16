@@ -49,6 +49,7 @@ private:
 
 	TArray<EPlayerMovementState> _movementStack;
 	float _slideTimer;
+	bool IsInFastMovementState();
 	void PushPlayerMovementState(EPlayerMovementState movementState);
 	void RemovePlayerMovementState(EPlayerMovementState movementState);
 	bool HasPlayerState(EPlayerMovementState movementState);
