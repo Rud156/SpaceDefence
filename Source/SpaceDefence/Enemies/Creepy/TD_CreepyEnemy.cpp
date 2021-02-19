@@ -52,8 +52,8 @@ void ATD_CreepyEnemy::OnCompHit(UPrimitiveComponent* HitComp, AActor* OtherActor
 
 	if (CastState && bIsAlive)
 	{
-
-		HealthAndDamage->TakeDamage(DamageAmount);
+		const float damageAmount = CastState->DamageAmount;
+		HealthAndDamage->TakeDamage(damageAmount);
 
 	}
 	//else
@@ -67,8 +67,8 @@ void ATD_CreepyEnemy::OnCompHitHead(UPrimitiveComponent* HitComp, AActor* OtherA
 
 	if (CastState && bIsAlive)
 	{
-		HealthAndDamage->TakeDamage(DamageAmount * HeadShotMultiplier);
-
+		const float damageAmount = CastState->DamageAmount;
+		HealthAndDamage->TakeDamage(damageAmount * HeadShotMultiplier);
 	}
 }
 

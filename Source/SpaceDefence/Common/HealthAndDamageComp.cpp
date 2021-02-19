@@ -28,6 +28,15 @@ int UHealthAndDamageComp::GetCurrentHealth()
 	return _currentHealth;
 }
 
+void UHealthAndDamageComp::SetMaxHealth(int healthAmount, bool resetCurrentHealth)
+{
+	MaxHealth = healthAmount;
+	if (resetCurrentHealth)
+	{
+		_currentHealth = MaxHealth;
+	}
+}
+
 void UHealthAndDamageComp::AddHealth(int healthAmount)
 {
 	_currentHealth += healthAmount;

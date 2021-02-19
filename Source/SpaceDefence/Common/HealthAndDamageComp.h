@@ -40,7 +40,7 @@ public:
 	UFUNCTION(Category = "Health", BlueprintPure, BlueprintCallable)
 		int GetCurrentHealth();
 
+	void SetMaxHealth(int healthAmount, bool resetCurrentHealth = true);
 	void AddHealth(int healthAmount);
 	void TakeDamage(int damageAmount);
-
 };

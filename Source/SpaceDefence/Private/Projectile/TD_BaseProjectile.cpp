@@ -34,13 +34,5 @@ ATD_BaseProjectile::ATD_BaseProjectile()
 void ATD_BaseProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 	FVector NormalImpulse, const FHitResult& Hit)
 {
-	UActorComponent* actorComponent = OtherActor->GetComponentByClass(UHealthAndDamageComp::StaticClass());
-	UHealthAndDamageComp* healthAndDamage = Cast<UHealthAndDamageComp>(actorComponent);
-
-	if (healthAndDamage != nullptr)
-	{
-		healthAndDamage->TakeDamage(DamageAmount);
-	}
-
 	Destroy();
 }

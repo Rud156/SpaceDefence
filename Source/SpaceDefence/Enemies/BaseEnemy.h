@@ -17,7 +17,7 @@ class SPACEDEFENCE_API ABaseEnemy : public ACharacter
 
 private:
 	FName HeadCollisionLocation = "HeadCollider";
-	
+
 	FTimerHandle TimerHandle;
 	virtual void Attack();
 
@@ -33,52 +33,56 @@ protected:
 public:
 #pragma region Properties
 
-	UPROPERTY(Category = "Enemy Settings", EditAnywhere)
+	UPROPERTY(Category = "Enemy|Enemy Settings", EditAnywhere)
 		FEnemySettings Settings;
 
-	UPROPERTY(Category = "Enemy Settings", EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Category = "Enemy|Enemy Settings", EditAnywhere, BlueprintReadWrite)
 		bool bIsItemWithinRange = false;
 
-	UPROPERTY(Category = "Enemy Settings", EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Category = "Enemy|Enemy Settings", EditAnywhere, BlueprintReadWrite)
 		bool bIsPlayerWithInRange = false;
-	UPROPERTY(Category = "Enemy Settings", EditAnywhere, BlueprintReadWrite)
+
+	UPROPERTY(Category = "Enemy|Enemy Settings", EditAnywhere, BlueprintReadWrite)
 		float DamageAmount = 10;
-	UPROPERTY(Category = "Enemy Settings", EditAnywhere, BlueprintReadWrite)
+
+	UPROPERTY(Category = "Enemy|Enemy Settings", EditAnywhere, BlueprintReadWrite)
 		float HeadShotMultiplier = 1.5;
-	UPROPERTY(Category = "Enemy Settings", EditAnywhere, BlueprintReadWrite)
+
+	UPROPERTY(Category = "Enemy|Enemy Settings", EditAnywhere, BlueprintReadWrite)
 		float AmountToGive = 20;
-	UPROPERTY(Category = "Enemy Settings", EditAnywhere, BlueprintReadWrite)
+
+	UPROPERTY(Category = "Enemy|Enemy Settings", EditAnywhere, BlueprintReadWrite)
 		bool bDeathBodyNeedsToBeRemoved = true;
-	UPROPERTY(Category = "Enemy Settings", EditAnywhere, BlueprintReadWrite)
+
+	UPROPERTY(Category = "Enemy|Enemy Settings", EditAnywhere, BlueprintReadWrite)
 		float DeadBodyTimer = 5;
 
-
-	
-	UPROPERTY(Category = "Optimization", VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(Category = "Enemy|Optimization", VisibleAnywhere, BlueprintReadWrite)
 		bool bClothSimulation = false;
+
+	UPROPERTY(Category = "Enemy|Optimization", EditAnywhere, BlueprintReadWrite)
+		bool bCanAffectNavigation = false;
+
+	UPROPERTY(Category = "Enemy|Optimization", EditAnywhere, BlueprintReadWrite)
+		bool bCastShadow = false;
+
+	UPROPERTY(Category = "Enemy|AI Settings", VisibleAnywhere, BlueprintReadWrite)
+		ATD_PlaceablesActors* CurrentAttackingItem = nullptr;
+
+	UPROPERTY(Category = "Enemy|AI Settings", VisibleAnywhere, BlueprintReadWrite)
+		AFPPlayer* CurrentAttackingPlayer = nullptr;
+
+	UPROPERTY(Category = "Enemy|AI Settings", VisibleAnywhere, BlueprintReadWrite)
+		TArray<ATD_PlaceablesActors*> ListOfCurrentTargetAbleItems;
+
+	UPROPERTY(Category = "Enemy|AI Settings", VisibleAnywhere, BlueprintReadWrite)
+		TArray<AFPPlayer*> ListOfCurrentTargetAblePlayers;
 
 	ATD_CurrencyManager* CurrencyManagerRef = nullptr;
 
-	
-	UPROPERTY(Category = "Optimization", EditAnywhere,BlueprintReadWrite)
-		bool bCanAffectNavigation = false;
-	
-	UPROPERTY(Category = "Optimization", EditAnywhere,BlueprintReadWrite)
-		bool bCastShadow = false;
-
-	UPROPERTY(Category = "AI Settings", VisibleAnywhere, BlueprintReadWrite)
-		ATD_PlaceablesActors* CurrentAttackingItem = nullptr;
-	UPROPERTY(Category = "AI Settings", VisibleAnywhere, BlueprintReadWrite)
-		AFPPlayer* CurrentAttackingPlayer = nullptr;
-	UPROPERTY(Category = "AI Settings", VisibleAnywhere, BlueprintReadWrite)
-		TArray<ATD_PlaceablesActors*> ListOfCurrentTargetAbleItems;
-	UPROPERTY(Category = "AI Settings", VisibleAnywhere, BlueprintReadWrite)
-		TArray<AFPPlayer*> ListOfCurrentTargetAblePlayers;
-
-
 	UFUNCTION(BlueprintCallable)
 		void RemoveCurrentAttackItem() { if (CurrentAttackingItem)CurrentAttackingItem->RemoveMaxEnemiesAttackingCount(); CurrentAttackingItem = nullptr; }
-	
+
 #pragma endregion
 
 	ABaseEnemy();
