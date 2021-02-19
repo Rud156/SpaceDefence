@@ -4,6 +4,7 @@
 #include "TD_PlaceableSpawnerActor.h"
 #include "DrawDebugHelpers.h"
 #include "TD_GameModeFPS.h"
+#include "TD_GameStateBase.h"
 #include "SpaceDefence/Public/DevelopmentTools/TD_DevelopmentTools.h"
 #include "CurrencyManager/TD_CurrencyManager.h"
 #include "Kismet/GameplayStatics.h"
@@ -46,7 +47,8 @@ void ATD_PlaceableSpawnerActor::BeginPlay()
 {
 	Super::BeginPlay();
 	auto GameMode = GetWorld()->GetAuthGameMode();
-	CurrencyRef = Cast<ATD_GameModeFPS>(GameMode)->CurrencyManagerRef;
+	GameState = Cast<ATD_GameStateBase>(GetWorld()->GetGameState());
+	CurrencyRef =(GameState)->CurrencyManagerRef;
 	
 }
 

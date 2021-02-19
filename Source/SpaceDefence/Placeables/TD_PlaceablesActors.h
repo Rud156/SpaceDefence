@@ -9,6 +9,7 @@
 #include "SpaceDefence/Utils/Structs.h"
 #include "TD_PlaceablesActors.generated.h"
 
+class ATD_GameStateBase;
 UCLASS()
 class SPACEDEFENCE_API ATD_PlaceablesActors : public AActor
 {
@@ -66,6 +67,7 @@ public:
 private:
 	bool bIsAlive = true;
 	AGameModeBase* GameMode = nullptr;
+	ATD_GameStateBase* GameSate = nullptr;
 	ATD_CurrencyManager* CurrencyManager = nullptr;
 	float CurrentEnemiesAttackingCount = 0;
 	

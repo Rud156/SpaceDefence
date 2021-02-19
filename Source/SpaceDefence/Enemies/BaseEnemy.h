@@ -41,14 +41,11 @@ public:
 
 	UPROPERTY(Category = "Enemy|Enemy Settings", EditAnywhere, BlueprintReadWrite)
 		bool bIsPlayerWithInRange = false;
-
-	UPROPERTY(Category = "Enemy|Enemy Settings", EditAnywhere, BlueprintReadWrite)
-		float DamageAmount = 10;
-
-	UPROPERTY(Category = "Enemy|Enemy Settings", EditAnywhere, BlueprintReadWrite)
-		float HeadShotMultiplier = 1.5;
-
-	UPROPERTY(Category = "Enemy|Enemy Settings", EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Category = "Enemy Settings", EditAnywhere, BlueprintReadWrite)
+		float DamageAmount = 30;
+	UPROPERTY(Category = "Enemy Settings", EditAnywhere, BlueprintReadWrite)
+		float HeadShotMultiplier = 3;
+	UPROPERTY(Category = "Enemy Settings", EditAnywhere, BlueprintReadWrite)
 		float AmountToGive = 20;
 
 	UPROPERTY(Category = "Enemy|Enemy Settings", EditAnywhere, BlueprintReadWrite)
