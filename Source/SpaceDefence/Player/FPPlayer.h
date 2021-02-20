@@ -38,9 +38,6 @@ private:
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
 		class USceneComponent* InteractionCastPoint;
 
-	UPROPERTY(Category = Camera, VisibleDefaultsOnly)
-		class USpringArmComponent* CameraBoom;
-
 	UPROPERTY(Category = Weapon, VisibleDefaultsOnly)
 		class USceneComponent* WeaponAttachPoint;
 
@@ -103,14 +100,17 @@ private:
 	void ApplyWeaponChangesToCharacter();
 
 protected:
-	UPROPERTY(Category = PlayerHealth, VisibleAnywhere, BlueprintReadOnly)
-		class UHealthAndDamageComp* HealthAndDamage;
+	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly)
+		class USpringArmComponent* CameraBoom;
 
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly, BlueprintReadOnly)
 		class USceneComponent* CameraLeftHandView;
 
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly, BlueprintReadOnly)
 		class USceneComponent* CameraRightHandView;
+
+	UPROPERTY(Category = PlayerHealth, VisibleAnywhere, BlueprintReadOnly)
+		class UHealthAndDamageComp* HealthAndDamage;
 
 	virtual void BeginPlay() override;
 
