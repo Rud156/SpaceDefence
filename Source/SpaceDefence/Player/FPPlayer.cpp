@@ -56,10 +56,6 @@ void AFPPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 
-	WeaponAttachPoint->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
-	WeaponAttachPoint->SetRelativeLocation(AttachRelativeLocation);
-	WeaponAttachPoint->SetRelativeRotation(AttachRelativeRotation);
-
 	OnPlayerLanded.AddDynamic(this, &AFPPlayer::PlayerLanded);
 
 	_slideTimer = 0;
@@ -88,6 +84,7 @@ void AFPPlayer::Tick(float DeltaTime)
 	UpdateRecoilRotation(DeltaTime);
 	WallClimbCheck(DeltaTime);
 	UpdateCapsuleSize(DeltaTime);
+	UpdateLeftRightHandPosition();
 }
 
 void AFPPlayer::UpdateCharacterSliding(float deltaTime)
@@ -590,6 +587,38 @@ void AFPPlayer::ApplyChangesToCharacter()
 	break;
 
 	default:
+		break;
+	}
+}
+
+void AFPPlayer::UpdateLeftRightHandPosition()
+{
+	switch (_currentWeapon)
+	{
+	case EPlayerWeapon::Primary:
+	{
+		FVector leftHandLocation = _primaryWeapon->SkeletalWeaponMesh->GetSocketLocation("LeftHandLocation");
+		FVector rightHandLocation = _primaryWeapon->SkeletalWeaponMesh->GetSocketLocation("RightHandLocation");
+
+		CameraLeftHandView->SetWorldLocation(leftHandLocation);
+		CameraRightHandView->SetWorldLocation(rightHandLocation);
+	}
+	break;
+
+	case EPlayerWeapon::Secondary:
+	{
+		FVector leftHandLocation = _secondaryWeapon->SkeletalWeaponMesh->GetSocketLocation("LeftHandLocation");
+		FVector rightHandLocation = _secondaryWeapon->SkeletalWeaponMesh->GetSocketLocation("RightHandLocation");
+
+		CameraLeftHandView->SetWorldLocation(leftHandLocation);
+		CameraRightHandView->SetWorldLocation(rightHandLocation);
+	}
+	break;
+
+	case EPlayerWeapon::Melee:
+	default:
+		CameraLeftHandView->SetRelativeLocation(LeftMeleeDefaultPosition);
+		CameraRightHandView->SetRelativeLocation(RightMeleeDefaultPosition);
 		break;
 	}
 }

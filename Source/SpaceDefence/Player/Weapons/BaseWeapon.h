@@ -29,12 +29,6 @@ class SPACEDEFENCE_API ABaseWeapon : public AActor
 protected:
 
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
-		class UStaticMeshComponent* StaticWeaponMesh;
-
-	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
-		class USkeletalMeshComponent* SkeletalWeaponMesh;
-
-	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
 		class USceneComponent* ShootingPoint;
 
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
@@ -54,6 +48,9 @@ protected:
 
 public:
 #pragma region Properties
+
+	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
+		class USkeletalMeshComponent* SkeletalWeaponMesh;
 
 	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
 		EPlayerWeapon WeaponType;

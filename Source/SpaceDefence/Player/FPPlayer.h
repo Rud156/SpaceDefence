@@ -51,6 +51,7 @@ private:
 	void RemovePlayerMovementState(EPlayerMovementState movementState);
 	bool HasPlayerState(EPlayerMovementState movementState);
 	void ApplyChangesToCharacter();
+	void UpdateLeftRightHandPosition();
 
 	float _verticalInput;
 	float _horizontalInput;
@@ -182,6 +183,12 @@ public:
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
 		float CapsuleSizeLerpRate;
+
+	UPROPERTY(Category = "Player|IK", EditAnywhere)
+		FVector LeftMeleeDefaultPosition;
+
+	UPROPERTY(Category = "Player|IK", EditAnywhere)
+		FVector RightMeleeDefaultPosition;
 
 	UPROPERTY(Category = "Player|Interaction", EditAnywhere)
 		float MaxInteractionDistance;

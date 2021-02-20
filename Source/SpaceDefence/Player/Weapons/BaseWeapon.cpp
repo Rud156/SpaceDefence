@@ -14,12 +14,10 @@
 ABaseWeapon::ABaseWeapon()
 {
 	WeaponCollider = CreateDefaultSubobject<UBoxComponent>(TEXT("WeaponCollider"));
-	StaticWeaponMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaitcWeaponMesh"));
 	SkeletalWeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalWeaponMesh"));
 	ShootingPoint = CreateDefaultSubobject<USceneComponent>(TEXT("ShootingPoint"));
 
 	RootComponent = WeaponCollider;
-	StaticWeaponMesh->SetupAttachment(WeaponCollider);
 	SkeletalWeaponMesh->SetupAttachment(WeaponCollider);
 	ShootingPoint->SetupAttachment(WeaponCollider);
 
