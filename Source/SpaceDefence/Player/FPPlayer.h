@@ -60,13 +60,8 @@ private:
 
 	FVector2D _capsuleRadius; // X: Target, Y: Current
 	FVector2D _capsuleHeight; // X: Target, Y: Current
-	FVector2D _meshZPosition; // X: Target, Y: Current
 	float _capsuleLerpAmount;
-	float _currentCrouchZPosition;
-	float _currentDefaultZPosition;
-	void ResetMeshNonWeaponState();
-	void ResetMeshWeaponState();
-	void SetCapsuleData(float targetHeight, float targetRadius, float targetZPosition);
+	void SetCapsuleData(float targetHeight, float targetRadius);
 	void UpdateCapsuleSize(float deltaTime);
 
 	float _currentClimbTime;
@@ -111,6 +106,12 @@ protected:
 	UPROPERTY(Category = PlayerHealth, VisibleAnywhere, BlueprintReadOnly)
 		class UHealthAndDamageComp* HealthAndDamage;
 
+	UPROPERTY(Category = Mesh, VisibleDefaultsOnly, BlueprintReadOnly)
+		class USceneComponent* CameraLeftHandView;
+
+	UPROPERTY(Category = Mesh, VisibleDefaultsOnly, BlueprintReadOnly)
+		class USceneComponent* CameraRightHandView;
+
 	virtual void BeginPlay() override;
 
 public:
@@ -118,9 +119,6 @@ public:
 
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadWrite)
 		class UCameraComponent* CharacterCamera;
-
-	UPROPERTY(Category = Mesh, BlueprintReadOnly, VisibleDefaultsOnly)
-		class USkeletalMeshComponent* PlayerMesh;
 
 	UPROPERTY(Category = "Player|Movement", EditAnywhere)
 		float WalkSpeed;
@@ -171,46 +169,16 @@ public:
 		float FallVelocityThreshold;
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
-		FVector2D DefaultMeshPosition;
-
-	UPROPERTY(Category = "Player|Size", EditAnywhere)
-		FVector2D WeaponMeshPosition;
-
-	UPROPERTY(Category = "Player|Size", EditAnywhere)
 		float CrouchHalfHeight;
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
 		float CrouchRadius;
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
-		float CrouchMeshZPosition;
-
-	UPROPERTY(Category = "Player|Size", EditAnywhere)
-		float CrouchMeshZPositionWeapon;
-
-	UPROPERTY(Category = "Player|Size", EditAnywhere)
 		float DefaultHalfHeight;
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
 		float DefaultRadius;
-
-	UPROPERTY(Category = "Player|Size", EditAnywhere)
-		float DefaultMeshZPosition;
-
-	UPROPERTY(Category = "Player|Size", EditAnywhere)
-		float DefaultMeshZPositionWeapon;
-
-	UPROPERTY(Category = "Player|Size", EditAnywhere)
-		float CameraDefaultZPosition;
-
-	UPROPERTY(Category = "Player|Size", EditAnywhere)
-		float CameraZPositionWeapon;
-
-	UPROPERTY(Category = "Player|Size", EditAnywhere)
-		float CameraCrouchZPosition;
-
-	UPROPERTY(Category = "Player|Size", EditAnywhere)
-		float CameraCrouchZPositionWeapon;
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
 		float CapsuleSizeLerpRate;
