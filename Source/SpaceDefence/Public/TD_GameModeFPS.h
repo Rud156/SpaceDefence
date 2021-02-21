@@ -23,7 +23,4 @@ public:
 
 	UPROPERTY(Category = "References", BlueprintReadWrite)
 		class ATD_WaveController* WaveControllerRef;
-
-	UPROPERTY(Category = "References", BlueprintReadWrite)
-		class AInteractionDisplayManager* InteractionDisplayManagerRef;
 };

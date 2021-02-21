@@ -17,4 +17,3 @@ void AInteractionDisplayManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
-

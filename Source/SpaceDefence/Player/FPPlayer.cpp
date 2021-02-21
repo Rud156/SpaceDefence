@@ -392,15 +392,13 @@ void AFPPlayer::UpdateInteractibleCollection(float deltaTime)
 				break;
 			}
 
-			ATD_GameModeFPS* gameMode = Cast<ATD_GameModeFPS>(GetWorld()->GetAuthGameMode());
-			gameMode->InteractionDisplayManagerRef->HideInteractionBar();
+			InteractionDisplayManager->HideInteractionBar();
 
 			ClearInteractableObject();
 		}
 		else
 		{
-			ATD_GameModeFPS* gameMode = Cast<ATD_GameModeFPS>(GetWorld()->GetAuthGameMode());
-			gameMode->InteractionDisplayManagerRef->SetInteractionBarProgress(_currentInteractionComponent->GetInteractionProgress());
+			InteractionDisplayManager->SetInteractionBarProgress(_currentInteractionComponent->GetInteractionProgress());
 		}
 	}
 	else
@@ -420,14 +418,12 @@ void AFPPlayer::UpdateInteractibleCollection(float deltaTime)
 			{
 				_currentInteractionComponent = interactionComponent;
 
-				ATD_GameModeFPS* gameMode = Cast<ATD_GameModeFPS>(GetWorld()->GetAuthGameMode());
-				gameMode->InteractionDisplayManagerRef->ShowInteractionBar();
+				InteractionDisplayManager->ShowInteractionBar();
 			}
 		}
 		else
 		{
-			ATD_GameModeFPS* gameMode = Cast<ATD_GameModeFPS>(GetWorld()->GetAuthGameMode());
-			gameMode->InteractionDisplayManagerRef->HideInteractionBar();
+			InteractionDisplayManager->HideInteractionBar();
 		}
 	}
 }
@@ -450,8 +446,7 @@ void AFPPlayer::HandleInteractReleased()
 {
 	if (_currentInteractionComponent != nullptr)
 	{
-		ATD_GameModeFPS* gameMode = Cast<ATD_GameModeFPS>(GetWorld()->GetAuthGameMode());
-		gameMode->InteractionDisplayManagerRef->SetInteractionBarProgress(0);
+		InteractionDisplayManager->SetInteractionBarProgress(0);
 		_currentInteractionComponent->CancelInteraction();
 
 		ClearInteractableObject();

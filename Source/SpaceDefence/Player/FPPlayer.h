@@ -202,6 +202,9 @@ public:
 	UPROPERTY(Category = "Player|Interaction", EditAnywhere)
 		float MaxInteractionDistance;
 
+	UPROPERTY(Category = "Player|Interaction", BlueprintReadWrite)
+		AInteractionDisplayManager* InteractionDisplayManager;
+
 	UPROPERTY(Category = "Player|Weapon", EditAnywhere)
 		TSubclassOf<class ABaseWeapon> MeleeWeapon;
 
@@ -226,7 +229,7 @@ public:
 	UPROPERTY(Category = "Player|Delegates", BlueprintAssignable)
 		FPlayerLanded OnPlayerLanded;
 
-	UPROPERTY(Category = "Spawner Settings", BlueprintReadWrite)
+	UPROPERTY(Category = "Player|SpawnerSettings", BlueprintReadWrite)
 		ATD_PlaceableSpawnerActor* PlaceAbleSpawnerActorRef = nullptr;
 #pragma endregion
 
