@@ -25,8 +25,9 @@
 
 AFPPlayer::AFPPlayer()
 {
-	PlayerMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("PlayerMesh"));
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBooom"));
+	CameraLeftHandView = CreateDefaultSubobject<USceneComponent>(TEXT("CameraLeftHandView"));
+	CameraRightHandView = CreateDefaultSubobject<USceneComponent>(TEXT("CameraRightHandView"));
 	CharacterCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("CharacterCamera"));
 	GroundCheckPoint = CreateDefaultSubobject<USceneComponent>(TEXT("GroundCheckPoint"));
 	WallCheckPoint = CreateDefaultSubobject<USceneComponent>(TEXT("WallCheckPoint"));
@@ -37,8 +38,9 @@ AFPPlayer::AFPPlayer()
 	CameraBoom->SetupAttachment(GetCapsuleComponent());
 	CameraBoom->bUsePawnControlRotation = true;
 
+	CameraLeftHandView->SetupAttachment(CharacterCamera);
+	CameraRightHandView->SetupAttachment(CharacterCamera);
 	CharacterCamera->SetupAttachment(CameraBoom);
-	PlayerMesh->SetupAttachment(CharacterCamera);
 	GroundCheckPoint->SetupAttachment(GetCapsuleComponent());
 	WallCheckPoint->SetupAttachment(GetCapsuleComponent());
 	InteractionCastPoint->SetupAttachment(CharacterCamera);
@@ -54,24 +56,19 @@ void AFPPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 
-	WeaponAttachPoint->AttachToComponent(PlayerMesh, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
-	WeaponAttachPoint->SetRelativeLocation(AttachRelativeLocation);
-	WeaponAttachPoint->SetRelativeRotation(AttachRelativeRotation);
-
 	OnPlayerLanded.AddDynamic(this, &AFPPlayer::PlayerLanded);
 
 	_slideTimer = 0;
 	_targetRecoilRotation = FVector::ZeroVector;
 
 	PushPlayerMovementState(EPlayerMovementState::Walk);
-	ApplyChangesToCharacter();
 
 	AActor* weapon = GetWorld()->SpawnActor(MeleeWeapon, &FVector::ZeroVector, &FRotator::ZeroRotator);
 	ABaseWeapon* meleeWeapon = Cast<ABaseWeapon>(weapon);
 	PickupMeleeWeapon(meleeWeapon);
 
-	SetCapsuleData(DefaultHalfHeight, DefaultRadius, _currentDefaultZPosition);
-	ResetMeshNonWeaponState();
+	SetCapsuleData(DefaultHalfHeight, DefaultRadius);
+	ApplyChangesToCharacter();
 
 	_initialized = true;
 }
@@ -87,6 +84,8 @@ void AFPPlayer::Tick(float DeltaTime)
 	UpdateRecoilRotation(DeltaTime);
 	WallClimbCheck(DeltaTime);
 	UpdateCapsuleSize(DeltaTime);
+
+	UpdateLeftRightHandPosition();
 }
 
 void AFPPlayer::UpdateCharacterSliding(float deltaTime)
@@ -553,19 +552,10 @@ bool AFPPlayer::HasPlayerState(EPlayerMovementState movementState)
 void AFPPlayer::ApplyChangesToCharacter()
 {
 	MovementStatePushed(GetTopPlayerState()); // This is just an event used to display the state being applied
+	SetCapsuleData(DefaultHalfHeight, DefaultRadius);
 
-	SetCapsuleData(DefaultHalfHeight, DefaultRadius, _currentDefaultZPosition);
-
-	if (GetCurrentWeapon() != EPlayerWeapon::Melee)
-	{
-		FVector currentCameraPosition = CharacterCamera->GetRelativeLocation();
-		CharacterCamera->SetRelativeLocation(FVector(currentCameraPosition.X, currentCameraPosition.Y, CameraZPositionWeapon));
-	}
-	else
-	{
-		FVector currentCameraPosition = CharacterCamera->GetRelativeLocation();
-		CharacterCamera->SetRelativeLocation(FVector(currentCameraPosition.X, currentCameraPosition.Y, CameraDefaultZPosition));
-	}
+	FVector relativeLocation = GetMesh()->GetRelativeLocation();
+	GetMesh()->SetRelativeLocation(FVector(relativeLocation.X, relativeLocation.Y, DefaultMeshZPosition));
 
 	switch (GetTopPlayerState())
 	{
@@ -589,17 +579,12 @@ void AFPPlayer::ApplyChangesToCharacter()
 	case EPlayerMovementState::Crouch:
 	{
 		GetCharacterMovement()->MaxWalkSpeed = CrouchSpeed;
-		SetCapsuleData(CrouchHalfHeight, CrouchRadius, _currentCrouchZPosition);
+		SetCapsuleData(CrouchHalfHeight, CrouchRadius);
 
-		if (GetCurrentWeapon() != EPlayerWeapon::Melee)
+		if (_currentWeapon == EPlayerWeapon::Melee)
 		{
-			FVector currentCameraPosition = CharacterCamera->GetRelativeLocation();
-			CharacterCamera->SetRelativeLocation(FVector(currentCameraPosition.X, currentCameraPosition.Y, CameraCrouchZPositionWeapon));
-		}
-		else
-		{
-			FVector currentCameraPosition = CharacterCamera->GetRelativeLocation();
-			CharacterCamera->SetRelativeLocation(FVector(currentCameraPosition.X, currentCameraPosition.Y, CameraCrouchZPosition));
+			FVector currentLocation = GetMesh()->GetRelativeLocation();
+			GetMesh()->SetRelativeLocation(FVector(currentLocation.X, currentLocation.Y, CrouchMeshZPosition));
 		}
 	}
 	break;
@@ -607,23 +592,77 @@ void AFPPlayer::ApplyChangesToCharacter()
 	case EPlayerMovementState::Slide:
 	{
 		GetCharacterMovement()->MaxWalkSpeed = SlideSpeed;
-		SetCapsuleData(CrouchHalfHeight, CrouchRadius, _currentCrouchZPosition);
+		SetCapsuleData(CrouchHalfHeight, CrouchRadius);
 
-		if (GetCurrentWeapon() != EPlayerWeapon::Melee)
+		if (_currentWeapon == EPlayerWeapon::Melee)
 		{
-			FVector currentCameraPosition = CharacterCamera->GetRelativeLocation();
-			CharacterCamera->SetRelativeLocation(FVector(currentCameraPosition.X, currentCameraPosition.Y, CameraCrouchZPositionWeapon));
-		}
-		else
-		{
-			FVector currentCameraPosition = CharacterCamera->GetRelativeLocation();
-			CharacterCamera->SetRelativeLocation(FVector(currentCameraPosition.X, currentCameraPosition.Y, CameraCrouchZPosition));
+			FVector currentLocation = GetMesh()->GetRelativeLocation();
+			GetMesh()->SetRelativeLocation(FVector(currentLocation.X, currentLocation.Y, CrouchMeshZPosition));
 		}
 	}
 	break;
 
 	default:
 		break;
+	}
+}
+
+void AFPPlayer::UpdateLeftRightHandPosition()
+{
+	switch (_currentWeapon)
+	{
+	case EPlayerWeapon::Primary:
+	{
+		FVector leftHandLocation = _primaryWeapon->SkeletalWeaponMesh->GetSocketLocation("LeftHandLocation");
+		FVector rightHandLocation = _primaryWeapon->SkeletalWeaponMesh->GetSocketLocation("RightHandLocation");
+
+		CameraLeftHandView->SetWorldLocation(leftHandLocation);
+		CameraRightHandView->SetWorldLocation(rightHandLocation);
+	}
+	break;
+
+	case EPlayerWeapon::Secondary:
+	{
+		FVector leftHandLocation = _secondaryWeapon->SkeletalWeaponMesh->GetSocketLocation("LeftHandLocation");
+		FVector rightHandLocation = _secondaryWeapon->SkeletalWeaponMesh->GetSocketLocation("RightHandLocation");
+
+		CameraLeftHandView->SetWorldLocation(leftHandLocation);
+		CameraRightHandView->SetWorldLocation(rightHandLocation);
+	}
+	break;
+
+	case EPlayerWeapon::Melee:
+	default:
+		CameraLeftHandView->SetRelativeLocation(LeftMeleeDefaultPosition);
+		CameraRightHandView->SetRelativeLocation(RightMeleeDefaultPosition);
+		break;
+	}
+}
+
+void AFPPlayer::IKFootTrace(FName socketName, float distance, FVector& outHitLocation, float& footTraceOffset)
+{
+	FVector socketLocation = GetMesh()->GetSocketLocation(socketName);
+	FVector actorLocation = GetActorLocation();
+
+	FVector startLocation = FVector(socketLocation.X, socketLocation.Y, actorLocation.Z);
+	FVector endLocation = FVector(socketLocation.X, socketLocation.Y, distance);
+
+	FHitResult hitResult;
+	bool hit = GetWorld()->LineTraceSingleByChannel(hitResult, startLocation, endLocation, ECollisionChannel::ECC_Visibility);
+
+	if (hit)
+	{
+		FVector hitLocation = hitResult.Location;
+		FVector meshLocation = GetMesh()->GetComponentLocation();
+		FVector targetLocation = hitLocation - meshLocation;
+
+		footTraceOffset = targetLocation.Z - IkHipOffset;
+		outHitLocation = hitLocation;
+	}
+	else
+	{
+		outHitLocation = FVector::ZeroVector;
+		footTraceOffset = 0;
 	}
 }
 
@@ -637,33 +676,10 @@ EPlayerMovementState AFPPlayer::GetTopPlayerState()
 	return _movementStack.Last();
 }
 
-void AFPPlayer::ResetMeshNonWeaponState()
-{
-	float currentZPosition = PlayerMesh->GetRelativeLocation().Z;
-	PlayerMesh->SetRelativeLocation(FVector(DefaultMeshPosition.X, DefaultMeshPosition.Y, currentZPosition));
-
-	_currentCrouchZPosition = CrouchMeshZPosition;
-	_currentDefaultZPosition = DefaultMeshZPosition;
-
-	ApplyChangesToCharacter();
-}
-
-void AFPPlayer::ResetMeshWeaponState()
-{
-	float currentZPosition = PlayerMesh->GetRelativeLocation().Z;
-	PlayerMesh->SetRelativeLocation(FVector(WeaponMeshPosition.X, WeaponMeshPosition.Y, currentZPosition));
-
-	_currentCrouchZPosition = CrouchMeshZPositionWeapon;
-	_currentDefaultZPosition = DefaultMeshZPositionWeapon;
-
-	ApplyChangesToCharacter();
-}
-
-void AFPPlayer::SetCapsuleData(float targetHeight, float targetRadius, float targetZPosition)
+void AFPPlayer::SetCapsuleData(float targetHeight, float targetRadius)
 {
 	_capsuleHeight = FVector2D(targetHeight, GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight());
 	_capsuleRadius = FVector2D(targetRadius, GetCapsuleComponent()->GetUnscaledCapsuleRadius());
-	_meshZPosition = FVector2D(targetZPosition, PlayerMesh->GetRelativeLocation().Z);
 	_capsuleLerpAmount = 0;
 }
 
@@ -678,21 +694,15 @@ void AFPPlayer::UpdateCapsuleSize(float deltaTime)
 	CameraBoom->bEnableCameraRotationLag = true;
 	float currentHeight = FMath::Lerp(_capsuleHeight.Y, _capsuleHeight.X, _capsuleLerpAmount);
 	float currentRadius = FMath::Lerp(_capsuleRadius.Y, _capsuleRadius.X, _capsuleLerpAmount);
-	float currentZPosition = FMath::Lerp(_meshZPosition.Y, _meshZPosition.X, _capsuleLerpAmount);
 
 	GetCapsuleComponent()->SetCapsuleHalfHeight(currentHeight);
 	GetCapsuleComponent()->SetCapsuleRadius(currentRadius);
-
-	FVector currentMeshPosition = PlayerMesh->GetRelativeLocation();
-	PlayerMesh->SetRelativeLocation(FVector(currentMeshPosition.X, currentMeshPosition.Y, currentZPosition));
 
 	_capsuleLerpAmount += CapsuleSizeLerpRate * deltaTime;
 	if (_capsuleLerpAmount > 1)
 	{
 		GetCapsuleComponent()->SetCapsuleHalfHeight(_capsuleHeight.X);
 		GetCapsuleComponent()->SetCapsuleRadius(_capsuleRadius.X);
-
-		PlayerMesh->SetRelativeLocation(FVector(currentMeshPosition.X, currentMeshPosition.Y, _meshZPosition.X));
 	}
 }
 
@@ -910,6 +920,8 @@ void AFPPlayer::PickupWeapon(ABaseWeapon* weapon)
 	}
 	break;
 	}
+
+	ApplyChangesToCharacter();
 }
 
 void AFPPlayer::CheckAndDropWeapon()
@@ -929,7 +941,6 @@ void AFPPlayer::CheckAndDropWeapon()
 		break;
 	}
 }
-
 
 ABaseWeapon* AFPPlayer::GetPrimaryWeapon()
 {
@@ -951,14 +962,11 @@ void AFPPlayer::PickupPrimaryWeapon(ABaseWeapon* primaryWeapon)
 		EAttachmentRule::KeepWorld,
 		false);
 	_primaryWeapon->AttachToComponent(WeaponAttachPoint, attachmentRules);
-
-	ResetMeshWeaponState();
 }
 
 ABaseWeapon* AFPPlayer::DropPrimaryWeapon()
 {
 	_primaryWeapon->DropWeapon();
-	ResetMeshNonWeaponState();
 
 	auto weaponCopy = _primaryWeapon;
 	_primaryWeapon = nullptr;
@@ -1000,15 +1008,11 @@ void AFPPlayer::PickupSecondaryWeapon(ABaseWeapon* secondaryWeapon)
 		EAttachmentRule::KeepRelative,
 		true);
 	_secondaryWeapon->AttachToComponent(WeaponAttachPoint, attachmentRules);
-
-	ResetMeshWeaponState();
 }
 
 ABaseWeapon* AFPPlayer::DropSecondaryWeapon()
 {
-
 	_secondaryWeapon->DropWeapon();
-	ResetMeshNonWeaponState();
 
 	auto weaponCopy = _secondaryWeapon;
 	_secondaryWeapon = nullptr;

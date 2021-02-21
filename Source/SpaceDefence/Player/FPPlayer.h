@@ -38,9 +38,6 @@ private:
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
 		class USceneComponent* InteractionCastPoint;
 
-	UPROPERTY(Category = Camera, VisibleDefaultsOnly)
-		class USpringArmComponent* CameraBoom;
-
 	UPROPERTY(Category = Weapon, VisibleDefaultsOnly)
 		class USceneComponent* WeaponAttachPoint;
 
@@ -54,19 +51,15 @@ private:
 	void RemovePlayerMovementState(EPlayerMovementState movementState);
 	bool HasPlayerState(EPlayerMovementState movementState);
 	void ApplyChangesToCharacter();
+	void UpdateLeftRightHandPosition();
 
 	float _verticalInput;
 	float _horizontalInput;
 
 	FVector2D _capsuleRadius; // X: Target, Y: Current
 	FVector2D _capsuleHeight; // X: Target, Y: Current
-	FVector2D _meshZPosition; // X: Target, Y: Current
 	float _capsuleLerpAmount;
-	float _currentCrouchZPosition;
-	float _currentDefaultZPosition;
-	void ResetMeshNonWeaponState();
-	void ResetMeshWeaponState();
-	void SetCapsuleData(float targetHeight, float targetRadius, float targetZPosition);
+	void SetCapsuleData(float targetHeight, float targetRadius);
 	void UpdateCapsuleSize(float deltaTime);
 
 	float _currentClimbTime;
@@ -108,6 +101,15 @@ private:
 	void ApplyWeaponChangesToCharacter();
 
 protected:
+	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly)
+		class USpringArmComponent* CameraBoom;
+
+	UPROPERTY(Category = Mesh, VisibleDefaultsOnly, BlueprintReadOnly)
+		class USceneComponent* CameraLeftHandView;
+
+	UPROPERTY(Category = Mesh, VisibleDefaultsOnly, BlueprintReadOnly)
+		class USceneComponent* CameraRightHandView;
+
 	UPROPERTY(Category = PlayerHealth, VisibleAnywhere, BlueprintReadOnly)
 		class UHealthAndDamageComp* HealthAndDamage;
 
@@ -118,9 +120,6 @@ public:
 
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadWrite)
 		class UCameraComponent* CharacterCamera;
-
-	UPROPERTY(Category = Mesh, BlueprintReadOnly, VisibleDefaultsOnly)
-		class USkeletalMeshComponent* PlayerMesh;
 
 	UPROPERTY(Category = "Player|Movement", EditAnywhere)
 		float WalkSpeed;
@@ -171,22 +170,10 @@ public:
 		float FallVelocityThreshold;
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
-		FVector2D DefaultMeshPosition;
-
-	UPROPERTY(Category = "Player|Size", EditAnywhere)
-		FVector2D WeaponMeshPosition;
-
-	UPROPERTY(Category = "Player|Size", EditAnywhere)
 		float CrouchHalfHeight;
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
 		float CrouchRadius;
-
-	UPROPERTY(Category = "Player|Size", EditAnywhere)
-		float CrouchMeshZPosition;
-
-	UPROPERTY(Category = "Player|Size", EditAnywhere)
-		float CrouchMeshZPositionWeapon;
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
 		float DefaultHalfHeight;
@@ -195,25 +182,22 @@ public:
 		float DefaultRadius;
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
+		float CapsuleSizeLerpRate;
+
+	UPROPERTY(Category = "Player|Size", EditAnywhere)
 		float DefaultMeshZPosition;
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
-		float DefaultMeshZPositionWeapon;
+		float CrouchMeshZPosition;
 
-	UPROPERTY(Category = "Player|Size", EditAnywhere)
-		float CameraDefaultZPosition;
+	UPROPERTY(Category = "Player|IK", EditAnywhere)
+		FVector LeftMeleeDefaultPosition;
 
-	UPROPERTY(Category = "Player|Size", EditAnywhere)
-		float CameraZPositionWeapon;
+	UPROPERTY(Category = "Player|IK", EditAnywhere)
+		FVector RightMeleeDefaultPosition;
 
-	UPROPERTY(Category = "Player|Size", EditAnywhere)
-		float CameraCrouchZPosition;
-
-	UPROPERTY(Category = "Player|Size", EditAnywhere)
-		float CameraCrouchZPositionWeapon;
-
-	UPROPERTY(Category = "Player|Size", EditAnywhere)
-		float CapsuleSizeLerpRate;
+	UPROPERTY(Category = "Player|IK", BlueprintReadWrite)
+		float IkHipOffset;
 
 	UPROPERTY(Category = "Player|Interaction", EditAnywhere)
 		float MaxInteractionDistance;
@@ -283,23 +267,26 @@ public:
 	UFUNCTION(Category = "PlayerMovementState", BlueprintImplementableEvent)
 		void WeaponShotCameraShake(TSubclassOf<UMatineeCameraShake> CameraShake);
 
-	UFUNCTION(Category = Weapons, BlueprintCallable, BlueprintPure)
+	UFUNCTION(Category = "Player|IK", BlueprintCallable)
+		void IKFootTrace(FName socketName, float distance, FVector& outHitLocation, float& footTraceOffset);
+
+	UFUNCTION(Category = "Player|Weapons", BlueprintCallable, BlueprintPure)
 		EPlayerWeapon GetCurrentWeapon();
-	UFUNCTION(Category = Weapons, BlueprintCallable, BlueprintPure)
+	UFUNCTION(Category = "Player|Weapons", BlueprintCallable, BlueprintPure)
 		ABaseWeapon* GetPrimaryWeapon();
 	void PickupPrimaryWeapon(ABaseWeapon* primaryWeapon);
 	ABaseWeapon* DropPrimaryWeapon();
-	UFUNCTION(Category = Weapons, BlueprintCallable, BlueprintPure)
+	UFUNCTION(Category = "Player|Weapons", BlueprintCallable, BlueprintPure)
 		bool HasPrimaryWeapon();
-	UFUNCTION(Category = Weapons, BlueprintCallable, BlueprintPure)
+	UFUNCTION(Category = "Player|Weapons", BlueprintCallable, BlueprintPure)
 		ABaseWeapon* GetSecondaryWeapon();
-	UFUNCTION(Category = Weapons, BlueprintCallable, BlueprintPure)
+	UFUNCTION(Category = "Player|Weapons", BlueprintCallable, BlueprintPure)
 		bool HasSecondaryWeapon();
 	void PickupSecondaryWeapon(ABaseWeapon* secondaryWeapon);
 	ABaseWeapon* DropSecondaryWeapon();
-	UFUNCTION(Category = Weapons, BlueprintCallable, BlueprintPure)
+	UFUNCTION(Category = "Player|Weapons", BlueprintCallable, BlueprintPure)
 		ABaseWeapon* GetMeleeWeapon();
-	UFUNCTION(Category = Weapons, BlueprintCallable, BlueprintPure)
+	UFUNCTION(Category = "Player|Weapons", BlueprintCallable, BlueprintPure)
 		bool HasMeleeWeapon();
 	void PickupMeleeWeapon(ABaseWeapon* meleeWeapon);
 
