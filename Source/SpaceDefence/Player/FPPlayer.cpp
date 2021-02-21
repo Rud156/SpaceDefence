@@ -84,6 +84,7 @@ void AFPPlayer::Tick(float DeltaTime)
 	UpdateRecoilRotation(DeltaTime);
 	WallClimbCheck(DeltaTime);
 	UpdateCapsuleSize(DeltaTime);
+
 	UpdateLeftRightHandPosition();
 }
 
@@ -635,6 +636,33 @@ void AFPPlayer::UpdateLeftRightHandPosition()
 		CameraLeftHandView->SetRelativeLocation(LeftMeleeDefaultPosition);
 		CameraRightHandView->SetRelativeLocation(RightMeleeDefaultPosition);
 		break;
+	}
+}
+
+void AFPPlayer::IKFootTrace(FName socketName, float distance, FVector& outHitLocation, float& footTraceOffset)
+{
+	FVector socketLocation = GetMesh()->GetSocketLocation(socketName);
+	FVector actorLocation = GetActorLocation();
+
+	FVector startLocation = FVector(socketLocation.X, socketLocation.Y, actorLocation.Z);
+	FVector endLocation = FVector(socketLocation.X, socketLocation.Y, distance);
+
+	FHitResult hitResult;
+	bool hit = GetWorld()->LineTraceSingleByChannel(hitResult, startLocation, endLocation, ECollisionChannel::ECC_Visibility);
+
+	if (hit)
+	{
+		FVector hitLocation = hitResult.Location;
+		FVector meshLocation = GetMesh()->GetComponentLocation();
+		FVector targetLocation = hitLocation - meshLocation;
+
+		footTraceOffset = targetLocation.Z - IkHipOffset;
+		outHitLocation = hitLocation;
+	}
+	else
+	{
+		outHitLocation = FVector::ZeroVector;
+		footTraceOffset = 0;
 	}
 }
 

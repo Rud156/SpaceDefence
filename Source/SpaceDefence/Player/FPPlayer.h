@@ -196,6 +196,9 @@ public:
 	UPROPERTY(Category = "Player|IK", EditAnywhere)
 		FVector RightMeleeDefaultPosition;
 
+	UPROPERTY(Category = "Player|IK", BlueprintReadWrite)
+		float IkHipOffset;
+
 	UPROPERTY(Category = "Player|Interaction", EditAnywhere)
 		float MaxInteractionDistance;
 
@@ -264,23 +267,26 @@ public:
 	UFUNCTION(Category = "PlayerMovementState", BlueprintImplementableEvent)
 		void WeaponShotCameraShake(TSubclassOf<UMatineeCameraShake> CameraShake);
 
-	UFUNCTION(Category = Weapons, BlueprintCallable, BlueprintPure)
+	UFUNCTION(Category = "Player|IK", BlueprintCallable)
+		void IKFootTrace(FName socketName, float distance, FVector& outHitLocation, float& footTraceOffset);
+
+	UFUNCTION(Category = "Player|Weapons", BlueprintCallable, BlueprintPure)
 		EPlayerWeapon GetCurrentWeapon();
-	UFUNCTION(Category = Weapons, BlueprintCallable, BlueprintPure)
+	UFUNCTION(Category = "Player|Weapons", BlueprintCallable, BlueprintPure)
 		ABaseWeapon* GetPrimaryWeapon();
 	void PickupPrimaryWeapon(ABaseWeapon* primaryWeapon);
 	ABaseWeapon* DropPrimaryWeapon();
-	UFUNCTION(Category = Weapons, BlueprintCallable, BlueprintPure)
+	UFUNCTION(Category = "Player|Weapons", BlueprintCallable, BlueprintPure)
 		bool HasPrimaryWeapon();
-	UFUNCTION(Category = Weapons, BlueprintCallable, BlueprintPure)
+	UFUNCTION(Category = "Player|Weapons", BlueprintCallable, BlueprintPure)
 		ABaseWeapon* GetSecondaryWeapon();
-	UFUNCTION(Category = Weapons, BlueprintCallable, BlueprintPure)
+	UFUNCTION(Category = "Player|Weapons", BlueprintCallable, BlueprintPure)
 		bool HasSecondaryWeapon();
 	void PickupSecondaryWeapon(ABaseWeapon* secondaryWeapon);
 	ABaseWeapon* DropSecondaryWeapon();
-	UFUNCTION(Category = Weapons, BlueprintCallable, BlueprintPure)
+	UFUNCTION(Category = "Player|Weapons", BlueprintCallable, BlueprintPure)
 		ABaseWeapon* GetMeleeWeapon();
-	UFUNCTION(Category = Weapons, BlueprintCallable, BlueprintPure)
+	UFUNCTION(Category = "Player|Weapons", BlueprintCallable, BlueprintPure)
 		bool HasMeleeWeapon();
 	void PickupMeleeWeapon(ABaseWeapon* meleeWeapon);
 
