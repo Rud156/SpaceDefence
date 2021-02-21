@@ -10,6 +10,7 @@
 
 #include "TD_PlaceableSpawnerActor.generated.h"
 
+class ATD_GameStateBase;
 UCLASS()
 class SPACEDEFENCE_API ATD_PlaceableSpawnerActor : public AActor
 {
@@ -109,5 +110,6 @@ public:
 
 private:
 	ATD_CurrencyManager* CurrencyRef;
+	ATD_GameStateBase* GameState = nullptr;
 	int GetCostFromID(int PlaceAbleID);
 };

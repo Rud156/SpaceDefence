@@ -5,7 +5,7 @@
 #include "SpaceDefence/Public/DevelopmentTools/TD_DevelopmentTools.h"
 #include "TD_GameModeFPS.h"
 #include "CurrencyManager/TD_CurrencyManager.h"
-
+#include "SpaceDefence/Public/TD_GameStateBase.h"
 #include "Kismet/GameplayStatics.h"
 
 #define ZER0 0.0
@@ -33,7 +33,9 @@ void ATD_PlaceablesActors::BeginPlay()
 
 	}
 	GameMode = GetWorld()->GetAuthGameMode();
-	CurrencyManager = Cast<ATD_GameModeFPS>(GameMode)->CurrencyManagerRef;
+	GameSate = Cast<ATD_GameStateBase>(GetWorld()->GetGameState());
+	//CurrencyManager = Cast<ATD_GameModeFPS>(GameMode)->CurrencyManagerRef;
+	CurrencyManager = (GameSate)->CurrencyManagerRef;
 	if (Model->GetStaticMesh())
 	{
 

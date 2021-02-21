@@ -10,7 +10,7 @@
 ATD_WaveController::ATD_WaveController()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	
 }
@@ -46,9 +46,15 @@ void ATD_WaveController::AddToList(ATD_SpawnPoints* SpawnPoints)
 
 void ATD_WaveController::SpawnWave()
 {
-	auto temp = ListOfSpawnPoints[WaveCounter];
 
+	if(WaveCounter < ListOfSpawnPoints.Num())
+	{
+		
+	auto temp = ListOfSpawnPoints[WaveCounter];
+	PrintToScreen_1("Current Wave %d", WaveCounter);
 	 SpawnGroups(temp.GroupSettings.Num());
+	 OnWaveStart.Broadcast();
+	}
 }
 
 
@@ -71,6 +77,9 @@ void ATD_WaveController::SpawnGroups(int GroupCount)
 	else
 	{
 		SpawnGroupCount = 0;
+		WaveCounter++;
+		OnWaveEndEvent.Broadcast();
+		PrintToScreen("Wave spawning completed");
 		GetWorld()->GetTimerManager().ClearTimer(GroupTimerHandle);
 	}
 }
@@ -80,7 +89,7 @@ void ATD_WaveController::SpawnEnemies(const FWaveGroup& GroupSettings, int Group
 	if (SpawnEnemyCount < GroupSettings.EnemyCount)
 	{
 
-		PrintToScreen_1("Test %d", SpawnEnemyCount);
+		
 		FVector Location = GetRandomLocationWithInTheRadius(GroupSettings.SpawnRadius,GroupSettings.OptionalSpawnLocation->GetActorLocation());
 		FRotator Rot (0.0f,0.0f,0.0f);
 		if(GroupSettings.EnemyType!=nullptr)

@@ -11,6 +11,11 @@
 #include "TD_WaveController.generated.h"
 
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FWaveEnded);
+
+//need to add more parameters to fetch all the wave details.
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FWaveStarted);
+
 UCLASS()
 class SPACEDEFENCE_API ATD_WaveController : public AActor
 {
@@ -33,8 +38,12 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 		int WaveCounter =0;
 
-	
+	//Delegates
+	UPROPERTY(BlueprintAssignable)
+		FWaveEnded OnWaveEndEvent;
 
+	UPROPERTY(BlueprintAssignable)
+		FWaveStarted OnWaveStart;
 
 
 	//functions
