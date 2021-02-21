@@ -553,6 +553,9 @@ void AFPPlayer::ApplyChangesToCharacter()
 	MovementStatePushed(GetTopPlayerState()); // This is just an event used to display the state being applied
 	SetCapsuleData(DefaultHalfHeight, DefaultRadius);
 
+	FVector relativeLocation = GetMesh()->GetRelativeLocation();
+	GetMesh()->SetRelativeLocation(FVector(relativeLocation.X, relativeLocation.Y, DefaultMeshZPosition));
+
 	switch (GetTopPlayerState())
 	{
 	case EPlayerMovementState::None:
@@ -576,6 +579,12 @@ void AFPPlayer::ApplyChangesToCharacter()
 	{
 		GetCharacterMovement()->MaxWalkSpeed = CrouchSpeed;
 		SetCapsuleData(CrouchHalfHeight, CrouchRadius);
+
+		if (_currentWeapon == EPlayerWeapon::Melee)
+		{
+			FVector currentLocation = GetMesh()->GetRelativeLocation();
+			GetMesh()->SetRelativeLocation(FVector(currentLocation.X, currentLocation.Y, CrouchMeshZPosition));
+		}
 	}
 	break;
 
@@ -583,6 +592,12 @@ void AFPPlayer::ApplyChangesToCharacter()
 	{
 		GetCharacterMovement()->MaxWalkSpeed = SlideSpeed;
 		SetCapsuleData(CrouchHalfHeight, CrouchRadius);
+
+		if (_currentWeapon == EPlayerWeapon::Melee)
+		{
+			FVector currentLocation = GetMesh()->GetRelativeLocation();
+			GetMesh()->SetRelativeLocation(FVector(currentLocation.X, currentLocation.Y, CrouchMeshZPosition));
+		}
 	}
 	break;
 
@@ -877,6 +892,8 @@ void AFPPlayer::PickupWeapon(ABaseWeapon* weapon)
 	}
 	break;
 	}
+
+	ApplyChangesToCharacter();
 }
 
 void AFPPlayer::CheckAndDropWeapon()
@@ -896,7 +913,6 @@ void AFPPlayer::CheckAndDropWeapon()
 		break;
 	}
 }
-
 
 ABaseWeapon* AFPPlayer::GetPrimaryWeapon()
 {

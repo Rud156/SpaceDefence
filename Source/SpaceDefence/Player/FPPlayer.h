@@ -184,6 +184,12 @@ public:
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
 		float CapsuleSizeLerpRate;
 
+	UPROPERTY(Category = "Player|Size", EditAnywhere)
+		float DefaultMeshZPosition;
+
+	UPROPERTY(Category = "Player|Size", EditAnywhere)
+		float CrouchMeshZPosition;
+
 	UPROPERTY(Category = "Player|IK", EditAnywhere)
 		FVector LeftMeleeDefaultPosition;
 
