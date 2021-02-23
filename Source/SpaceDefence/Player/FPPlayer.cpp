@@ -303,12 +303,11 @@ void AFPPlayer::CharacterJump()
 
 void AFPPlayer::FrameDelayedJump()
 {
-	FVector directionVector = GetActorForwardVector() * _verticalInput;
+	FVector directionVector = GetActorForwardVector() * _verticalInput + GetActorRightVector() * _horizontalInput;
 	FVector velocityDirection = GetVelocity();
-	float velocityMag = velocityDirection.Size();
 
-	directionVector.X *= JumpVelocity.X * velocityMag;
-	directionVector.Y *= JumpVelocity.Y * velocityMag;
+	directionVector.X *= JumpVelocity.X;
+	directionVector.Y *= JumpVelocity.Y;
 	directionVector.Z = JumpVelocity.Z;
 
 	LaunchCharacter(directionVector, true, true);
