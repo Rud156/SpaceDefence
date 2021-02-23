@@ -19,6 +19,8 @@ private:
 	void HandleCrouchReleased();
 	void HandleFirePressed();
 	void HandleFireReleased();
+	void HandleAltFirePressed();
+	void HandleAltFireReleased();
 	void HandleInteractPressed();
 	void HandleInteractReleased();
 	void HandleMeleeSelected();

@@ -81,8 +81,12 @@ private:
 	FVector _targetRecoilRotation;
 	float _recoilLerpAmount;
 	bool _receoilDelay;
-	void UpdateRecoilRotation(float deltaTime);
+	FVector _adsStartPosition;
+	FVector _adsEndPosition;
+	float _adsLerpAmount;
 	void FireUpdate(float deltaTime);
+	void UpdateRecoilRotation(float deltaTime);
+	void UpdateADSWeaponPoint(float deltaTime);
 	void SetRecoilCameraPosition(FRecoilOffset recoilOffset, int maxRecoilCount);
 	void SpawnWeaponProjectile(TSubclassOf<class AActor> projectile, FVector spawnPoint);
 	UFUNCTION()
@@ -226,6 +230,15 @@ public:
 	UPROPERTY(Category = "Player|Weapon", EditAnywhere)
 		float RecoilRotationLerpRate;
 
+	UPROPERTY(Category = "Player|Weapon", EditAnywhere)
+		FVector NonADSAttachPointPosition;
+
+	UPROPERTY(Category = "Player|Weapon", EditAnywhere)
+		FVector ADSAttachPointPosition;
+
+	UPROPERTY(Category = "Player|Weapon", EditAnywhere)
+		float ADSLerpSpeed;
+
 	UPROPERTY(Category = "Player|Delegates", BlueprintAssignable)
 		FPlayerLanded OnPlayerLanded;
 
@@ -247,6 +260,8 @@ public:
 	void CrouchReleased();
 	void FirePressed();
 	void FireReleased();
+	void HandleAltFirePressed();
+	void HandleAltFireReleased();
 	void HandleInteractPressed();
 	void HandleInteractReleased();
 	void HandleMeleeSelected();

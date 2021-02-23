@@ -59,6 +59,7 @@ void AFPPlayer::BeginPlay()
 	OnPlayerLanded.AddDynamic(this, &AFPPlayer::PlayerLanded);
 
 	_slideTimer = 0;
+	_adsLerpAmount = 1;
 	_targetRecoilRotation = FVector::ZeroVector;
 
 	PushPlayerMovementState(EPlayerMovementState::Walk);
@@ -82,6 +83,7 @@ void AFPPlayer::Tick(float DeltaTime)
 
 	FireUpdate(DeltaTime);
 	UpdateRecoilRotation(DeltaTime);
+	UpdateADSWeaponPoint(DeltaTime);
 	WallClimbCheck(DeltaTime);
 	UpdateCapsuleSize(DeltaTime);
 
@@ -822,6 +824,24 @@ void AFPPlayer::UpdateRecoilRotation(float deltaTime)
 	}
 }
 
+void AFPPlayer::UpdateADSWeaponPoint(float deltaTime)
+{
+	if (_adsLerpAmount >= 1 || _adsLerpAmount < 0)
+	{
+		return;
+	}
+
+	FVector newPosition = FMath::Lerp(_adsStartPosition, _adsEndPosition, _adsLerpAmount);
+	WeaponAttachPoint->SetRelativeLocation(newPosition);
+
+	_adsLerpAmount += ADSLerpSpeed * deltaTime;
+
+	if (_adsLerpAmount >= 1)
+	{
+		WeaponAttachPoint->SetRelativeLocation(_adsEndPosition);
+	}
+}
+
 void AFPPlayer::DelayedCameraMovement(ABaseWeapon* baseWeapon, FRecoilOffset recoilOffset, int maxRecoilCount)
 {
 	WeaponShotCameraShake(baseWeapon->CameraShake);
@@ -867,6 +887,55 @@ void AFPPlayer::SpawnWeaponProjectile(TSubclassOf<class AActor> projectile, FVec
 
 	FRotator spawnRotation = UKismetMathLibrary::FindLookAtRotation(spawnPoint, targetPoint);
 	GetWorld()->SpawnActor<ATD_BaseProjectile>(projectile, spawnPoint, spawnRotation, spawnParams);
+}
+
+void AFPPlayer::HandleAltFirePressed()
+{
+	switch (_currentWeapon)
+	{
+	case EPlayerWeapon::Melee:
+	{
+		if (_meleeWeapon->HasAds)
+		{
+			_adsStartPosition = WeaponAttachPoint->GetRelativeLocation();
+			_adsEndPosition = ADSAttachPointPosition;
+			_adsLerpAmount = 0;
+		}
+	}
+	break;
+
+	case EPlayerWeapon::Primary:
+	{
+		if (_primaryWeapon->HasAds)
+		{
+			_adsStartPosition = WeaponAttachPoint->GetRelativeLocation();
+			_adsEndPosition = ADSAttachPointPosition;
+			_adsLerpAmount = 0;
+		}
+	}
+	break;
+
+	case EPlayerWeapon::Secondary:
+	{
+		if (_secondaryWeapon->HasAds)
+		{
+			_adsStartPosition = WeaponAttachPoint->GetRelativeLocation();
+			_adsEndPosition = ADSAttachPointPosition;
+			_adsLerpAmount = 0;
+		}
+	}
+	break;
+
+	default:
+		break;
+	}
+}
+
+void AFPPlayer::HandleAltFireReleased()
+{
+	_adsStartPosition = WeaponAttachPoint->GetRelativeLocation();
+	_adsEndPosition = NonADSAttachPointPosition;
+	_adsLerpAmount = 0;
 }
 
 EPlayerWeapon AFPPlayer::GetCurrentWeapon()

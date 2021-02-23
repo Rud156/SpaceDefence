@@ -61,6 +61,9 @@ public:
 	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
 		bool UseSkeletonMesh;
 
+	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
+		bool HasAds;
+
 	UPROPERTY(Category = "Weapon|Recoil", EditAnywhere)
 		bool HasRecoil;
 

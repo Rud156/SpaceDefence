@@ -15,6 +15,8 @@ void AFPPlayerController::SetupInputComponent()
 	InputComponent->BindAction("Crouch", EInputEvent::IE_Released, this, &AFPPlayerController::HandleCrouchReleased);
 	InputComponent->BindAction("Fire", EInputEvent::IE_Pressed, this, &AFPPlayerController::HandleFirePressed);
 	InputComponent->BindAction("Fire", EInputEvent::IE_Released, this, &AFPPlayerController::HandleFireReleased);
+	InputComponent->BindAction("RemoveObjects", EInputEvent::IE_Pressed, this, &AFPPlayerController::HandleAltFirePressed);
+	InputComponent->BindAction("RemoveObjects", EInputEvent::IE_Released, this, &AFPPlayerController::HandleAltFireReleased);
 	InputComponent->BindAction("Interact", EInputEvent::IE_Pressed, this, &AFPPlayerController::HandleInteractPressed);
 	InputComponent->BindAction("Interact", EInputEvent::IE_Released, this, &AFPPlayerController::HandleInteractReleased);
 	InputComponent->BindAction("Melee", EInputEvent::IE_Pressed, this, &AFPPlayerController::HandleMeleeSelected);
@@ -78,6 +80,20 @@ void AFPPlayerController::HandleFireReleased()
 	playerPawn->FireReleased();
 }
 
+void AFPPlayerController::HandleAltFirePressed()
+{
+	AActor* pawn = GetPawn();
+	AFPPlayer* playerPawn = Cast<AFPPlayer>(pawn);
+	playerPawn->HandleAltFirePressed();
+}
+
+void AFPPlayerController::HandleAltFireReleased()
+{
+	AActor* pawn = GetPawn();
+	AFPPlayer* playerPawn = Cast<AFPPlayer>(pawn);
+	playerPawn->HandleAltFireReleased();
+}
+
 void AFPPlayerController::HandleInteractPressed()
 {
 	AActor* pawn = GetPawn();
@@ -132,7 +148,7 @@ void AFPPlayerController::MoveForward(float input)
 	AActor* pawn = GetPawn();
 	AFPPlayer* playerPawn = Cast<AFPPlayer>(pawn);
 
-	if (playerPawn != nullptr) 
+	if (playerPawn != nullptr)
 	{
 		playerPawn->MoveForward(input);
 	}
@@ -143,7 +159,7 @@ void AFPPlayerController::MoveRight(float input)
 	AActor* pawn = GetPawn();
 	AFPPlayer* playerPawn = Cast<AFPPlayer>(pawn);
 
-	if (playerPawn != nullptr) 
+	if (playerPawn != nullptr)
 	{
 		playerPawn->MoveRight(input);
 	}
@@ -154,7 +170,7 @@ void AFPPlayerController::Turn(float input)
 	AActor* pawn = GetPawn();
 	AFPPlayer* playerPawn = Cast<AFPPlayer>(pawn);
 
-	if (playerPawn != nullptr) 
+	if (playerPawn != nullptr)
 	{
 		playerPawn->Turn(input);
 	}
@@ -165,7 +181,7 @@ void AFPPlayerController::LookUp(float input)
 	AActor* pawn = GetPawn();
 	AFPPlayer* playerPawn = Cast<AFPPlayer>(pawn);
 
-	if (playerPawn != nullptr) 
+	if (playerPawn != nullptr)
 	{
 		playerPawn->LookUp(input);
 	}
