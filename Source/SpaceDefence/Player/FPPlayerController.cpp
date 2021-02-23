@@ -15,8 +15,8 @@ void AFPPlayerController::SetupInputComponent()
 	InputComponent->BindAction("Crouch", EInputEvent::IE_Released, this, &AFPPlayerController::HandleCrouchReleased);
 	InputComponent->BindAction("Fire", EInputEvent::IE_Pressed, this, &AFPPlayerController::HandleFirePressed);
 	InputComponent->BindAction("Fire", EInputEvent::IE_Released, this, &AFPPlayerController::HandleFireReleased);
-	InputComponent->BindAction("RemoveObjects", EInputEvent::IE_Pressed, this, &AFPPlayerController::HandleAltFirePressed);
-	InputComponent->BindAction("RemoveObjects", EInputEvent::IE_Released, this, &AFPPlayerController::HandleAltFireReleased);
+	InputComponent->BindAction("AltFire", EInputEvent::IE_Pressed, this, &AFPPlayerController::HandleAltFirePressed);
+	InputComponent->BindAction("AltFire", EInputEvent::IE_Released, this, &AFPPlayerController::HandleAltFireReleased);
 	InputComponent->BindAction("Interact", EInputEvent::IE_Pressed, this, &AFPPlayerController::HandleInteractPressed);
 	InputComponent->BindAction("Interact", EInputEvent::IE_Released, this, &AFPPlayerController::HandleInteractReleased);
 	InputComponent->BindAction("Melee", EInputEvent::IE_Pressed, this, &AFPPlayerController::HandleMeleeSelected);
