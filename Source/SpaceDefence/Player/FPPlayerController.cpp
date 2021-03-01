@@ -31,6 +31,7 @@ void AFPPlayerController::SetupInputComponent()
 	InputComponent->BindAxis("LookUp", this, &AFPPlayerController::LookUp);
 }
 
+
 void AFPPlayerController::HandleCharacterJump()
 {
 	AActor* pawn = GetPawn();
