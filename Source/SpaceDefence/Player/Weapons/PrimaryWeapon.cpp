@@ -15,11 +15,22 @@ APrimaryWeapon::APrimaryWeapon() : Super()
 void APrimaryWeapon::BeginPlay()
 {
 	Super::BeginPlay();
+	_totalAmmoLeft = 300;
+	_magAmmoLeft = MagSize;
 }
 
 void APrimaryWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
+
+void APrimaryWeapon::Shoot()
+{
+	_magAmmoLeft -= 1;
+	if (_magAmmoLeft <= 0)
+	{
+		_reloadTime = ReloadTime;
+	}
 }
 
 TSubclassOf<AActor> APrimaryWeapon::GetProjectile()

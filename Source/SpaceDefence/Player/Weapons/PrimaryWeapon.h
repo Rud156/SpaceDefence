@@ -15,13 +15,15 @@ class SPACEDEFENCE_API APrimaryWeapon : public ABaseWeapon, public IIntfBaseInte
 {
 	GENERATED_BODY()
 
-		float _currentInteractionTime;
+private:
+
+	float _currentInteractionTime;
 	float _interactionDuration;
 	bool _interactionStarted;
 
 protected:
 	UPROPERTY(Category = Interaction, VisibleAnywhere, BlueprintReadOnly)
-		class UInteractionComponent* InteractionComponent;
+	class UInteractionComponent* InteractionComponent;
 
 	virtual void BeginPlay() override;
 
@@ -29,12 +31,14 @@ public:
 #pragma region Properties
 
 	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
-		TSubclassOf<class ATD_BaseProjectile> Projectile;
+	TSubclassOf<class ATD_BaseProjectile> Projectile;
 
 #pragma endregion
 
 	APrimaryWeapon();
 	virtual void Tick(float DeltaTime) override;
+
+	virtual void Shoot() override;
 
 	virtual TSubclassOf<AActor> GetProjectile() override;
 	virtual UInteractionComponent* GetInteractionComponent_Implementation() override;

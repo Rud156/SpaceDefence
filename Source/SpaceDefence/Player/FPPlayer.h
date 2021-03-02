@@ -30,16 +30,16 @@ private:
 	const float RECOIL_CAMERA_DELAY = 0.05f;
 
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
-		class USceneComponent* GroundCheckPoint;
+	class USceneComponent* GroundCheckPoint;
 
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
-		class USceneComponent* WallCheckPoint;
+	class USceneComponent* WallCheckPoint;
 
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
-		class USceneComponent* InteractionCastPoint;
+	class USceneComponent* InteractionCastPoint;
 
 	UPROPERTY(Category = Weapon, VisibleDefaultsOnly)
-		class USceneComponent* WeaponAttachPoint;
+	class USceneComponent* WeaponAttachPoint;
 
 	// Top Level Initialization for MultiPlayer
 	bool _initialized;
@@ -51,7 +51,7 @@ private:
 	void RemovePlayerMovementState(EPlayerMovementState movementState);
 	bool HasPlayerState(EPlayerMovementState movementState);
 	void ApplyChangesToCharacter();
-	void UpdateLeftRightHandPosition();
+	void UpdateLeftRightHandPosition() const;
 
 	float _verticalInput;
 	float _horizontalInput;
@@ -67,12 +67,12 @@ private:
 	void WallClimbCheck(float deltaTime);
 
 	UFUNCTION()
-		void FrameDelayedJump();
+	void FrameDelayedJump();
 
 	bool _isOnGround;
 	void UpdateGroundStatus();
 	UFUNCTION()
-		void PlayerLanded();
+	void PlayerLanded();
 
 	void UpdateCharacterSliding(float deltaTime);
 	void StopCharacterSliding();
@@ -88,9 +88,9 @@ private:
 	void UpdateRecoilRotation(float deltaTime);
 	void UpdateADSWeaponPoint(float deltaTime);
 	void SetRecoilCameraPosition(FRecoilOffset recoilOffset, int maxRecoilCount);
-	void SpawnWeaponProjectile(TSubclassOf<class AActor> projectile, FVector spawnPoint);
+	void SpawnWeaponProjectile(TSubclassOf<class AActor> projectile, FVector spawnPoint) const;
 	UFUNCTION()
-		void DelayedCameraMovement(ABaseWeapon* baseWeapon, FRecoilOffset recoilOffset, int maxRecoilCount);
+	void DelayedCameraMovement(ABaseWeapon* baseWeapon, FRecoilOffset recoilOffset, int maxRecoilCount);
 
 	UInteractionComponent* _currentInteractionComponent;
 	void UpdateInteractibleCollection(float deltaTime);
@@ -102,20 +102,20 @@ private:
 	EPlayerWeapon _currentWeapon;
 	void PickupWeapon(ABaseWeapon* weapon);
 	void ChangeCurrentWeapon(EPlayerWeapon weapon);
-	void ApplyWeaponChangesToCharacter();
+	void ApplyWeaponChangesToCharacter() const;
 
 protected:
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly)
-		class USpringArmComponent* CameraBoom;
+	class USpringArmComponent* CameraBoom;
 
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly, BlueprintReadOnly)
-		class USceneComponent* CameraLeftHandView;
+	class USceneComponent* CameraLeftHandView;
 
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly, BlueprintReadOnly)
-		class USceneComponent* CameraRightHandView;
+	class USceneComponent* CameraRightHandView;
 
 	UPROPERTY(Category = PlayerHealth, VisibleAnywhere, BlueprintReadOnly)
-		class UHealthAndDamageComp* HealthAndDamage;
+	class UHealthAndDamageComp* HealthAndDamage;
 
 	virtual void BeginPlay() override;
 
@@ -123,127 +123,127 @@ public:
 #pragma region Parameters
 
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadWrite)
-		class UCameraComponent* CharacterCamera;
+	class UCameraComponent* CharacterCamera;
 
 	UPROPERTY(Category = "Player|Movement", EditAnywhere)
-		float WalkSpeed;
+	float WalkSpeed;
 
 	UPROPERTY(Category = "Player|Movement", EditAnywhere)
-		float RunSpeed;
+	float RunSpeed;
 
 	UPROPERTY(Category = "Player|Movement", EditAnywhere)
-		float CrouchSpeed;
+	float CrouchSpeed;
 
 	UPROPERTY(Category = "Player|Movement", EditAnywhere)
-		float SlideSpeed;
+	float SlideSpeed;
 
 	UPROPERTY(Category = "Player|Movement", EditAnywhere)
-		float SlideDuration;
+	float SlideDuration;
 
 	UPROPERTY(Category = "Player|Movement", EditAnywhere)
-		float MinSlideSpeed;
+	float MinSlideSpeed;
 
 	UPROPERTY(Category = "Player|Movement", EditAnywhere)
-		float TurnSpeed;
+	float TurnSpeed;
 
 	UPROPERTY(Category = "Player|Movement", EditAnywhere)
-		float LookUpRate;
+	float LookUpRate;
 
 	UPROPERTY(Category = "Player|Movement", EditAnywhere)
-		FVector JumpVelocity;
+	FVector JumpVelocity;
 
 	UPROPERTY(Category = "Player|Movement", EditAnywhere)
-		float ClimbDuration;
+	float ClimbDuration;
 
 	UPROPERTY(Category = "Player|Movement", EditAnywhere)
-		float ClimbVelocity;
+	float ClimbVelocity;
 
 	UPROPERTY(Category = "Player|Movement", EditAnywhere)
-		FName NotClimbableTag;
+	FName NotClimbableTag;
 
 	UPROPERTY(Category = "Player|Movement", EditAnywhere)
-		float HSensitivityMultiplier;
+	float HSensitivityMultiplier;
 
 	UPROPERTY(Category = "Player|Movement", EditAnywhere)
-		float VSensitivityMultiplier;
+	float VSensitivityMultiplier;
 
 	UPROPERTY(Category = "Player|Movement", EditAnywhere)
-		float GroundCheckDistance;
+	float GroundCheckDistance;
 
 	UPROPERTY(Category = "Player|Movement", EditAnywhere)
-		float FallVelocityThreshold;
+	float FallVelocityThreshold;
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
-		float CrouchHalfHeight;
+	float CrouchHalfHeight;
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
-		float CrouchRadius;
+	float CrouchRadius;
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
-		float DefaultHalfHeight;
+	float DefaultHalfHeight;
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
-		float DefaultRadius;
+	float DefaultRadius;
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
-		float CapsuleSizeLerpRate;
+	float CapsuleSizeLerpRate;
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
-		float DefaultMeshZPosition;
+	float DefaultMeshZPosition;
 
 	UPROPERTY(Category = "Player|Size", EditAnywhere)
-		float CrouchMeshZPosition;
+	float CrouchMeshZPosition;
 
 	UPROPERTY(Category = "Player|IK", EditAnywhere)
-		FVector LeftMeleeDefaultPosition;
+	FVector LeftMeleeDefaultPosition;
 
 	UPROPERTY(Category = "Player|IK", EditAnywhere)
-		FVector RightMeleeDefaultPosition;
+	FVector RightMeleeDefaultPosition;
 
 	UPROPERTY(Category = "Player|IK", BlueprintReadWrite)
-		float IkHipOffset;
+	float IkHipOffset;
 
 	UPROPERTY(Category = "Player|Interaction", EditAnywhere)
-		float MaxInteractionDistance;
+	float MaxInteractionDistance;
 
 	UPROPERTY(Category = "Player|Interaction", BlueprintReadWrite)
-		AInteractionDisplayManager* InteractionDisplayManager;
+	AInteractionDisplayManager* InteractionDisplayManager;
 
 	UPROPERTY(Category = "Player|Weapon", EditAnywhere)
-		TSubclassOf<class ABaseWeapon> MeleeWeapon;
+	TSubclassOf<class ABaseWeapon> MeleeWeapon;
 
 	UPROPERTY(Category = "Player|Weapon", EditAnywhere)
-		FVector AttachRelativeLocation;
+	FVector AttachRelativeLocation;
 
 	UPROPERTY(Category = "Player|Weapon", EditAnywhere)
-		FRotator AttachRelativeRotation;
+	FRotator AttachRelativeRotation;
 
 	UPROPERTY(Category = "Player|Ping", EditAnywhere)
-		TSubclassOf<class AWorldPingMarker> PingMarker;
+	TSubclassOf<class AWorldPingMarker> PingMarker;
 
 	UPROPERTY(Category = "Player|Ping", EditAnywhere)
-		FVector PingSpawnOffset;
+	FVector PingSpawnOffset;
 
 	UPROPERTY(Category = "Player|Weapon", EditAnywhere)
-		float MaxShootRayCastRange;
+	float MaxShootRayCastRange;
 
 	UPROPERTY(Category = "Player|Weapon", EditAnywhere)
-		float RecoilRotationLerpRate;
+	float RecoilRotationLerpRate;
 
 	UPROPERTY(Category = "Player|Weapon", EditAnywhere)
-		FVector NonADSAttachPointPosition;
+	FVector NonADSAttachPointPosition;
 
 	UPROPERTY(Category = "Player|Weapon", EditAnywhere)
-		FVector ADSAttachPointPosition;
+	FVector ADSAttachPointPosition;
 
 	UPROPERTY(Category = "Player|Weapon", EditAnywhere)
-		float ADSLerpSpeed;
+	float ADSLerpSpeed;
 
 	UPROPERTY(Category = "Player|Delegates", BlueprintAssignable)
-		FPlayerLanded OnPlayerLanded;
+	FPlayerLanded OnPlayerLanded;
 
 	UPROPERTY(Category = "Player|SpawnerSettings", BlueprintReadWrite)
-		ATD_PlaceableSpawnerActor* PlaceAbleSpawnerActorRef = nullptr;
+	ATD_PlaceableSpawnerActor* PlaceAbleSpawnerActorRef = nullptr;
 #pragma endregion
 
 #pragma region Inputs
@@ -262,66 +262,79 @@ public:
 	void FireReleased();
 	void HandleAltFirePressed();
 	void HandleAltFireReleased();
-	void HandleInteractPressed();
+	void HandleInteractPressed() const;
 	void HandleInteractReleased();
 	void HandleMeleeSelected();
 	void HandlePrimarySelected();
 	void HandleSecondarySelected();
 	void CheckAndDropWeapon();
-	void HandlePlayerPinged();
+	void HandlePlayerPinged() const;
 
 #pragma endregion
 
 	UFUNCTION(Category = "Debug", BlueprintImplementableEvent)
-		void MovementStatePushed(EPlayerMovementState playerMovementState);
-	UFUNCTION(Category = "PlayerMovementState", BlueprintImplementableEvent)
-		void PlayerJumped();
-	UFUNCTION(Category = "PlayerMovementState", BlueprintImplementableEvent)
-		void PlayerRunJumped();
-	UFUNCTION(Category = "PlayerMovementState", BlueprintImplementableEvent)
-		void PlayerRunStarted();
-	UFUNCTION(Category = "PlayerMovementState", BlueprintImplementableEvent)
-		void PlayerRunEnded();
-	UFUNCTION(Category = "PlayerMovementState", BlueprintImplementableEvent)
-		void WeaponShotCameraShake(TSubclassOf<UMatineeCameraShake> CameraShake);
+	void MovementStatePushed(EPlayerMovementState playerMovementState);
+	UFUNCTION(Category = "Player|MovementState", BlueprintImplementableEvent)
+	void PlayerJumped();
+	UFUNCTION(Category = "Player|MovementState", BlueprintImplementableEvent)
+	void PlayerRunJumped();
+	UFUNCTION(Category = "Player|MovementState", BlueprintImplementableEvent)
+	void PlayerRunStarted();
+	UFUNCTION(Category = "Player|MovementState", BlueprintImplementableEvent)
+	void PlayerRunEnded();
+	UFUNCTION(Category = "Player|MovementState", BlueprintImplementableEvent)
+	void WeaponShotCameraShake(TSubclassOf<UMatineeCameraShake> CameraShake);
+
+	UFUNCTION(Category = "Player|Weapon", BlueprintImplementableEvent)
+	void ShowWeaponReloadNotify();
+	UFUNCTION(Category = "Player|Weapon", BlueprintImplementableEvent)
+	void UpdateReloadPercentNotify(float Percent);
+	UFUNCTION(Category = "Player|Weapon", BlueprintImplementableEvent)
+	void HideWeaponReloadNotify();
+	UFUNCTION(Category = "Player|Weapon", BlueprintImplementableEvent)
+	void UpdateAmmoCountNotify(int MagAmmo, int TotalAmmo);
+	UFUNCTION(Category = "Player|Weapon", BlueprintImplementableEvent)
+	void DropWeaponNotify(bool IsPrimary);
+	UFUNCTION(Category = "Player|Weapon", BlueprintImplementableEvent)
+	void DisplayWeaponNotify(UTexture2D* WeaponTexture, int MagAmmo, int TotalAmmo, const FString& WeaponName, bool IsPrimary);
 
 	UFUNCTION(Category = "Player|IK", BlueprintCallable)
-		void IKFootTrace(FName socketName, float distance, FVector& outHitLocation, float& footTraceOffset);
+	void IKFootTrace(FName socketName, float distance, FVector& outHitLocation, float& footTraceOffset);
 
 	UFUNCTION(Category = "Player|Weapons", BlueprintCallable, BlueprintPure)
-		EPlayerWeapon GetCurrentWeapon();
+	EPlayerWeapon GetCurrentWeapon();
 	UFUNCTION(Category = "Player|Weapons", BlueprintCallable, BlueprintPure)
-		ABaseWeapon* GetPrimaryWeapon();
+	ABaseWeapon* GetPrimaryWeapon();
 	void PickupPrimaryWeapon(ABaseWeapon* primaryWeapon);
 	ABaseWeapon* DropPrimaryWeapon();
 	UFUNCTION(Category = "Player|Weapons", BlueprintCallable, BlueprintPure)
-		bool HasPrimaryWeapon();
+	bool HasPrimaryWeapon();
 	UFUNCTION(Category = "Player|Weapons", BlueprintCallable, BlueprintPure)
-		ABaseWeapon* GetSecondaryWeapon();
+	ABaseWeapon* GetSecondaryWeapon();
 	UFUNCTION(Category = "Player|Weapons", BlueprintCallable, BlueprintPure)
-		bool HasSecondaryWeapon();
+	bool HasSecondaryWeapon();
 	void PickupSecondaryWeapon(ABaseWeapon* secondaryWeapon);
 	ABaseWeapon* DropSecondaryWeapon();
 	UFUNCTION(Category = "Player|Weapons", BlueprintCallable, BlueprintPure)
-		ABaseWeapon* GetMeleeWeapon();
+	ABaseWeapon* GetMeleeWeapon();
 	UFUNCTION(Category = "Player|Weapons", BlueprintCallable, BlueprintPure)
-		bool HasMeleeWeapon();
+	bool HasMeleeWeapon();
 	void PickupMeleeWeapon(ABaseWeapon* meleeWeapon);
 
 	UFUNCTION(Category = "Player|Input", BlueprintCallable, BlueprintPure)
-		float GetVerticalInput();
+	float GetVerticalInput();
 	UFUNCTION(Category = "Player|Input", BlueprintCallable, BlueprintPure)
-		float GetHorizontalInput();
+	float GetHorizontalInput();
 	UFUNCTION(Category = "Player|State", BlueprintCallable, BlueprintPure)
-		bool IsRunning(); // This is different from the running state. Probably only used for effects and animation
+	bool IsRunning(); // This is different from the running state. Probably only used for effects and animation
 	UFUNCTION(Category = "Player|State", BlueprintCallable, BlueprintPure)
-		bool IsOnGround();
+	bool IsOnGround();
 	UFUNCTION(Category = "Player|State", BlueprintCallable, BlueprintPure)
-		bool IsClimbing();
+	bool IsClimbing();
 	UFUNCTION(Category = "Player|State", BlueprintCallable, BlueprintPure)
-		bool IsFalling();
+	bool IsFalling();
 	UFUNCTION(Category = "Player|State", BlueprintCallable, BlueprintPure)
-		EPlayerMovementState GetTopPlayerState();
+	EPlayerMovementState GetTopPlayerState();
 
 	AFPPlayer();
 	virtual void Tick(float DeltaTime) override;

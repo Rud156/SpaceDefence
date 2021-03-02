@@ -6,7 +6,6 @@
 #include "Components/BoxComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "Components/StaticMeshComponent.h"
 
 #include "Containers/UnrealString.h"
 #include "Misc/DefaultValueHelper.h"
@@ -42,6 +41,15 @@ void ABaseWeapon::Tick(float DeltaTime)
 	{
 		RecoilTick(DeltaTime);
 	}
+
+	if (_reloadTime > 0)
+	{
+		_reloadTime -= DeltaTime;
+		if (_reloadTime <= 0)
+		{
+			FinishReloading();
+		}
+	}
 }
 
 void ABaseWeapon::LoadRecoilData(FText recoilText)
@@ -60,7 +68,7 @@ void ABaseWeapon::LoadRecoilData(FText recoilText)
 
 	for (int i = 0; i < recoilString.Len(); i++)
 	{
-		auto letter = recoilString[i];
+		const auto letter = recoilString[i];
 
 		if (letter == '\r')
 		{
@@ -78,7 +86,7 @@ void ABaseWeapon::LoadRecoilData(FText recoilText)
 			if (currentNumberString != "")
 			{
 				int number;
-				bool success = FDefaultValueHelper::ParseInt(currentNumberString, number);
+				const bool success = FDefaultValueHelper::ParseInt(currentNumberString, number);
 				if (success)
 				{
 					FRecoilOffset recoilOffset;
@@ -101,17 +109,17 @@ void ABaseWeapon::LoadRecoilData(FText recoilText)
 		}
 	}
 
-	int centerRow = currentRowIndex / 2;
-	int centerColumn = currentColumnIndex / 2;
+	const int centerRow = currentRowIndex / 2;
+	const int centerColumn = currentColumnIndex / 2;
 
 	for (int j = 0; j < _recoilOffsets.Num(); j++)
 	{
 		auto recoilData = _recoilOffsets[j];
 
-		int rowDiff = centerRow - recoilData.rowIndex;
-		int columnDiff = centerColumn - recoilData.columnIndex;
+		const int rowDiff = centerRow - recoilData.rowIndex;
+		const int columnDiff = centerColumn - recoilData.columnIndex;
 
-		FVector2D offset = FVector2D(columnDiff, rowDiff);
+		const FVector2D offset = FVector2D(columnDiff, rowDiff);
 		recoilData.offset = offset;
 
 		_recoilOffsets[j] = recoilData;
@@ -121,17 +129,20 @@ void ABaseWeapon::LoadRecoilData(FText recoilText)
 
 bool ABaseWeapon::ShootTick(float DeltaTime)
 {
-	float currentTime = GetWorld()->GetTimeSeconds();
-	float difference = currentTime - _lastShotTime;
-	if (difference > FireRate)
+	if (_reloadTime > 0)
+	{
+		return false;
+	}
+
+	const float currentTime = GetWorld()->GetTimeSeconds();
+	const float difference = currentTime - _lastShotTime;
+	if (difference > FireRate && _magAmmoLeft > 0)
 	{
 		_lastShotTime = currentTime;
 		return true;
 	}
-	else
-	{
-		return false;
-	}
+
+	return false;
 }
 
 void ABaseWeapon::RecoilTick(float deltaTime)
@@ -156,6 +167,20 @@ FVector ABaseWeapon::GetShootingPoint()
 void ABaseWeapon::Shoot()
 {
 	// Probably use this to play VFX or something...
+}
+
+void ABaseWeapon::FinishReloading()
+{
+	if (_totalAmmoLeft >= MagSize)
+	{
+		_totalAmmoLeft -= MagSize;
+		_magAmmoLeft = MagSize;
+	}
+	else
+	{
+		_totalAmmoLeft = 0;
+		_magAmmoLeft = _totalAmmoLeft;
+	}
 }
 
 TSubclassOf<AActor> ABaseWeapon::GetProjectile()
@@ -198,8 +223,8 @@ FRecoilOffset ABaseWeapon::GetCurrentRecoilData()
 						_currentRandomXPosition += RandomRecoilXDelta;
 					}
 
-					float randomXOffset = FMath::RandRange(-RandomStopXDelta, RandomStopXDelta);
-					float randomYOffset = FMath::RandRange(-RandomStopYDelta, RandomStopYDelta);
+					const float randomXOffset = FMath::RandRange(-RandomStopXDelta, RandomStopXDelta);
+					const float randomYOffset = FMath::RandRange(-RandomStopYDelta, RandomStopYDelta);
 					recoilData.offset = FVector2D(randomXOffset, randomYOffset);
 				}
 				else
@@ -226,8 +251,8 @@ FRecoilOffset ABaseWeapon::GetCurrentRecoilData()
 						_currentRandomXPosition -= RandomRecoilXDelta;
 					}
 
-					float randomXOffset = FMath::RandRange(-RandomStopXDelta, RandomStopXDelta);
-					float randomYOffset = FMath::RandRange(-RandomStopYDelta, RandomStopYDelta);
+					const float randomXOffset = FMath::RandRange(-RandomStopXDelta, RandomStopXDelta);
+					const float randomYOffset = FMath::RandRange(-RandomStopYDelta, RandomStopYDelta);
 					recoilData.offset = FVector2D(randomXOffset, randomYOffset);
 				}
 				else
@@ -257,8 +282,8 @@ FRecoilOffset ABaseWeapon::GetCurrentRecoilData()
 						_currentRandomXPosition += RandomRecoilXDelta;
 					}
 
-					float randomXOffset = FMath::RandRange(-RandomStopXDelta, RandomStopXDelta);
-					float randomYOffset = FMath::RandRange(-RandomStopYDelta, RandomStopYDelta);
+					const float randomXOffset = FMath::RandRange(-RandomStopXDelta, RandomStopXDelta);
+					const float randomYOffset = FMath::RandRange(-RandomStopYDelta, RandomStopYDelta);
 					recoilData.offset = FVector2D(randomXOffset, randomYOffset);
 				}
 				else
@@ -285,8 +310,8 @@ FRecoilOffset ABaseWeapon::GetCurrentRecoilData()
 						_currentRandomXPosition -= RandomRecoilXDelta;
 					}
 
-					float randomXOffset = FMath::RandRange(-RandomStopXDelta, RandomStopXDelta);
-					float randomYOffset = FMath::RandRange(-RandomStopYDelta, RandomStopYDelta);
+					const float randomXOffset = FMath::RandRange(-RandomStopXDelta, RandomStopXDelta);
+					const float randomYOffset = FMath::RandRange(-RandomStopYDelta, RandomStopYDelta);
 					recoilData.offset = FVector2D(randomXOffset, randomYOffset);
 				}
 				else
@@ -336,7 +361,27 @@ int ABaseWeapon::GetMaxRecoilCount()
 	return _recoilOffsets.Num();
 }
 
-float ABaseWeapon::GetFireRate()
+int ABaseWeapon::GetMagAmmo() const
+{
+	return _magAmmoLeft;
+}
+
+int ABaseWeapon::GetTotalAmmo() const
+{
+	return _totalAmmoLeft;
+}
+
+float ABaseWeapon::GetReloadTime() const
+{
+	return _reloadTime;
+}
+
+bool ABaseWeapon::IsReloading() const
+{
+	return _reloadTime > 0;
+}
+
+float ABaseWeapon::GetFireRate() const
 {
 	return FireRate;
 }
@@ -363,10 +408,10 @@ void ABaseWeapon::PickupWeapon()
 
 void ABaseWeapon::DropWeapon()
 {
-	FDetachmentTransformRules detachRules = FDetachmentTransformRules(EDetachmentRule::KeepWorld,
-		EDetachmentRule::KeepWorld,
-		EDetachmentRule::KeepWorld,
-		true);
+	const FDetachmentTransformRules detachRules = FDetachmentTransformRules(EDetachmentRule::KeepWorld,
+	                                                                        EDetachmentRule::KeepWorld,
+	                                                                        EDetachmentRule::KeepWorld,
+	                                                                        true);
 	DetachFromActor(detachRules);
 
 	WeaponCollider->SetCollisionProfileName(TEXT("Weapons"));

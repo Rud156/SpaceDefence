@@ -13,7 +13,7 @@
 
 struct FSortRecoil
 {
-	bool operator() (const FRecoilOffset A, const FRecoilOffset B) const
+	bool operator()(const FRecoilOffset A, const FRecoilOffset B) const
 	{
 		return A.index < B.index;
 	}
@@ -29,10 +29,10 @@ class SPACEDEFENCE_API ABaseWeapon : public AActor
 protected:
 
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
-		class USceneComponent* ShootingPoint;
+	class USceneComponent* ShootingPoint;
 
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
-		class UBoxComponent* WeaponCollider;
+	class UBoxComponent* WeaponCollider;
 
 	virtual void BeginPlay() override;
 
@@ -42,6 +42,11 @@ protected:
 	float _currentRecoilTime;
 	void RecoilTick(float deltaTime);
 
+	float _reloadTime;
+	int _magAmmoLeft;
+	int _totalAmmoLeft;
+	void FinishReloading();
+
 	bool _isLeft;
 	float _currentRandomXPosition;
 	int _currentRandomShotCount;
@@ -50,55 +55,67 @@ public:
 #pragma region Properties
 
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
-		class USkeletalMeshComponent* SkeletalWeaponMesh;
+	class USkeletalMeshComponent* SkeletalWeaponMesh;
 
 	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
-		EPlayerWeapon WeaponType;
+	EPlayerWeapon WeaponType;
 
 	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
-		float FireRate;
+	float FireRate;
 
 	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
-		bool UseSkeletonMesh;
+	bool UseSkeletonMesh;
 
 	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
-		bool HasAds;
+	bool HasAds;
+
+	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
+	int MagSize;
+
+	UPROPERTY(Category = "Weapon|Data", EditAnywhere)
+	float ReloadTime;
 
 	UPROPERTY(Category = "Weapon|Recoil", EditAnywhere)
-		bool HasRecoil;
+	bool HasRecoil;
 
 	UPROPERTY(Category = "Weapon|Recoil", BlueprintReadOnly, EditAnywhere)
-		UTextAsset* RecoilData;
+	UTextAsset* RecoilData;
 
 	UPROPERTY(Category = "Weapon|Recoil", EditAnywhere)
-		float FastMovementRecoilMultiplier;
+	float FastMovementRecoilMultiplier;
 
 	UPROPERTY(Category = "Weapon|Recoil", EditAnywhere)
-		TSubclassOf<UMatineeCameraShake> CameraShake;
+	TSubclassOf<UMatineeCameraShake> CameraShake;
 
 	UPROPERTY(Category = "Weapon|Recoil", EditAnywhere)
-		float RecoilOffsetMultiplier;
+	float RecoilOffsetMultiplier;
 
 	UPROPERTY(Category = "Weapon|Recoil", EditAnywhere)
-		bool IsLeftRandomRecoil;
+	bool IsLeftRandomRecoil;
 
 	UPROPERTY(Category = "Weapon|Recoil", EditAnywhere)
-		float RandomRecoilXDelta;
+	float RandomRecoilXDelta;
 
 	UPROPERTY(Category = "Weapon|Recoil", EditAnywhere)
-		float RandomXOffset;
+	float RandomXOffset;
 
 	UPROPERTY(Category = "Weapon|Recoil", EditAnywhere)
-		int RandomEdgeStopCount;
+	int RandomEdgeStopCount;
 
 	UPROPERTY(Category = "Weapon|Recoil", EditAnywhere)
-		float RandomStopXDelta;
+	float RandomStopXDelta;
 
 	UPROPERTY(Category = "Weapon|Recoil", EditAnywhere)
-		float RandomStopYDelta;
+	float RandomStopYDelta;
 
 	UPROPERTY(Category = "Weapon|Recoil", EditAnywhere)
-		float RecoilResetTime;
+	float RecoilResetTime;
+
+	UPROPERTY(Category = "Weapon|Display", EditAnywhere)
+	UTexture2D* WeaponImage;
+
+	UPROPERTY(Category = "Weapon|Display", EditAnywhere)
+	FString WeaponName;
 
 #pragma endregion
 
@@ -119,8 +136,12 @@ public:
 	virtual FRecoilOffset GetCurrentRecoilData();
 	virtual int GetMaxRecoilCount();
 
-	float GetFireRate();
+	int GetMagAmmo() const;
+	int GetTotalAmmo() const;
+	float GetReloadTime() const;
+	bool IsReloading() const;
+	float GetFireRate() const;
 
 	UFUNCTION(Category = Weapon, BlueprintCallable)
-		void LoadRecoilData(FText recoilText);
+	void LoadRecoilData(FText recoilText);
 };
