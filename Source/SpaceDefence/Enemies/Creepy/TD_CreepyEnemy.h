@@ -21,7 +21,7 @@ public:
 	UPROPERTY(Category = "Mesh", VisibleDefaultsOnly)
 		class UBoxComponent* HandCollider;
 
-	UPROPERTY(Category = "Creepy Settings", BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(Category = "Creepy Settings", BlueprintReadWrite, EditAnywhere, Replicated)
 		ECreepyAnimState CurrentAnimationState = ECreepyAnimState::Idle;
 
 	UPROPERTY(Category = "Creepy Settings", BlueprintReadWrite, VisibleAnywhere)
@@ -46,4 +46,6 @@ public:
 private:
 	FName HandBoxCollisionLocation = "HandBoxCollision";
 	FTimerHandle DeathTimerHandle;
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps)const override;
 };

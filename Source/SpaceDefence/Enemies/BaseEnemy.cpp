@@ -2,6 +2,7 @@
 
 
 #include "BaseEnemy.h"
+#include "Net/UnrealNetwork.h"
 
 #include "TD_GameModeFPS.h"
 #include "TD_GameStateBase.h"
@@ -46,6 +47,10 @@ ABaseEnemy::ABaseEnemy()
 	bBlockInput = true;
 	AutoReceiveInput = EAutoReceiveInput::Disabled;
 
+	SetReplicates(true);
+	SetReplicateMovement(true);
+	
+	
 
 }
 
@@ -67,6 +72,15 @@ void ABaseEnemy::Tick(float DeltaTime)
 void ABaseEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+}
+
+void ABaseEnemy::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ABaseEnemy, bIsItemWithinRange)
+	DOREPLIFETIME(ABaseEnemy, bIsPlayerWithInRange)
+	
 }
 
 void ABaseEnemy::PlayRandomSoundWhenMoving()

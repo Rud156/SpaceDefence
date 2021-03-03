@@ -36,10 +36,10 @@ public:
 	UPROPERTY(Category = "Enemy|Enemy Settings", EditAnywhere)
 		FEnemySettings Settings;
 
-	UPROPERTY(Category = "Enemy|Enemy Settings", EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Category = "Enemy|Enemy Settings", EditAnywhere, BlueprintReadWrite, Replicated)
 		bool bIsItemWithinRange = false;
 
-	UPROPERTY(Category = "Enemy|Enemy Settings", EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Category = "Enemy|Enemy Settings", EditAnywhere, BlueprintReadWrite,Replicated)
 		bool bIsPlayerWithInRange = false;
 	UPROPERTY(Category = "Enemy Settings", EditAnywhere, BlueprintReadWrite)
 		float DamageAmount = 30;
@@ -85,10 +85,15 @@ public:
 	ABaseEnemy();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps)const override;
 	void PlayRandomSoundWhenMoving();
 
 
+	
 protected:
 	bool bIsAlive = true;
+
+
+
+	
 };

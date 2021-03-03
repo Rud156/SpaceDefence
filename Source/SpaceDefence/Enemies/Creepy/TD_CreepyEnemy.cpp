@@ -6,6 +6,7 @@
 #include "SpaceDefence/Public/Projectile/TD_BaseProjectile.h"
 
 #include "Components/BoxComponent.h"
+#include "Net/UnrealNetwork.h"
 
 ATD_CreepyEnemy::ATD_CreepyEnemy() : Super()
 {
@@ -78,5 +79,12 @@ void ATD_CreepyEnemy::Death(AActor* Actor)
 	bIsAlive = false;
 	CurrencyManagerRef->AddCurrency(AmountToGive);
 	GetWorld()->GetTimerManager().SetTimer(DeathTimerHandle, this, &ATD_CreepyEnemy::RemoveDeadBody, DeadBodyTimer, false, -1);
+}
+
+void ATD_CreepyEnemy::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ATD_CreepyEnemy, CurrentAnimationState)
 }
 
