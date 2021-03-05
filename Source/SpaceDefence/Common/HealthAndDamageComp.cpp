@@ -17,7 +17,7 @@ void UHealthAndDamageComp::BeginPlay()
 {
 	Super::BeginPlay();
 
-	CurrentHealth = MaxHealth;
+	_currentHealth = MaxHealth;
 }
 
 void UHealthAndDamageComp::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -27,7 +27,7 @@ void UHealthAndDamageComp::TickComponent(float DeltaTime, ELevelTick TickType, F
 
 int UHealthAndDamageComp::GetCurrentHealth()
 {
-	return CurrentHealth;
+	return _currentHealth;
 }
 
 void UHealthAndDamageComp::SetMaxHealth(int healthAmount, bool resetCurrentHealth)
@@ -35,19 +35,19 @@ void UHealthAndDamageComp::SetMaxHealth(int healthAmount, bool resetCurrentHealt
 	MaxHealth = healthAmount;
 	if (resetCurrentHealth)
 	{
-		CurrentHealth = MaxHealth;
+		_currentHealth = MaxHealth;
 	}
 }
 
 void UHealthAndDamageComp::AddHealth(int healthAmount)
 {
-	CurrentHealth += healthAmount;
-	if (CurrentHealth > MaxHealth)
+	_currentHealth += healthAmount;
+	if (_currentHealth > MaxHealth)
 	{
-		CurrentHealth = MaxHealth;
+		_currentHealth = MaxHealth;
 	}
 
-	OnHealthChanged.Broadcast(CurrentHealth);
+	OnHealthChanged.Broadcast(_currentHealth);
 }
 
 void UHealthAndDamageComp::TakeDamage(int damageAmount)
@@ -59,15 +59,15 @@ void UHealthAndDamageComp::TakeDamage(int damageAmount)
 		damageAmount = damageDebuff->TakeDamage(damageAmount);
 	}
 
-	const int lastHealth = CurrentHealth;
-	CurrentHealth -= damageAmount;
+	const int lastHealth = _currentHealth;
+	_currentHealth -= damageAmount;
 
-	if (lastHealth != CurrentHealth)
+	if (lastHealth != _currentHealth)
 	{
-		OnHealthChanged.Broadcast(CurrentHealth);
+		OnHealthChanged.Broadcast(_currentHealth);
 	}
 
-	if (CurrentHealth <= 0)
+	if (_currentHealth <= 0)
 	{
 		OnUnitDied.Broadcast(GetOwner());
 	}
@@ -77,6 +77,6 @@ void UHealthAndDamageComp::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(UHealthAndDamageComp, CurrentHealth);
+	DOREPLIFETIME(UHealthAndDamageComp, _currentHealth);
 	DOREPLIFETIME(UHealthAndDamageComp, MaxHealth);
 }

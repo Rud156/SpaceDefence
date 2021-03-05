@@ -50,9 +50,6 @@ private:
 	void ApplyChangesToCharacter();
 	void UpdateLeftRightHandPosition() const;
 
-	float _verticalInput;
-	float _horizontalInput;
-
 	FVector2D _capsuleRadius; // X: Target, Y: Current
 	FVector2D _capsuleHeight; // X: Target, Y: Current
 	float _capsuleLerpAmount;
@@ -60,7 +57,6 @@ private:
 	void UpdateCapsuleSize(float deltaTime);
 
 	float _currentClimbTime;
-	bool _isClimbing;
 	void WallClimbCheck(float deltaTime);
 
 	UFUNCTION()
@@ -96,7 +92,6 @@ private:
 	ABaseWeapon* _meleeWeapon;
 	ABaseWeapon* _primaryWeapon;
 	ABaseWeapon* _secondaryWeapon;
-	EPlayerWeapon _currentWeapon;
 	void PickupWeapon(ABaseWeapon* weapon);
 	void ChangeCurrentWeapon(EPlayerWeapon weapon);
 	void ApplyWeaponChangesToCharacter() const;
@@ -123,7 +118,15 @@ public:
 	class UCameraComponent* CharacterCamera;
 
 	UPROPERTY(Replicated)
-	TArray<EPlayerMovementState> MovementStack;
+	TArray<EPlayerMovementState> _movementStack;
+	UPROPERTY(Replicated)
+	float _verticalInput;
+	UPROPERTY(Replicated)
+	float _horizontalInput;
+	UPROPERTY(Replicated)
+	bool _isClimbing;
+	UPROPERTY(Replicated)
+	EPlayerWeapon _currentWeapon;
 
 	UPROPERTY(Category = "Player|Movement", EditAnywhere)
 	float WalkSpeed;
@@ -200,7 +203,7 @@ public:
 	UPROPERTY(Category = "Player|IK", EditAnywhere)
 	FVector RightMeleeDefaultPosition;
 
-	UPROPERTY(Category = "Player|IK", BlueprintReadWrite)
+	UPROPERTY(Category = "Player|IK", BlueprintReadWrite, Replicated)
 	float IkHipOffset;
 
 	UPROPERTY(Category = "Player|Interaction", EditAnywhere)
@@ -336,6 +339,6 @@ public:
 	UFUNCTION(Category = "Player|State", BlueprintCallable, BlueprintPure)
 	EPlayerMovementState GetTopPlayerState();
 
-	AFPPlayer(const class FObjectInitializer & PCIP);
+	AFPPlayer(const class FObjectInitializer& PCIP);
 	virtual void Tick(float DeltaTime) override;
 };

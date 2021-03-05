@@ -22,7 +22,7 @@ public:
 #pragma region Properties
 
 	UPROPERTY(Replicated)
-	int CurrentHealth;
+	int _currentHealth;
 
 	UPROPERTY(Category = "Health", BlueprintReadOnly, EditAnywhere, Replicated)
 	int MaxHealth;
@@ -35,7 +35,7 @@ public:
 
 #pragma endregion
 
-	UHealthAndDamageComp(const class FObjectInitializer & PCIP);
+	UHealthAndDamageComp(const class FObjectInitializer& PCIP);
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(Category = "Health", BlueprintPure, BlueprintCallable)

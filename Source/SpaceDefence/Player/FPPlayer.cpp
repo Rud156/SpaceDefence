@@ -517,30 +517,30 @@ bool AFPPlayer::IsInFastMovementState()
 
 void AFPPlayer::PushPlayerMovementState(const EPlayerMovementState movementState)
 {
-	if (MovementStack.Num() > 0 && GetTopPlayerState() == movementState)
+	if (_movementStack.Num() > 0 && GetTopPlayerState() == movementState)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Movement: Previous State And Last State Is Same");
 	}
 
-	MovementStack.Push(movementState);
+	_movementStack.Push(movementState);
 }
 
 void AFPPlayer::RemovePlayerMovementState(const EPlayerMovementState movementState)
 {
-	for (int i = MovementStack.Num() - 1; i >= 0; i--)
+	for (int i = _movementStack.Num() - 1; i >= 0; i--)
 	{
-		if (MovementStack[i] == movementState)
+		if (_movementStack[i] == movementState)
 		{
-			MovementStack.RemoveAt(i);
+			_movementStack.RemoveAt(i);
 		}
 	}
 }
 
 bool AFPPlayer::HasPlayerState(const EPlayerMovementState movementState)
 {
-	for (int i = 0; i < MovementStack.Num(); i++)
+	for (int i = 0; i < _movementStack.Num(); i++)
 	{
-		if (MovementStack[i] == movementState)
+		if (_movementStack[i] == movementState)
 		{
 			return true;
 		}
@@ -668,12 +668,12 @@ void AFPPlayer::IKFootTrace(FName socketName, float distance, FVector& outHitLoc
 
 EPlayerMovementState AFPPlayer::GetTopPlayerState()
 {
-	if (MovementStack.Num() <= 0)
+	if (_movementStack.Num() <= 0)
 	{
 		return EPlayerMovementState::None;
 	}
 
-	return MovementStack.Last();
+	return _movementStack.Last();
 }
 
 void AFPPlayer::SetCapsuleData(float targetHeight, float targetRadius)
@@ -1279,5 +1279,5 @@ void AFPPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetim
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(AFPPlayer, MovementStack);
+	DOREPLIFETIME(AFPPlayer, _movementStack);
 }
