@@ -32,69 +32,103 @@ void AFPPlayerController::SetupInputComponent()
 }
 
 
-
-
 void AFPPlayerController::HandleCharacterJump()
 {
 	AActor* pawn = GetPawn();
 	AFPPlayer* playerPawn = Cast<AFPPlayer>(pawn);
-	playerPawn->CharacterJump();
+
+	if (playerPawn != nullptr)
+	{
+		playerPawn->CharacterJump();
+	}
 }
 
 void AFPPlayerController::HandleRunPressed()
 {
 	AActor* pawn = GetPawn();
 	AFPPlayer* playerPawn = Cast<AFPPlayer>(pawn);
-	playerPawn->RunPressed();
+
+	if (playerPawn != nullptr)
+	{
+		playerPawn->RunPressed();
+	}
 }
 
 void AFPPlayerController::HandleRunReleased()
 {
 	AActor* pawn = GetPawn();
 	AFPPlayer* playerPawn = Cast<AFPPlayer>(pawn);
-	playerPawn->RunReleased();
+
+	if (playerPawn != nullptr)
+	{
+		playerPawn->RunReleased();
+	}
 }
 
 void AFPPlayerController::HandleCrouchPressed()
 {
 	AActor* pawn = GetPawn();
 	AFPPlayer* playerPawn = Cast<AFPPlayer>(pawn);
-	playerPawn->CrouchPressed();
+
+	if (playerPawn != nullptr)
+	{
+		playerPawn->CrouchPressed();
+	}
 }
 
 void AFPPlayerController::HandleCrouchReleased()
 {
 	AActor* pawn = GetPawn();
 	AFPPlayer* playerPawn = Cast<AFPPlayer>(pawn);
-	playerPawn->CrouchReleased();
+
+	if (playerPawn != nullptr)
+	{
+		playerPawn->CrouchReleased();
+	}
 }
 
 void AFPPlayerController::HandleFirePressed()
 {
 	AActor* pawn = GetPawn();
 	AFPPlayer* playerPawn = Cast<AFPPlayer>(pawn);
-	playerPawn->FirePressed();
+
+	if (playerPawn != nullptr)
+	{
+		playerPawn->FirePressed();
+	}
 }
 
 void AFPPlayerController::HandleFireReleased()
 {
 	AActor* pawn = GetPawn();
 	AFPPlayer* playerPawn = Cast<AFPPlayer>(pawn);
-	playerPawn->FireReleased();
+
+	if (playerPawn != nullptr)
+	{
+		playerPawn->FireReleased();
+	}
 }
 
 void AFPPlayerController::HandleAltFirePressed()
 {
 	AActor* pawn = GetPawn();
 	AFPPlayer* playerPawn = Cast<AFPPlayer>(pawn);
-	playerPawn->HandleAltFirePressed();
+
+	if (playerPawn != nullptr)
+	{
+		playerPawn->HandleAltFirePressed();
+	}
 }
 
 void AFPPlayerController::HandleAltFireReleased()
 {
 	AActor* pawn = GetPawn();
 	AFPPlayer* playerPawn = Cast<AFPPlayer>(pawn);
-	playerPawn->HandleAltFireReleased();
+
+	if (playerPawn != nullptr)
+	{
+		playerPawn->HandleAltFireReleased();
+	}
 }
 
 void AFPPlayerController::HandleInteractPressed()
@@ -108,21 +142,33 @@ void AFPPlayerController::HandleInteractReleased()
 {
 	AActor* pawn = GetPawn();
 	AFPPlayer* playerPawn = Cast<AFPPlayer>(pawn);
-	playerPawn->HandleInteractReleased();
+
+	if (playerPawn != nullptr)
+	{
+		playerPawn->HandleInteractReleased();
+	}
 }
 
 void AFPPlayerController::HandleMeleeSelected()
 {
 	AActor* pawn = GetPawn();
 	AFPPlayer* playerPawn = Cast<AFPPlayer>(pawn);
-	playerPawn->HandleMeleeSelected();
+
+	if (playerPawn != nullptr)
+	{
+		playerPawn->HandleMeleeSelected();
+	}
 }
 
 void AFPPlayerController::HandlePrimarySelected()
 {
 	AActor* pawn = GetPawn();
 	AFPPlayer* playerPawn = Cast<AFPPlayer>(pawn);
-	playerPawn->HandlePrimarySelected();
+
+	if (playerPawn != nullptr)
+	{
+		playerPawn->HandlePrimarySelected();
+	}
 }
 
 void AFPPlayerController::HandleSecondarySelected()
@@ -136,14 +182,22 @@ void AFPPlayerController::HandleTestCheckAndDropWeapon()
 {
 	AActor* pawn = GetPawn();
 	AFPPlayer* playerPawn = Cast<AFPPlayer>(pawn);
-	playerPawn->CheckAndDropWeapon();
+
+	if (playerPawn != nullptr)
+	{
+		playerPawn->CheckAndDropWeapon();
+	}
 }
 
 void AFPPlayerController::HandlePlayerPinged()
 {
 	AActor* pawn = GetPawn();
 	AFPPlayer* playerPawn = Cast<AFPPlayer>(pawn);
-	playerPawn->HandlePlayerPinged();
+
+	if (playerPawn != nullptr)
+	{
+		playerPawn->HandlePlayerPinged();
+	}
 }
 
 void AFPPlayerController::MoveForward(float input)

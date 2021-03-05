@@ -1280,4 +1280,8 @@ void AFPPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetim
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AFPPlayer, _movementStack);
+	DOREPLIFETIME(AFPPlayer, _verticalInput);
+	DOREPLIFETIME(AFPPlayer, _horizontalInput);
+	DOREPLIFETIME(AFPPlayer, _isClimbing);
+	DOREPLIFETIME(AFPPlayer, _currentWeapon);
 }
