@@ -10,7 +10,6 @@
 #include "../Utils/Structs.h"
 #include "SpaceDefence/Placeables/TD_PlaceableSpawnerActor.h"
 
-
 #include "FPPlayer.generated.h"
 
 class ABaseWeapon;
@@ -26,7 +25,6 @@ class SPACEDEFENCE_API AFPPlayer : public ACharacter
 	GENERATED_BODY()
 
 private:
-
 	const float RECOIL_CAMERA_DELAY = 0.05f;
 
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
@@ -44,7 +42,6 @@ private:
 	// Top Level Initialization for MultiPlayer
 	bool _initialized;
 
-	TArray<EPlayerMovementState> _movementStack;
 	float _slideTimer;
 	bool IsInFastMovementState();
 	void PushPlayerMovementState(EPlayerMovementState movementState);
@@ -124,6 +121,9 @@ public:
 
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadWrite)
 	class UCameraComponent* CharacterCamera;
+
+	UPROPERTY(Replicated)
+	TArray<EPlayerMovementState> MovementStack;
 
 	UPROPERTY(Category = "Player|Movement", EditAnywhere)
 	float WalkSpeed;
@@ -336,6 +336,6 @@ public:
 	UFUNCTION(Category = "Player|State", BlueprintCallable, BlueprintPure)
 	EPlayerMovementState GetTopPlayerState();
 
-	AFPPlayer();
+	AFPPlayer(const class FObjectInitializer & PCIP);
 	virtual void Tick(float DeltaTime) override;
 };

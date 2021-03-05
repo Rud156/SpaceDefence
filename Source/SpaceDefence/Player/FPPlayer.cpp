@@ -9,7 +9,6 @@
 #include "../Markers/WorldPingComponent.h"
 #include "../Markers/WorldPingMarker.h"
 #include "../Common/HealthAndDamageComp.h"
-#include "../Public/TD_GameModeFPS.h"
 
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -19,11 +18,12 @@
 #include "Components/SceneComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 
+#include "Net/UnrealNetwork.h"
 #include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 
-AFPPlayer::AFPPlayer()
+AFPPlayer::AFPPlayer(const class FObjectInitializer& PCIP) : Super(PCIP)
 {
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBooom"));
 	CameraLeftHandView = CreateDefaultSubobject<USceneComponent>(TEXT("CameraLeftHandView"));
@@ -77,17 +77,21 @@ void AFPPlayer::BeginPlay()
 void AFPPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	UpdateGroundStatus();
-	UpdateCharacterSliding(DeltaTime);
-	UpdateInteractibleCollection(DeltaTime);
 
-	FireUpdate(DeltaTime);
-	UpdateRecoilRotation(DeltaTime);
-	UpdateADSWeaponPoint(DeltaTime);
-	WallClimbCheck(DeltaTime);
-	UpdateCapsuleSize(DeltaTime);
+	if (HasAuthority())
+	{
+		UpdateGroundStatus();
+		UpdateCharacterSliding(DeltaTime);
+		UpdateInteractibleCollection(DeltaTime);
 
-	UpdateLeftRightHandPosition();
+		FireUpdate(DeltaTime);
+		UpdateRecoilRotation(DeltaTime);
+		UpdateADSWeaponPoint(DeltaTime);
+		WallClimbCheck(DeltaTime);
+		UpdateCapsuleSize(DeltaTime);
+
+		UpdateLeftRightHandPosition();
+	}
 }
 
 void AFPPlayer::UpdateCharacterSliding(float deltaTime)
@@ -513,30 +517,30 @@ bool AFPPlayer::IsInFastMovementState()
 
 void AFPPlayer::PushPlayerMovementState(const EPlayerMovementState movementState)
 {
-	if (_movementStack.Num() > 0 && GetTopPlayerState() == movementState)
+	if (MovementStack.Num() > 0 && GetTopPlayerState() == movementState)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Movement: Previous State And Last State Is Same");
 	}
 
-	_movementStack.Push(movementState);
+	MovementStack.Push(movementState);
 }
 
 void AFPPlayer::RemovePlayerMovementState(const EPlayerMovementState movementState)
 {
-	for (int i = _movementStack.Num() - 1; i >= 0; i--)
+	for (int i = MovementStack.Num() - 1; i >= 0; i--)
 	{
-		if (_movementStack[i] == movementState)
+		if (MovementStack[i] == movementState)
 		{
-			_movementStack.RemoveAt(i);
+			MovementStack.RemoveAt(i);
 		}
 	}
 }
 
 bool AFPPlayer::HasPlayerState(const EPlayerMovementState movementState)
 {
-	for (int i = 0; i < _movementStack.Num(); i++)
+	for (int i = 0; i < MovementStack.Num(); i++)
 	{
-		if (_movementStack[i] == movementState)
+		if (MovementStack[i] == movementState)
 		{
 			return true;
 		}
@@ -664,12 +668,12 @@ void AFPPlayer::IKFootTrace(FName socketName, float distance, FVector& outHitLoc
 
 EPlayerMovementState AFPPlayer::GetTopPlayerState()
 {
-	if (_movementStack.Num() <= 0)
+	if (MovementStack.Num() <= 0)
 	{
 		return EPlayerMovementState::None;
 	}
 
-	return _movementStack.Last();
+	return MovementStack.Last();
 }
 
 void AFPPlayer::SetCapsuleData(float targetHeight, float targetRadius)
@@ -797,7 +801,7 @@ void AFPPlayer::FireUpdate(const float deltaTime)
 	{
 	case EPlayerWeapon::Melee:
 		break;
-	
+
 	case EPlayerWeapon::Primary:
 		{
 			if (_primaryWeapon->IsReloading())
@@ -810,13 +814,13 @@ void AFPPlayer::FireUpdate(const float deltaTime)
 			{
 				HideWeaponReloadNotify();
 			}
-	
+
 			const int magAmmo = _primaryWeapon->GetMagAmmo();
 			const int totalAmmo = _primaryWeapon->GetTotalAmmo();
 			UpdateAmmoCountNotify(magAmmo, totalAmmo);
 		}
 		break;
-	
+
 	case EPlayerWeapon::Secondary:
 		{
 			if (_secondaryWeapon->IsReloading())
@@ -829,13 +833,13 @@ void AFPPlayer::FireUpdate(const float deltaTime)
 			{
 				HideWeaponReloadNotify();
 			}
-	
+
 			const int magAmmo = _secondaryWeapon->GetMagAmmo();
 			const int totalAmmo = _secondaryWeapon->GetTotalAmmo();
 			UpdateAmmoCountNotify(magAmmo, totalAmmo);
 		}
 		break;
-	
+
 	default:
 		break;
 	}
@@ -1269,4 +1273,11 @@ void AFPPlayer::HandlePlayerPinged() const
 			worldPingMarker->SetPingTime(pingTime);
 		}
 	}
+}
+
+void AFPPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AFPPlayer, MovementStack);
 }

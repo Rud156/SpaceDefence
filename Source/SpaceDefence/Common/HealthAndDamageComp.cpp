@@ -4,7 +4,9 @@
 #include "HealthAndDamageComp.h"
 #include "./DefenceBuffBaseComp.h"
 
-UHealthAndDamageComp::UHealthAndDamageComp()
+#include "Net/UnrealNetwork.h"
+
+UHealthAndDamageComp::UHealthAndDamageComp(const class FObjectInitializer& PCIP) : Super(PCIP)
 {
 	MaxHealth = 100;
 
@@ -15,7 +17,7 @@ void UHealthAndDamageComp::BeginPlay()
 {
 	Super::BeginPlay();
 
-	_currentHealth = MaxHealth;
+	CurrentHealth = MaxHealth;
 }
 
 void UHealthAndDamageComp::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -25,7 +27,7 @@ void UHealthAndDamageComp::TickComponent(float DeltaTime, ELevelTick TickType, F
 
 int UHealthAndDamageComp::GetCurrentHealth()
 {
-	return _currentHealth;
+	return CurrentHealth;
 }
 
 void UHealthAndDamageComp::SetMaxHealth(int healthAmount, bool resetCurrentHealth)
@@ -33,19 +35,19 @@ void UHealthAndDamageComp::SetMaxHealth(int healthAmount, bool resetCurrentHealt
 	MaxHealth = healthAmount;
 	if (resetCurrentHealth)
 	{
-		_currentHealth = MaxHealth;
+		CurrentHealth = MaxHealth;
 	}
 }
 
 void UHealthAndDamageComp::AddHealth(int healthAmount)
 {
-	_currentHealth += healthAmount;
-	if (_currentHealth > MaxHealth)
+	CurrentHealth += healthAmount;
+	if (CurrentHealth > MaxHealth)
 	{
-		_currentHealth = MaxHealth;
+		CurrentHealth = MaxHealth;
 	}
 
-	OnHealthChanged.Broadcast(_currentHealth);
+	OnHealthChanged.Broadcast(CurrentHealth);
 }
 
 void UHealthAndDamageComp::TakeDamage(int damageAmount)
@@ -57,16 +59,24 @@ void UHealthAndDamageComp::TakeDamage(int damageAmount)
 		damageAmount = damageDebuff->TakeDamage(damageAmount);
 	}
 
-	int lastHealth = _currentHealth;
-	_currentHealth -= damageAmount;
+	const int lastHealth = CurrentHealth;
+	CurrentHealth -= damageAmount;
 
-	if (lastHealth != _currentHealth)
+	if (lastHealth != CurrentHealth)
 	{
-		OnHealthChanged.Broadcast(_currentHealth);
+		OnHealthChanged.Broadcast(CurrentHealth);
 	}
 
-	if (_currentHealth <= 0)
+	if (CurrentHealth <= 0)
 	{
 		OnUnitDied.Broadcast(GetOwner());
 	}
+}
+
+void UHealthAndDamageComp::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UHealthAndDamageComp, CurrentHealth);
+	DOREPLIFETIME(UHealthAndDamageComp, MaxHealth);
 }
