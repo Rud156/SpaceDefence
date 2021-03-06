@@ -36,12 +36,18 @@ public:
 #pragma endregion
 
 	UHealthAndDamageComp(const class FObjectInitializer& PCIP);
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
+	
 	UFUNCTION(Category = "Health", BlueprintPure, BlueprintCallable)
 	int GetCurrentHealth();
 
-	void SetMaxHealth(int healthAmount, bool resetCurrentHealth = true);
-	void AddHealth(int healthAmount);
-	void TakeDamage(int damageAmount);
+	void SetMaxHealth(int HealthAmount, bool ResetCurrentHealth = true);
+	void AddHealth(int HealthAmount);
+	void TakeDamage(int DamageAmount);
+
+	UFUNCTION(Server, Reliable)
+	void Server_TakeDamage(int DamageAmount);
+	UFUNCTION(Server, Reliable)
+	void Server_AddHealth(int HealthAmount);
+	UFUNCTION(Server, Reliable)
+	void Server_SetMaxHealth(int HealthAmount, bool ResetCurrentHealth = true);
 };

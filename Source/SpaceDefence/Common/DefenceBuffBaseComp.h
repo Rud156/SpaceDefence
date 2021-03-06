@@ -17,8 +17,7 @@ protected:
 
 public:
 	UDefenceBuffBaseComp();
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
+	
 	// Returns the DeBUffed Version of the damage
 	virtual int TakeDamage(int damageAmount);
 };

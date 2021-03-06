@@ -39,7 +39,7 @@ void AFPPlayerController::HandleCharacterJump()
 
 	if (playerPawn != nullptr)
 	{
-		playerPawn->CharacterJump();
+		playerPawn->Client_HandleJumpPressed();
 	}
 }
 
@@ -50,7 +50,7 @@ void AFPPlayerController::HandleRunPressed()
 
 	if (playerPawn != nullptr)
 	{
-		playerPawn->RunPressed();
+		playerPawn->Client_HandleRunPressed();
 	}
 }
 
@@ -61,7 +61,7 @@ void AFPPlayerController::HandleRunReleased()
 
 	if (playerPawn != nullptr)
 	{
-		playerPawn->RunReleased();
+		playerPawn->Client_HandleRunReleased();
 	}
 }
 
@@ -72,7 +72,7 @@ void AFPPlayerController::HandleCrouchPressed()
 
 	if (playerPawn != nullptr)
 	{
-		playerPawn->CrouchPressed();
+		playerPawn->Client_HandleCrouchPressed();
 	}
 }
 
@@ -83,7 +83,7 @@ void AFPPlayerController::HandleCrouchReleased()
 
 	if (playerPawn != nullptr)
 	{
-		playerPawn->CrouchReleased();
+		playerPawn->Client_HandleCrouchReleased();
 	}
 }
 
@@ -94,7 +94,7 @@ void AFPPlayerController::HandleFirePressed()
 
 	if (playerPawn != nullptr)
 	{
-		playerPawn->FirePressed();
+		playerPawn->Client_HandleFirePressed();
 	}
 }
 
@@ -105,7 +105,7 @@ void AFPPlayerController::HandleFireReleased()
 
 	if (playerPawn != nullptr)
 	{
-		playerPawn->FireReleased();
+		playerPawn->Client_HandleFireReleased();
 	}
 }
 
@@ -116,7 +116,7 @@ void AFPPlayerController::HandleAltFirePressed()
 
 	if (playerPawn != nullptr)
 	{
-		playerPawn->HandleAltFirePressed();
+		playerPawn->Client_HandleAltFirePressed();
 	}
 }
 
@@ -127,7 +127,7 @@ void AFPPlayerController::HandleAltFireReleased()
 
 	if (playerPawn != nullptr)
 	{
-		playerPawn->HandleAltFireReleased();
+		playerPawn->Client_HandleAltFireReleased();
 	}
 }
 
@@ -135,7 +135,7 @@ void AFPPlayerController::HandleInteractPressed()
 {
 	AActor* pawn = GetPawn();
 	AFPPlayer* playerPawn = Cast<AFPPlayer>(pawn);
-	playerPawn->HandleInteractPressed();
+	playerPawn->Client_HandleInteractPressed();
 }
 
 void AFPPlayerController::HandleInteractReleased()
@@ -145,7 +145,7 @@ void AFPPlayerController::HandleInteractReleased()
 
 	if (playerPawn != nullptr)
 	{
-		playerPawn->HandleInteractReleased();
+		playerPawn->Client_HandleInteractReleased();
 	}
 }
 
@@ -156,7 +156,7 @@ void AFPPlayerController::HandleMeleeSelected()
 
 	if (playerPawn != nullptr)
 	{
-		playerPawn->HandleMeleeSelected();
+		playerPawn->Client_HandleMeleeSelected();
 	}
 }
 
@@ -167,7 +167,7 @@ void AFPPlayerController::HandlePrimarySelected()
 
 	if (playerPawn != nullptr)
 	{
-		playerPawn->HandlePrimarySelected();
+		playerPawn->Client_HandlePrimarySelected();
 	}
 }
 
@@ -175,7 +175,7 @@ void AFPPlayerController::HandleSecondarySelected()
 {
 	AActor* pawn = GetPawn();
 	AFPPlayer* playerPawn = Cast<AFPPlayer>(pawn);
-	playerPawn->HandleSecondarySelected();
+	playerPawn->Client_HandleSecondarySelected();
 }
 
 void AFPPlayerController::HandleTestCheckAndDropWeapon()
@@ -185,7 +185,7 @@ void AFPPlayerController::HandleTestCheckAndDropWeapon()
 
 	if (playerPawn != nullptr)
 	{
-		playerPawn->CheckAndDropWeapon();
+		playerPawn->Client_HandleCheckAndDropWeapon();
 	}
 }
 
@@ -196,7 +196,7 @@ void AFPPlayerController::HandlePlayerPinged()
 
 	if (playerPawn != nullptr)
 	{
-		playerPawn->HandlePlayerPinged();
+		playerPawn->Client_HandlePlayerPinged();
 	}
 }
 
@@ -207,7 +207,7 @@ void AFPPlayerController::MoveForward(float input)
 
 	if (playerPawn != nullptr)
 	{
-		playerPawn->MoveForward(input);
+		playerPawn->Client_MoveForward(input);
 	}
 }
 
@@ -218,7 +218,7 @@ void AFPPlayerController::MoveRight(float input)
 
 	if (playerPawn != nullptr)
 	{
-		playerPawn->MoveRight(input);
+		playerPawn->Client_MoveRight(input);
 	}
 }
 
@@ -229,7 +229,7 @@ void AFPPlayerController::Turn(float input)
 
 	if (playerPawn != nullptr)
 	{
-		playerPawn->Turn(input);
+		playerPawn->Client_Turn(input);
 	}
 }
 
@@ -240,6 +240,6 @@ void AFPPlayerController::LookUp(float input)
 
 	if (playerPawn != nullptr)
 	{
-		playerPawn->LookUp(input);
+		playerPawn->Client_LookUp(input);
 	}
 }

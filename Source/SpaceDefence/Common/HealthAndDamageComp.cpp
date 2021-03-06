@@ -10,19 +10,17 @@ UHealthAndDamageComp::UHealthAndDamageComp(const class FObjectInitializer& PCIP)
 {
 	MaxHealth = 100;
 
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 }
 
 void UHealthAndDamageComp::BeginPlay()
 {
 	Super::BeginPlay();
 
-	_currentHealth = MaxHealth;
-}
-
-void UHealthAndDamageComp::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	if (GetOwner()->HasAuthority())
+	{
+		_currentHealth = MaxHealth;
+	}
 }
 
 int UHealthAndDamageComp::GetCurrentHealth()
@@ -30,18 +28,28 @@ int UHealthAndDamageComp::GetCurrentHealth()
 	return _currentHealth;
 }
 
-void UHealthAndDamageComp::SetMaxHealth(int healthAmount, bool resetCurrentHealth)
+void UHealthAndDamageComp::SetMaxHealth(int HealthAmount, bool ResetCurrentHealth)
 {
-	MaxHealth = healthAmount;
-	if (resetCurrentHealth)
+	Server_SetMaxHealth(HealthAmount, ResetCurrentHealth);
+}
+
+void UHealthAndDamageComp::Server_SetMaxHealth_Implementation(int HealthAmount, bool ResetCurrentHealth)
+{
+	MaxHealth = HealthAmount;
+	if (ResetCurrentHealth)
 	{
 		_currentHealth = MaxHealth;
 	}
 }
 
-void UHealthAndDamageComp::AddHealth(int healthAmount)
+void UHealthAndDamageComp::AddHealth(int HealthAmount)
 {
-	_currentHealth += healthAmount;
+	Server_AddHealth(HealthAmount);
+}
+
+void UHealthAndDamageComp::Server_AddHealth_Implementation(int HealthAmount)
+{
+	_currentHealth += HealthAmount;
 	if (_currentHealth > MaxHealth)
 	{
 		_currentHealth = MaxHealth;
@@ -50,17 +58,22 @@ void UHealthAndDamageComp::AddHealth(int healthAmount)
 	OnHealthChanged.Broadcast(_currentHealth);
 }
 
-void UHealthAndDamageComp::TakeDamage(int damageAmount)
+void UHealthAndDamageComp::TakeDamage(int DamageAmount)
+{
+	Server_TakeDamage(DamageAmount);
+}
+
+void UHealthAndDamageComp::Server_TakeDamage_Implementation(int DamageAmount)
 {
 	TArray<UActorComponent*> actorComponents = GetOwner()->GetComponentsByClass(UDefenceBuffBaseComp::StaticClass());
 	for (int i = 0; i < actorComponents.Num(); i++)
 	{
 		UDefenceBuffBaseComp* damageDebuff = Cast<UDefenceBuffBaseComp>(actorComponents[i]);
-		damageAmount = damageDebuff->TakeDamage(damageAmount);
+		DamageAmount = damageDebuff->TakeDamage(DamageAmount);
 	}
 
 	const int lastHealth = _currentHealth;
-	_currentHealth -= damageAmount;
+	_currentHealth -= DamageAmount;
 
 	if (lastHealth != _currentHealth)
 	{

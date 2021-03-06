@@ -29,7 +29,6 @@ AFPPlayer::AFPPlayer(const class FObjectInitializer& PCIP) : Super(PCIP)
 	CameraLeftHandView = CreateDefaultSubobject<USceneComponent>(TEXT("CameraLeftHandView"));
 	CameraRightHandView = CreateDefaultSubobject<USceneComponent>(TEXT("CameraRightHandView"));
 	CharacterCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("CharacterCamera"));
-	GroundCheckPoint = CreateDefaultSubobject<USceneComponent>(TEXT("GroundCheckPoint"));
 	WallCheckPoint = CreateDefaultSubobject<USceneComponent>(TEXT("WallCheckPoint"));
 	InteractionCastPoint = CreateDefaultSubobject<USceneComponent>(TEXT("InteractionCastPoint"));
 	WeaponAttachPoint = CreateDefaultSubobject<USceneComponent>(TEXT("WeaponAttachPoint"));
@@ -41,14 +40,12 @@ AFPPlayer::AFPPlayer(const class FObjectInitializer& PCIP) : Super(PCIP)
 	CameraLeftHandView->SetupAttachment(CharacterCamera);
 	CameraRightHandView->SetupAttachment(CharacterCamera);
 	CharacterCamera->SetupAttachment(CameraBoom);
-	GroundCheckPoint->SetupAttachment(GetCapsuleComponent());
 	WallCheckPoint->SetupAttachment(GetCapsuleComponent());
 	InteractionCastPoint->SetupAttachment(CharacterCamera);
 	WeaponAttachPoint->SetupAttachment(CharacterCamera);
 
 	HSensitivityMultiplier = 1;
 	VSensitivityMultiplier = 1;
-	GroundCheckDistance = 30;
 	PrimaryActorTick.bCanEverTick = true;
 }
 
@@ -70,126 +67,44 @@ void AFPPlayer::BeginPlay()
 
 	SetCapsuleData(DefaultHalfHeight, DefaultRadius);
 	ApplyChangesToCharacter();
-
-	_initialized = true;
 }
 
 void AFPPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (HasAuthority())
-	{
-		UpdateGroundStatus();
-		UpdateCharacterSliding(DeltaTime);
-		UpdateInteractibleCollection(DeltaTime);
+	UpdateGroundStatus();
+	UpdateCharacterSliding(DeltaTime);
+	UpdateInteractibleCollection(DeltaTime);
 
-		FireUpdate(DeltaTime);
-		UpdateRecoilRotation(DeltaTime);
-		UpdateADSWeaponPoint(DeltaTime);
-		WallClimbCheck(DeltaTime);
-		UpdateCapsuleSize(DeltaTime);
+	FireUpdate(DeltaTime);
+	UpdateRecoilRotation(DeltaTime);
+	UpdateADSWeaponPoint(DeltaTime);
+	WallClimbCheck(DeltaTime);
+	UpdateCapsuleSize(DeltaTime);
 
-		UpdateLeftRightHandPosition();
-	}
+	UpdateLeftRightHandPosition();
 }
 
-void AFPPlayer::UpdateCharacterSliding(float deltaTime)
+void AFPPlayer::Client_MoveForward(const float Value)
 {
-	if (_slideTimer > 0)
-	{
-		_slideTimer -= deltaTime;
-		if (_slideTimer <= 0)
-		{
-			StopCharacterSliding();
-			RemovePlayerMovementState(EPlayerMovementState::Slide);
-			PushPlayerMovementState(EPlayerMovementState::Crouch);
-			ApplyChangesToCharacter();
-		}
-		else
-		{
-			AddMovementInput(GetActorForwardVector(), 1);
-		}
-
-		const auto velocity = GetVelocity().Size();
-		if (velocity < MinSlideSpeed)
-		{
-			StopCharacterSliding();
-			RemovePlayerMovementState(EPlayerMovementState::Slide);
-			PushPlayerMovementState(EPlayerMovementState::Crouch);
-			ApplyChangesToCharacter();
-		}
-	}
+	Server_MoveForward(Value);
+	MoveForward(Value);
 }
 
-void AFPPlayer::WallClimbCheck(float deltaTime)
+void AFPPlayer::Server_MoveForward_Implementation(const float Value)
 {
-	FHitResult hitResult;
-	FCollisionQueryParams collisionParams;
-	collisionParams.AddIgnoredActor(this);
-
-	FVector startPosition = GetActorLocation();
-	FVector endPosition = WallCheckPoint->GetComponentLocation();
-
-	bool hit = GetWorld()->LineTraceSingleByChannel(hitResult, startPosition, endPosition, ECollisionChannel::ECC_Visibility, collisionParams);
-	if (hit && hitResult.GetActor() != nullptr && !hitResult.GetActor()->ActorHasTag(NotClimbableTag))
-	{
-		auto playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-		FKey key = EKeys::SpaceBar;
-
-		float duration = playerController->GetInputKeyTimeDown(key); // TODO: Change this when custom input is added...
-		if (duration != 0)
-		{
-			_currentClimbTime += deltaTime;
-			if (_currentClimbTime <= ClimbDuration)
-			{
-				_isClimbing = true;
-				LaunchCharacter(FVector(0, 0, ClimbVelocity), true, true);
-			}
-			else if (_isOnGround)
-			{
-				_isClimbing = false;
-				_currentClimbTime = 0;
-			}
-		}
-		else
-		{
-			_isClimbing = false;
-			_currentClimbTime = 0;
-		}
-	}
-	else
-	{
-		_isClimbing = false;
-		_currentClimbTime = 0;
-	}
-
-	// So that when climbing the jump state is not pushed
-	if (_isClimbing)
-	{
-		RemovePlayerMovementState(EPlayerMovementState::Jump);
-		RemovePlayerMovementState(EPlayerMovementState::RunJump);
-	}
+	MoveForward(Value);
 }
 
-bool AFPPlayer::IsClimbing()
+void AFPPlayer::MoveForward(const float Value)
 {
-	return _isClimbing;
-}
-
-void AFPPlayer::MoveForward(float value)
-{
-	if (!_initialized)
-	{
-		return;
-	}
-
-	_verticalInput = value;
+	_verticalInput = Value;
 
 	const auto lastState = GetTopPlayerState();
 	if (lastState != EPlayerMovementState::Slide)
 	{
-		AddMovementInput(GetActorForwardVector(), value);
+		AddMovementInput(GetActorForwardVector(), Value);
 	}
 }
 
@@ -198,14 +113,20 @@ float AFPPlayer::GetVerticalInput()
 	return _verticalInput;
 }
 
-void AFPPlayer::MoveRight(float value)
+void AFPPlayer::Client_MoveRight(const float Value)
 {
-	if (!_initialized)
-	{
-		return;
-	}
+	Server_MoveRight(Value);
+	MoveRight(Value);
+}
 
-	_horizontalInput = value;
+void AFPPlayer::Server_MoveRight_Implementation(const float Value)
+{
+	MoveRight(Value);
+}
+
+void AFPPlayer::MoveRight(const float Value)
+{
+	_horizontalInput = Value;
 
 	if (_isClimbing)
 	{
@@ -217,9 +138,9 @@ void AFPPlayer::MoveRight(float value)
 		return;
 	}
 
-	if (value != 0)
+	if (Value != 0)
 	{
-		AddMovementInput(GetActorRightVector(), value);
+		AddMovementInput(GetActorRightVector(), Value);
 	}
 }
 
@@ -228,19 +149,24 @@ float AFPPlayer::GetHorizontalInput()
 	return _horizontalInput;
 }
 
-void AFPPlayer::Turn(float value)
+void AFPPlayer::Client_Turn(const float Value)
 {
-	if (!_initialized)
-	{
-		return;
-	}
+	Turn(Value);
+}
 
+void AFPPlayer::Server_Turn_Implementation(const float Value)
+{
+	Turn(Value);
+}
+
+void AFPPlayer::Turn(const float Value)
+{
 	if (_isClimbing)
 	{
 		return;
 	}
 
-	const float turnAmount = value * TurnSpeed * HSensitivityMultiplier * GetWorld()->GetDeltaSeconds();
+	const float turnAmount = Value * TurnSpeed * HSensitivityMultiplier * GetWorld()->GetDeltaSeconds();
 	if (HasPlayerState(EPlayerMovementState::Slide))
 	{
 		CameraBoom->AddRelativeRotation(FRotator(0, turnAmount, 0));
@@ -251,19 +177,24 @@ void AFPPlayer::Turn(float value)
 	}
 }
 
-void AFPPlayer::LookUp(float value)
+void AFPPlayer::Client_LookUp(const float Value)
 {
-	if (!_initialized)
-	{
-		return;
-	}
+	LookUp(Value);
+}
 
+void AFPPlayer::Server_LookUp_Implementation(const float Value)
+{
+	LookUp(Value);
+}
+
+void AFPPlayer::LookUp(const float Value)
+{
 	if (_isClimbing)
 	{
 		return;
 	}
 
-	const float turnAmount = value * LookUpRate * VSensitivityMultiplier * GetWorld()->GetDeltaSeconds();
+	const float turnAmount = Value * LookUpRate * VSensitivityMultiplier * GetWorld()->GetDeltaSeconds();
 	if (HasPlayerState(EPlayerMovementState::Slide))
 	{
 		CameraBoom->AddRelativeRotation(FRotator(-turnAmount, 0, 0));
@@ -274,7 +205,18 @@ void AFPPlayer::LookUp(float value)
 	}
 }
 
-void AFPPlayer::CharacterJump()
+void AFPPlayer::Client_HandleJumpPressed()
+{
+	Server_HandleJumpPressed();
+	HandleJumpPressed();
+}
+
+void AFPPlayer::Server_HandleJumpPressed_Implementation()
+{
+	HandleJumpPressed();
+}
+
+void AFPPlayer::HandleJumpPressed()
 {
 	if (!_isOnGround)
 	{
@@ -310,7 +252,6 @@ void AFPPlayer::CharacterJump()
 void AFPPlayer::FrameDelayedJump()
 {
 	FVector directionVector = GetActorForwardVector() * _verticalInput + GetActorRightVector() * _horizontalInput;
-	FVector velocityDirection = GetVelocity();
 
 	directionVector.X *= JumpVelocity.X;
 	directionVector.Y *= JumpVelocity.Y;
@@ -319,7 +260,55 @@ void AFPPlayer::FrameDelayedJump()
 	LaunchCharacter(directionVector, true, true);
 }
 
-void AFPPlayer::RunPressed()
+void AFPPlayer::PlayerLanded()
+{
+	RemovePlayerMovementState(EPlayerMovementState::Jump);
+	RemovePlayerMovementState(EPlayerMovementState::RunJump);
+
+	ApplyChangesToCharacter();
+}
+
+void AFPPlayer::UpdateGroundStatus()
+{
+	const bool isOnGround = !GetCharacterMovement()->IsFalling();
+
+	if (!_isOnGround && isOnGround)
+	{
+		OnPlayerLanded.Broadcast();
+	}
+	_isOnGround = isOnGround;
+}
+
+bool AFPPlayer::IsOnGround()
+{
+	return _isOnGround;
+}
+
+bool AFPPlayer::IsFalling()
+{
+	const FVector velocity = GetVelocity();
+	const float zVelocity = velocity.Z;
+
+	if (zVelocity < -FallVelocityThreshold)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+void AFPPlayer::Client_HandleRunPressed()
+{
+	Server_HandleRunPressed();
+	HandleRunPressed();
+}
+
+void AFPPlayer::Server_HandleRunPressed_Implementation()
+{
+	HandleRunPressed();
+}
+
+void AFPPlayer::HandleRunPressed()
 {
 	StopCharacterSliding();
 
@@ -330,7 +319,18 @@ void AFPPlayer::RunPressed()
 	PlayerRunStarted();
 }
 
-void AFPPlayer::RunReleased()
+void AFPPlayer::Client_HandleRunReleased()
+{
+	Server_HandleRunReleased();
+	HandleRunReleased();
+}
+
+void AFPPlayer::Server_HandleRunReleased_Implementation()
+{
+	HandleRunReleased();
+}
+
+void AFPPlayer::HandleRunReleased()
 {
 	RemovePlayerMovementState(EPlayerMovementState::Run);
 	ApplyChangesToCharacter();
@@ -343,7 +343,18 @@ bool AFPPlayer::IsRunning()
 	return playerLastState == EPlayerMovementState::Run && _verticalInput == 1 && !_isClimbing && _isOnGround;
 }
 
-void AFPPlayer::CrouchPressed()
+void AFPPlayer::Client_HandleCrouchPressed()
+{
+	Server_HandleCrouchPressed();
+	HandleCrouchPressed();
+}
+
+void AFPPlayer::Server_HandleCrouchPressed_Implementation()
+{
+	HandleCrouchPressed();
+}
+
+void AFPPlayer::HandleCrouchPressed()
 {
 	StopCharacterSliding();
 
@@ -361,33 +372,139 @@ void AFPPlayer::CrouchPressed()
 	ApplyChangesToCharacter();
 }
 
-void AFPPlayer::CrouchReleased()
+void AFPPlayer::Client_HandleCrouchReleased()
+{
+	Server_HandleCrouchReleased();
+	HandleCrouchReleased();
+}
+
+void AFPPlayer::Server_HandleCrouchReleased_Implementation()
+{
+	HandleCrouchReleased();
+}
+
+void AFPPlayer::HandleCrouchReleased()
 {
 	RemovePlayerMovementState(EPlayerMovementState::Crouch);
 	ApplyChangesToCharacter();
 }
 
-void AFPPlayer::PlayerLanded()
+void AFPPlayer::UpdateCharacterSliding(const float DeltaTime)
 {
-	RemovePlayerMovementState(EPlayerMovementState::Jump);
-	RemovePlayerMovementState(EPlayerMovementState::RunJump);
+	if (_slideTimer > 0)
+	{
+		_slideTimer -= DeltaTime;
+		if (_slideTimer <= 0)
+		{
+			StopCharacterSliding();
+			RemovePlayerMovementState(EPlayerMovementState::Slide);
+			PushPlayerMovementState(EPlayerMovementState::Crouch);
+			ApplyChangesToCharacter();
+		}
+		else
+		{
+			AddMovementInput(GetActorForwardVector(), 1);
+		}
 
+		const auto velocity = GetVelocity().Size();
+		if (velocity < MinSlideSpeed)
+		{
+			StopCharacterSliding();
+			RemovePlayerMovementState(EPlayerMovementState::Slide);
+			PushPlayerMovementState(EPlayerMovementState::Crouch);
+			ApplyChangesToCharacter();
+		}
+	}
+}
+
+void AFPPlayer::StopCharacterSliding()
+{
+	const FRotator cameraRotation = CameraBoom->GetRelativeRotation();
+	auto playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+
+	CameraBoom->SetRelativeRotation(FRotator::ZeroRotator);
+	const FRotator currentRotation = playerController->GetControlRotation();
+	playerController->SetControlRotation(currentRotation + cameraRotation);
+	CameraBoom->bUsePawnControlRotation = true;
+
+	_slideTimer = 0;
+
+	RemovePlayerMovementState(EPlayerMovementState::Slide);
 	ApplyChangesToCharacter();
 }
 
-void AFPPlayer::UpdateInteractibleCollection(float deltaTime)
+void AFPPlayer::Client_HandleInteractPressed()
 {
+	Server_HandleInteractPressed();
+	HandleInteractPressed();
+}
+
+void AFPPlayer::Server_HandleInteractPressed_Implementation()
+{
+	HandleInteractPressed();
+}
+
+void AFPPlayer::HandleInteractPressed()
+{
+	if (InteractionDisplayManager == nullptr)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Interaction NULL");
+		return;
+	}
+
+	if (_currentInteractionComponent != nullptr)
+	{
+		_currentInteractionComponent->SetInteractionTime();
+		_currentInteractionComponent->StartInteraction();
+	}
+}
+
+void AFPPlayer::Client_HandleInteractReleased()
+{
+	Server_HandleInteractReleased();
+	HandleInteractReleased();
+}
+
+void AFPPlayer::Server_HandleInteractReleased_Implementation()
+{
+	HandleInteractReleased();
+}
+
+void AFPPlayer::HandleInteractReleased()
+{
+	if (InteractionDisplayManager == nullptr)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Interaction NULL");
+		return;
+	}
+
+	if (_currentInteractionComponent != nullptr)
+	{
+		InteractionDisplayManager->SetInteractionBarProgress(0);
+		_currentInteractionComponent->CancelInteraction();
+
+		ClearInteractableObject();
+	}
+}
+
+void AFPPlayer::UpdateInteractibleCollection(float DeltaTime)
+{
+	if (InteractionDisplayManager == nullptr)
+	{
+		return;
+	}
+
 	if (_currentInteractionComponent != nullptr && _currentInteractionComponent->IsInteractionActive())
 	{
 		const auto actor = _currentInteractionComponent->GetOwner();
 		const float distance = FVector::Distance(actor->GetActorLocation(), GetActorLocation());
 		if (distance > MaxInteractionDistance)
 		{
-			HandleInteractReleased();
+			Client_HandleInteractReleased();
 			return;
 		}
 
-		const bool interactionComplete = _currentInteractionComponent->InteractionUpdate(deltaTime);
+		const bool interactionComplete = _currentInteractionComponent->InteractionUpdate(DeltaTime);
 		if (interactionComplete)
 		{
 			switch (_currentInteractionComponent->GetInteractibleType())
@@ -438,61 +555,6 @@ void AFPPlayer::ClearInteractableObject()
 	_currentInteractionComponent = nullptr;
 }
 
-void AFPPlayer::HandleInteractPressed() const
-{
-	if (_currentInteractionComponent != nullptr)
-	{
-		_currentInteractionComponent->SetInteractionTime();
-		_currentInteractionComponent->StartInteraction();
-	}
-}
-
-void AFPPlayer::HandleInteractReleased()
-{
-	if (_currentInteractionComponent != nullptr)
-	{
-		InteractionDisplayManager->SetInteractionBarProgress(0);
-		_currentInteractionComponent->CancelInteraction();
-
-		ClearInteractableObject();
-	}
-}
-
-void AFPPlayer::UpdateGroundStatus()
-{
-	FHitResult hitResult;
-	FVector startPosition = GroundCheckPoint->GetComponentLocation();
-	FVector endPosition = startPosition + FVector::DownVector * GroundCheckDistance;
-
-	FCollisionQueryParams collisionParams;
-	collisionParams.AddIgnoredActor(this);
-
-	bool hit = GetWorld()->LineTraceSingleByChannel(hitResult, startPosition, endPosition, ECollisionChannel::ECC_Visibility, collisionParams);
-	if (!_isOnGround && hit)
-	{
-		OnPlayerLanded.Broadcast();
-	}
-	_isOnGround = hit;
-}
-
-bool AFPPlayer::IsOnGround()
-{
-	return _isOnGround;
-}
-
-bool AFPPlayer::IsFalling()
-{
-	const FVector velocity = GetVelocity();
-	const float zVelocity = velocity.Z;
-
-	if (zVelocity < -FallVelocityThreshold)
-	{
-		return true;
-	}
-
-	return false;
-}
-
 bool AFPPlayer::IsInFastMovementState()
 {
 	const EPlayerMovementState movementState = GetTopPlayerState();
@@ -515,32 +577,32 @@ bool AFPPlayer::IsInFastMovementState()
 	}
 }
 
-void AFPPlayer::PushPlayerMovementState(const EPlayerMovementState movementState)
+void AFPPlayer::PushPlayerMovementState(const EPlayerMovementState MovementState)
 {
-	if (_movementStack.Num() > 0 && GetTopPlayerState() == movementState)
+	if (_movementStack.Num() > 0 && GetTopPlayerState() == MovementState)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Movement: Previous State And Last State Is Same");
 	}
 
-	_movementStack.Push(movementState);
+	_movementStack.Push(MovementState);
 }
 
-void AFPPlayer::RemovePlayerMovementState(const EPlayerMovementState movementState)
+void AFPPlayer::RemovePlayerMovementState(const EPlayerMovementState MovementState)
 {
 	for (int i = _movementStack.Num() - 1; i >= 0; i--)
 	{
-		if (_movementStack[i] == movementState)
+		if (_movementStack[i] == MovementState)
 		{
 			_movementStack.RemoveAt(i);
 		}
 	}
 }
 
-bool AFPPlayer::HasPlayerState(const EPlayerMovementState movementState)
+bool AFPPlayer::HasPlayerState(const EPlayerMovementState MovementState)
 {
 	for (int i = 0; i < _movementStack.Num(); i++)
 	{
-		if (_movementStack[i] == movementState)
+		if (_movementStack[i] == MovementState)
 		{
 			return true;
 		}
@@ -639,13 +701,13 @@ void AFPPlayer::UpdateLeftRightHandPosition() const
 	}
 }
 
-void AFPPlayer::IKFootTrace(FName socketName, float distance, FVector& outHitLocation, float& footTraceOffset)
+void AFPPlayer::IKFootTrace(FName SocketName, float Distance, FVector& OutHitLocation, float& FootTraceOffset)
 {
-	const FVector socketLocation = GetMesh()->GetSocketLocation(socketName);
+	const FVector socketLocation = GetMesh()->GetSocketLocation(SocketName);
 	const FVector actorLocation = GetActorLocation();
 
 	const FVector startLocation = FVector(socketLocation.X, socketLocation.Y, actorLocation.Z);
-	const FVector endLocation = FVector(socketLocation.X, socketLocation.Y, distance);
+	const FVector endLocation = FVector(socketLocation.X, socketLocation.Y, Distance);
 
 	FHitResult hitResult;
 	const bool hit = GetWorld()->LineTraceSingleByChannel(hitResult, startLocation, endLocation, ECollisionChannel::ECC_Visibility);
@@ -656,13 +718,13 @@ void AFPPlayer::IKFootTrace(FName socketName, float distance, FVector& outHitLoc
 		const FVector meshLocation = GetMesh()->GetComponentLocation();
 		const FVector targetLocation = hitLocation - meshLocation;
 
-		footTraceOffset = targetLocation.Z - IkHipOffset;
-		outHitLocation = hitLocation;
+		FootTraceOffset = targetLocation.Z - IkHipOffset;
+		OutHitLocation = hitLocation;
 	}
 	else
 	{
-		outHitLocation = FVector::ZeroVector;
-		footTraceOffset = 0;
+		OutHitLocation = FVector::ZeroVector;
+		FootTraceOffset = 0;
 	}
 }
 
@@ -676,14 +738,14 @@ EPlayerMovementState AFPPlayer::GetTopPlayerState()
 	return _movementStack.Last();
 }
 
-void AFPPlayer::SetCapsuleData(float targetHeight, float targetRadius)
+void AFPPlayer::SetCapsuleData(float TargetHeight, float TargetRadius)
 {
-	_capsuleHeight = FVector2D(targetHeight, GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight());
-	_capsuleRadius = FVector2D(targetRadius, GetCapsuleComponent()->GetUnscaledCapsuleRadius());
+	_capsuleHeight = FVector2D(TargetHeight, GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight());
+	_capsuleRadius = FVector2D(TargetRadius, GetCapsuleComponent()->GetUnscaledCapsuleRadius());
 	_capsuleLerpAmount = 0;
 }
 
-void AFPPlayer::UpdateCapsuleSize(float deltaTime)
+void AFPPlayer::UpdateCapsuleSize(float DeltaTime)
 {
 	if (_capsuleLerpAmount > 1 || _capsuleLerpAmount < 0)
 	{
@@ -698,7 +760,7 @@ void AFPPlayer::UpdateCapsuleSize(float deltaTime)
 	GetCapsuleComponent()->SetCapsuleHalfHeight(currentHeight);
 	GetCapsuleComponent()->SetCapsuleRadius(currentRadius);
 
-	_capsuleLerpAmount += CapsuleSizeLerpRate * deltaTime;
+	_capsuleLerpAmount += CapsuleSizeLerpRate * DeltaTime;
 	if (_capsuleLerpAmount > 1)
 	{
 		GetCapsuleComponent()->SetCapsuleHalfHeight(_capsuleHeight.X);
@@ -706,33 +768,39 @@ void AFPPlayer::UpdateCapsuleSize(float deltaTime)
 	}
 }
 
-void AFPPlayer::StopCharacterSliding()
+void AFPPlayer::Client_HandleFirePressed()
 {
-	const FRotator cameraRotation = CameraBoom->GetRelativeRotation();
-	auto playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-
-	CameraBoom->SetRelativeRotation(FRotator::ZeroRotator);
-	const FRotator currentRotation = playerController->GetControlRotation();
-	playerController->SetControlRotation(currentRotation + cameraRotation);
-	CameraBoom->bUsePawnControlRotation = true;
-
-	_slideTimer = 0;
-
-	RemovePlayerMovementState(EPlayerMovementState::Slide);
-	ApplyChangesToCharacter();
+	Server_HandleFirePressed();
+	HandleFirePressed();
 }
 
-void AFPPlayer::FirePressed()
+void AFPPlayer::Server_HandleFirePressed_Implementation()
+{
+	HandleFirePressed();
+}
+
+void AFPPlayer::HandleFirePressed()
 {
 	_firePressed = true;
 }
 
-void AFPPlayer::FireReleased()
+void AFPPlayer::Client_HandleFireReleased()
+{
+	Server_HandleFireReleased();
+	HandleFireReleased();
+}
+
+void AFPPlayer::Server_HandleFireReleased_Implementation()
+{
+	HandleFireReleased();
+}
+
+void AFPPlayer::HandleFireReleased()
 {
 	_firePressed = false;
 }
 
-void AFPPlayer::FireUpdate(const float deltaTime)
+void AFPPlayer::FireUpdate(const float DeltaTime)
 {
 	if (_firePressed)
 	{
@@ -740,7 +808,7 @@ void AFPPlayer::FireUpdate(const float deltaTime)
 		{
 		case EPlayerWeapon::Melee:
 			{
-				if (_meleeWeapon->ShootTick(deltaTime))
+				if (_meleeWeapon->ShootTick(DeltaTime))
 				{
 					_meleeWeapon->Shoot();
 				}
@@ -749,7 +817,7 @@ void AFPPlayer::FireUpdate(const float deltaTime)
 
 		case EPlayerWeapon::Primary:
 			{
-				if (_primaryWeapon->ShootTick(deltaTime))
+				if (_primaryWeapon->ShootTick(DeltaTime))
 				{
 					_primaryWeapon->Shoot();
 
@@ -773,7 +841,7 @@ void AFPPlayer::FireUpdate(const float deltaTime)
 
 		case EPlayerWeapon::Secondary:
 			{
-				if (_secondaryWeapon->ShootTick(deltaTime))
+				if (_secondaryWeapon->ShootTick(DeltaTime))
 				{
 					_secondaryWeapon->Shoot();
 
@@ -845,7 +913,7 @@ void AFPPlayer::FireUpdate(const float deltaTime)
 	}
 }
 
-void AFPPlayer::UpdateRecoilRotation(const float deltaTime)
+void AFPPlayer::UpdateRecoilRotation(const float DeltaTime)
 {
 	if (_recoilLerpAmount > 1 || _recoilLerpAmount < 0 || _receoilDelay)
 	{
@@ -856,7 +924,7 @@ void AFPPlayer::UpdateRecoilRotation(const float deltaTime)
 	const FRotator currentRotation = playerController->GetControlRotation();
 
 	const float startLerp = _recoilLerpAmount;
-	_recoilLerpAmount += RecoilRotationLerpRate * deltaTime;
+	_recoilLerpAmount += RecoilRotationLerpRate * DeltaTime;
 	float endLerp = _recoilLerpAmount;
 	if (endLerp > 1)
 	{
@@ -875,7 +943,7 @@ void AFPPlayer::UpdateRecoilRotation(const float deltaTime)
 	}
 }
 
-void AFPPlayer::UpdateADSWeaponPoint(const float deltaTime)
+void AFPPlayer::UpdateADSWeaponPoint(const float DeltaTime)
 {
 	if (_adsLerpAmount >= 1 || _adsLerpAmount < 0)
 	{
@@ -885,7 +953,7 @@ void AFPPlayer::UpdateADSWeaponPoint(const float deltaTime)
 	const FVector newPosition = FMath::Lerp(_adsStartPosition, _adsEndPosition, _adsLerpAmount);
 	WeaponAttachPoint->SetRelativeLocation(newPosition);
 
-	_adsLerpAmount += ADSLerpSpeed * deltaTime;
+	_adsLerpAmount += ADSLerpSpeed * DeltaTime;
 
 	if (_adsLerpAmount >= 1)
 	{
@@ -893,30 +961,35 @@ void AFPPlayer::UpdateADSWeaponPoint(const float deltaTime)
 	}
 }
 
-void AFPPlayer::DelayedCameraMovement(ABaseWeapon* baseWeapon, const FRecoilOffset recoilOffset, const int maxRecoilCount)
+void AFPPlayer::DelayedCameraMovement(ABaseWeapon* BaseWeapon, const FRecoilOffset RecoilOffset, const int MaxRecoilCount)
 {
-	WeaponShotCameraShake(baseWeapon->CameraShake);
-	SetRecoilCameraPosition(recoilOffset, maxRecoilCount);
+	WeaponShotCameraShake(BaseWeapon->CameraShake);
+	SetRecoilCameraPosition(RecoilOffset, MaxRecoilCount);
 
 	_receoilDelay = false;
 }
 
-void AFPPlayer::SetRecoilCameraPosition(FRecoilOffset recoilOffset, int maxRecoilCount)
+void AFPPlayer::SetRecoilCameraPosition(FRecoilOffset RecoilOffset, int MaxRecoilCount)
 {
-	if (recoilOffset.index == maxRecoilCount - 1)
+	if (RecoilOffset.index == MaxRecoilCount - 1)
 	{
 		// Don't do anything...
 	}
 	else
 	{
-		const FVector2D offset = recoilOffset.offset;
+		const FVector2D offset = RecoilOffset.offset;
 		_targetRecoilRotation = _targetRecoilRotation * (1 - _recoilLerpAmount) + FVector(offset.X, offset.Y, 0);
 		_recoilLerpAmount = 0;
 	}
 }
 
-void AFPPlayer::SpawnWeaponProjectile(TSubclassOf<class AActor> projectile, FVector spawnPoint) const
+void AFPPlayer::SpawnWeaponProjectile(TSubclassOf<class AActor> Projectile, FVector SpawnPoint) const
 {
+	if (!HasAuthority())
+	{
+		return;
+	}
+
 	FVector startingPoint = CharacterCamera->GetComponentLocation();
 	FVector forwardVector = CharacterCamera->GetForwardVector();
 	FVector endingPoint = startingPoint + forwardVector * MaxShootRayCastRange;
@@ -936,8 +1009,19 @@ void AFPPlayer::SpawnWeaponProjectile(TSubclassOf<class AActor> projectile, FVec
 	FActorSpawnParameters spawnParams;
 	spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
 
-	FRotator spawnRotation = UKismetMathLibrary::FindLookAtRotation(spawnPoint, targetPoint);
-	GetWorld()->SpawnActor<ATD_BaseProjectile>(projectile, spawnPoint, spawnRotation, spawnParams);
+	FRotator spawnRotation = UKismetMathLibrary::FindLookAtRotation(SpawnPoint, targetPoint);
+	GetWorld()->SpawnActor<ATD_BaseProjectile>(Projectile, SpawnPoint, spawnRotation, spawnParams);
+}
+
+void AFPPlayer::Client_HandleAltFirePressed()
+{
+	Server_HandleAltFirePressed();
+	HandleAltFirePressed();
+}
+
+void AFPPlayer::Server_HandleAltFirePressed_Implementation()
+{
+	HandleAltFirePressed();
 }
 
 void AFPPlayer::HandleAltFirePressed()
@@ -982,6 +1066,17 @@ void AFPPlayer::HandleAltFirePressed()
 	}
 }
 
+void AFPPlayer::Client_HandleAltFireReleased()
+{
+	Server_HandleAltFireReleased();
+	HandleAltFireReleased();
+}
+
+void AFPPlayer::Server_HandleAltFireReleased_Implementation()
+{
+	HandleAltFireReleased();
+}
+
 void AFPPlayer::HandleAltFireReleased()
 {
 	_adsStartPosition = WeaponAttachPoint->GetRelativeLocation();
@@ -994,26 +1089,26 @@ EPlayerWeapon AFPPlayer::GetCurrentWeapon()
 	return _currentWeapon;
 }
 
-void AFPPlayer::ChangeCurrentWeapon(EPlayerWeapon weapon)
+void AFPPlayer::ChangeCurrentWeapon(EPlayerWeapon Weapon)
 {
-	if (_currentWeapon == weapon)
+	if (_currentWeapon == Weapon)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Trying to Equip Same Weapon");
 	}
 
-	_currentWeapon = weapon;
+	_currentWeapon = Weapon;
 	ApplyWeaponChangesToCharacter();
 }
 
-void AFPPlayer::PickupWeapon(ABaseWeapon* weapon)
+void AFPPlayer::PickupWeapon(ABaseWeapon* Weapon)
 {
-	if (weapon == nullptr)
+	if (Weapon == nullptr)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "Trying to Pickup NULL Weapon");
 		return;
 	}
 
-	const EPlayerWeapon weaponType = weapon->WeaponType;
+	const EPlayerWeapon weaponType = Weapon->WeaponType;
 	switch (weaponType)
 	{
 	case EPlayerWeapon::Melee:
@@ -1022,17 +1117,17 @@ void AFPPlayer::PickupWeapon(ABaseWeapon* weapon)
 
 	case EPlayerWeapon::Primary:
 		{
-			weapon->PickupWeapon();
-			DisplayWeaponNotify(weapon->WeaponImage, weapon->GetMagAmmo(), weapon->GetTotalAmmo(), weapon->WeaponName, true);
-			PickupPrimaryWeapon(weapon);
+			Weapon->PickupWeapon();
+			DisplayWeaponNotify(Weapon->WeaponImage, Weapon->GetMagAmmo(), Weapon->GetTotalAmmo(), Weapon->WeaponName, true);
+			PickupPrimaryWeapon(Weapon);
 		}
 		break;
 
 	case EPlayerWeapon::Secondary:
 		{
-			weapon->PickupWeapon();
-			DisplayWeaponNotify(weapon->WeaponImage, weapon->GetMagAmmo(), weapon->GetTotalAmmo(), weapon->WeaponName, false);
-			PickupSecondaryWeapon(weapon);
+			Weapon->PickupWeapon();
+			DisplayWeaponNotify(Weapon->WeaponImage, Weapon->GetMagAmmo(), Weapon->GetTotalAmmo(), Weapon->WeaponName, false);
+			PickupSecondaryWeapon(Weapon);
 		}
 		break;
 	}
@@ -1040,7 +1135,18 @@ void AFPPlayer::PickupWeapon(ABaseWeapon* weapon)
 	ApplyChangesToCharacter();
 }
 
-void AFPPlayer::CheckAndDropWeapon()
+void AFPPlayer::Client_HandleCheckAndDropWeapon()
+{
+	Server_HandleCheckAndDropWeapon();
+	HandleCheckAndDropWeapons();
+}
+
+void AFPPlayer::Server_HandleCheckAndDropWeapon_Implementation()
+{
+	HandleCheckAndDropWeapons();
+}
+
+void AFPPlayer::HandleCheckAndDropWeapons()
 {
 	switch (_currentWeapon)
 	{
@@ -1069,14 +1175,14 @@ ABaseWeapon* AFPPlayer::GetPrimaryWeapon()
 	return _primaryWeapon;
 }
 
-void AFPPlayer::PickupPrimaryWeapon(ABaseWeapon* primaryWeapon)
+void AFPPlayer::PickupPrimaryWeapon(ABaseWeapon* PrimaryWeapon)
 {
 	if (_primaryWeapon != nullptr)
 	{
 		DropPrimaryWeapon();
 	}
 
-	_primaryWeapon = primaryWeapon;
+	_primaryWeapon = PrimaryWeapon;
 	ChangeCurrentWeapon(EPlayerWeapon::Primary);
 
 	const FAttachmentTransformRules attachmentRules = FAttachmentTransformRules(EAttachmentRule::SnapToTarget,
@@ -1115,14 +1221,14 @@ ABaseWeapon* AFPPlayer::GetSecondaryWeapon()
 	return _secondaryWeapon;
 }
 
-void AFPPlayer::PickupSecondaryWeapon(ABaseWeapon* secondaryWeapon)
+void AFPPlayer::PickupSecondaryWeapon(ABaseWeapon* SecondaryWeapon)
 {
 	if (_secondaryWeapon != nullptr)
 	{
 		DropSecondaryWeapon();
 	}
 
-	_secondaryWeapon = secondaryWeapon;
+	_secondaryWeapon = SecondaryWeapon;
 	ChangeCurrentWeapon(EPlayerWeapon::Secondary);
 
 	const FAttachmentTransformRules attachmentRules = FAttachmentTransformRules(EAttachmentRule::SnapToTarget,
@@ -1166,7 +1272,7 @@ bool AFPPlayer::HasMeleeWeapon()
 	return _meleeWeapon != nullptr;
 }
 
-void AFPPlayer::PickupMeleeWeapon(ABaseWeapon* meleeWeapon)
+void AFPPlayer::PickupMeleeWeapon(ABaseWeapon* i_MeleeWeapon)
 {
 	if (_meleeWeapon != nullptr)
 	{
@@ -1174,7 +1280,7 @@ void AFPPlayer::PickupMeleeWeapon(ABaseWeapon* meleeWeapon)
 		return;
 	}
 
-	_meleeWeapon = meleeWeapon;
+	_meleeWeapon = i_MeleeWeapon;
 	ChangeCurrentWeapon(EPlayerWeapon::Melee);
 
 	const FAttachmentTransformRules attachmentRules = FAttachmentTransformRules(EAttachmentRule::SnapToTarget,
@@ -1219,10 +1325,32 @@ void AFPPlayer::ApplyWeaponChangesToCharacter() const
 	}
 }
 
+void AFPPlayer::Client_HandleMeleeSelected()
+{
+	Server_HandleMeleeSelected();
+	HandleMeleeSelected();
+}
+
+void AFPPlayer::Server_HandleMeleeSelected_Implementation()
+{
+	HandleMeleeSelected();
+}
+
 void AFPPlayer::HandleMeleeSelected()
 {
 	ChangeCurrentWeapon(EPlayerWeapon::Melee);
 	ApplyWeaponChangesToCharacter();
+}
+
+void AFPPlayer::Client_HandlePrimarySelected()
+{
+	Server_HandlePrimarySelected();
+	HandlePrimarySelected();
+}
+
+void AFPPlayer::Server_HandlePrimarySelected_Implementation()
+{
+	HandlePrimarySelected();
 }
 
 void AFPPlayer::HandlePrimarySelected()
@@ -1234,6 +1362,17 @@ void AFPPlayer::HandlePrimarySelected()
 	}
 }
 
+void AFPPlayer::Client_HandleSecondarySelected()
+{
+	Server_HandleSecondarySelected();
+	HandleSecondarySelected();
+}
+
+void AFPPlayer::Server_HandleSecondarySelected_Implementation()
+{
+	HandleSecondarySelected();
+}
+
 void AFPPlayer::HandleSecondarySelected()
 {
 	if (HasSecondaryWeapon())
@@ -1243,7 +1382,12 @@ void AFPPlayer::HandleSecondarySelected()
 	}
 }
 
-void AFPPlayer::HandlePlayerPinged() const
+void AFPPlayer::Client_HandlePlayerPinged()
+{
+	Server_HandlePlayerPinged();
+}
+
+void AFPPlayer::Server_HandlePlayerPinged_Implementation()
 {
 	FVector startingPoint = CharacterCamera->GetComponentLocation();
 	FVector forwardVector = CharacterCamera->GetForwardVector();
@@ -1275,6 +1419,61 @@ void AFPPlayer::HandlePlayerPinged() const
 	}
 }
 
+void AFPPlayer::WallClimbCheck(float DeltaTime)
+{
+	// FHitResult hitResult;
+	// FCollisionQueryParams collisionParams;
+	// collisionParams.AddIgnoredActor(this);
+	//
+	// FVector startPosition = GetActorLocation();
+	// FVector endPosition = WallCheckPoint->GetComponentLocation();
+	//
+	// bool hit = GetWorld()->LineTraceSingleByChannel(hitResult, startPosition, endPosition, ECollisionChannel::ECC_Visibility, collisionParams);
+	// if (hit && hitResult.GetActor() != nullptr && !hitResult.GetActor()->ActorHasTag(NotClimbableTag))
+	// {
+	// 	auto playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	// 	FKey key = EKeys::SpaceBar;
+	//
+	// 	float duration = playerController->GetInputKeyTimeDown(key); // TODO: Change this when custom input is added...
+	// 	if (duration != 0)
+	// 	{
+	// 		_currentClimbTime += DeltaTime;
+	// 		if (_currentClimbTime <= ClimbDuration)
+	// 		{
+	// 			_isClimbing = true;
+	// 			LaunchCharacter(FVector(0, 0, ClimbVelocity), true, true);
+	// 		}
+	// 		else if (_isOnGround)
+	// 		{
+	// 			_isClimbing = false;
+	// 			_currentClimbTime = 0;
+	// 		}
+	// 	}
+	// 	else
+	// 	{
+	// 		_isClimbing = false;
+	// 		_currentClimbTime = 0;
+	// 	}
+	// }
+	// else
+	// {
+	// 	_isClimbing = false;
+	// 	_currentClimbTime = 0;
+	// }
+	//
+	// // So that when climbing the jump state is not pushed
+	// if (_isClimbing)
+	// {
+	// 	RemovePlayerMovementState(EPlayerMovementState::Jump);
+	// 	RemovePlayerMovementState(EPlayerMovementState::RunJump);
+	// }
+}
+
+bool AFPPlayer::IsClimbing()
+{
+	return _isClimbing;
+}
+
 void AFPPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -1284,4 +1483,7 @@ void AFPPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetim
 	DOREPLIFETIME(AFPPlayer, _horizontalInput);
 	DOREPLIFETIME(AFPPlayer, _isClimbing);
 	DOREPLIFETIME(AFPPlayer, _currentWeapon);
+	DOREPLIFETIME(AFPPlayer, _meleeWeapon);
+	DOREPLIFETIME(AFPPlayer, _primaryWeapon);
+	DOREPLIFETIME(AFPPlayer, _secondaryWeapon);
 }

@@ -5,17 +5,12 @@
 
 UDefenceBuffBaseComp::UDefenceBuffBaseComp()
 {
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 }
 
 void UDefenceBuffBaseComp::BeginPlay()
 {
 	Super::BeginPlay();
-}
-
-void UDefenceBuffBaseComp::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
 int UDefenceBuffBaseComp::TakeDamage(int damageAmount)

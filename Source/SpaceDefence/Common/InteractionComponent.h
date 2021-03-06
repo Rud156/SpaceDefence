@@ -37,7 +37,6 @@ public:
 #pragma endregion
 
 	UInteractionComponent();
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	bool InteractionUpdate(float deltaTime);
 
 	EInteractibleType GetInteractibleType();

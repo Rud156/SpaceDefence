@@ -2,20 +2,16 @@
 
 
 #include "InteractionComponent.h"
+#include "Net/UnrealNetwork.h"
 
 UInteractionComponent::UInteractionComponent()
 {
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 }
 
 void UInteractionComponent::BeginPlay()
 {
 	Super::BeginPlay();
-}
-
-void UInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
 bool UInteractionComponent::InteractionUpdate(float deltaTime)

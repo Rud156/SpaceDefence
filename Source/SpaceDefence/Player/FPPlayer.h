@@ -27,8 +27,20 @@ class SPACEDEFENCE_API AFPPlayer : public ACharacter
 private:
 	const float RECOIL_CAMERA_DELAY = 0.05f;
 
-	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
-	class USceneComponent* GroundCheckPoint;
+	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class USpringArmComponent* CameraBoom;
+
+	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	class UCameraComponent* CharacterCamera;
+
+	UPROPERTY(Category = Mesh, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class USceneComponent* CameraLeftHandView;
+
+	UPROPERTY(Category = Mesh, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class USceneComponent* CameraRightHandView;
+
+	UPROPERTY(Category = PlayerHealth, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class UHealthAndDamageComp* HealthAndDamage;
 
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly)
 	class USceneComponent* WallCheckPoint;
@@ -39,25 +51,20 @@ private:
 	UPROPERTY(Category = Weapon, VisibleDefaultsOnly)
 	class USceneComponent* WeaponAttachPoint;
 
-	// Top Level Initialization for MultiPlayer
-	bool _initialized;
-
-	float _slideTimer;
 	bool IsInFastMovementState();
-	void PushPlayerMovementState(EPlayerMovementState movementState);
-	void RemovePlayerMovementState(EPlayerMovementState movementState);
-	bool HasPlayerState(EPlayerMovementState movementState);
+	void PushPlayerMovementState(EPlayerMovementState MovementState);
+	void RemovePlayerMovementState(EPlayerMovementState MovementState);
+	bool HasPlayerState(EPlayerMovementState MovementState);
 	void ApplyChangesToCharacter();
-	void UpdateLeftRightHandPosition() const;
 
 	FVector2D _capsuleRadius; // X: Target, Y: Current
 	FVector2D _capsuleHeight; // X: Target, Y: Current
 	float _capsuleLerpAmount;
-	void SetCapsuleData(float targetHeight, float targetRadius);
-	void UpdateCapsuleSize(float deltaTime);
+	void SetCapsuleData(float TargetHeight, float TargetRadius);
+	void UpdateCapsuleSize(float DeltaTime);
 
 	float _currentClimbTime;
-	void WallClimbCheck(float deltaTime);
+	void WallClimbCheck(float DeltaTime);
 
 	UFUNCTION()
 	void FrameDelayedJump();
@@ -67,7 +74,8 @@ private:
 	UFUNCTION()
 	void PlayerLanded();
 
-	void UpdateCharacterSliding(float deltaTime);
+	float _slideTimer;
+	void UpdateCharacterSliding(float DeltaTime);
 	void StopCharacterSliding();
 
 	bool _firePressed;
@@ -77,45 +85,29 @@ private:
 	FVector _adsStartPosition;
 	FVector _adsEndPosition;
 	float _adsLerpAmount;
-	void FireUpdate(float deltaTime);
-	void UpdateRecoilRotation(float deltaTime);
-	void UpdateADSWeaponPoint(float deltaTime);
-	void SetRecoilCameraPosition(FRecoilOffset recoilOffset, int maxRecoilCount);
-	void SpawnWeaponProjectile(TSubclassOf<class AActor> projectile, FVector spawnPoint) const;
+	void FireUpdate(float DeltaTime);
+	void UpdateRecoilRotation(float DeltaTime);
+	void UpdateADSWeaponPoint(float DeltaTime);
+	void SetRecoilCameraPosition(FRecoilOffset RecoilOffset, int MaxRecoilCount);
+	void SpawnWeaponProjectile(TSubclassOf<class AActor> Projectile, FVector SpawnPoint) const;
+
 	UFUNCTION()
-	void DelayedCameraMovement(ABaseWeapon* baseWeapon, FRecoilOffset recoilOffset, int maxRecoilCount);
+	void DelayedCameraMovement(ABaseWeapon* BaseWeapon, FRecoilOffset RecoilOffset, int MaxRecoilCount);
+	void UpdateLeftRightHandPosition() const;
 
 	UInteractionComponent* _currentInteractionComponent;
-	void UpdateInteractibleCollection(float deltaTime);
+	void UpdateInteractibleCollection(float DeltaTime);
 	void ClearInteractableObject();
 
-	ABaseWeapon* _meleeWeapon;
-	ABaseWeapon* _primaryWeapon;
-	ABaseWeapon* _secondaryWeapon;
-	void PickupWeapon(ABaseWeapon* weapon);
-	void ChangeCurrentWeapon(EPlayerWeapon weapon);
+	void PickupWeapon(ABaseWeapon* Weapon);
+	void ChangeCurrentWeapon(EPlayerWeapon Weapon);
 	void ApplyWeaponChangesToCharacter() const;
 
 protected:
-	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly)
-	class USpringArmComponent* CameraBoom;
-
-	UPROPERTY(Category = Mesh, VisibleDefaultsOnly, BlueprintReadOnly)
-	class USceneComponent* CameraLeftHandView;
-
-	UPROPERTY(Category = Mesh, VisibleDefaultsOnly, BlueprintReadOnly)
-	class USceneComponent* CameraRightHandView;
-
-	UPROPERTY(Category = PlayerHealth, VisibleAnywhere, BlueprintReadOnly)
-	class UHealthAndDamageComp* HealthAndDamage;
-
 	virtual void BeginPlay() override;
 
 public:
 #pragma region Parameters
-
-	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadWrite)
-	class UCameraComponent* CharacterCamera;
 
 	UPROPERTY(Replicated)
 	TArray<EPlayerMovementState> _movementStack;
@@ -127,6 +119,12 @@ public:
 	bool _isClimbing;
 	UPROPERTY(Replicated)
 	EPlayerWeapon _currentWeapon;
+	UPROPERTY(Replicated)
+	ABaseWeapon* _meleeWeapon;
+	UPROPERTY(Replicated)
+	ABaseWeapon* _primaryWeapon;
+	UPROPERTY(Replicated)
+	ABaseWeapon* _secondaryWeapon;
 
 	UPROPERTY(Category = "Player|Movement", EditAnywhere)
 	float WalkSpeed;
@@ -169,9 +167,6 @@ public:
 
 	UPROPERTY(Category = "Player|Movement", EditAnywhere)
 	float VSensitivityMultiplier;
-
-	UPROPERTY(Category = "Player|Movement", EditAnywhere)
-	float GroundCheckDistance;
 
 	UPROPERTY(Category = "Player|Movement", EditAnywhere)
 	float FallVelocityThreshold;
@@ -251,32 +246,109 @@ public:
 
 #pragma region Inputs
 
-	void MoveForward(float value);
-	void MoveRight(float value);
-	void Turn(float value);
-	void LookUp(float value);
+	void Client_MoveForward(const float Value);
+	UFUNCTION(Server, Reliable)
+	void Server_MoveForward(const float Value);
+	void MoveForward(const float Value);
 
-	void CharacterJump();
-	void RunPressed();
-	void RunReleased();
-	void CrouchPressed();
-	void CrouchReleased();
-	void FirePressed();
-	void FireReleased();
+	void Client_MoveRight(const float Value);
+	UFUNCTION(Server, Reliable)
+	void Server_MoveRight(const float Value);
+	void MoveRight(const float Value);
+
+	void Client_Turn(const float Value);
+	UFUNCTION(Server, Reliable)
+	void Server_Turn(const float Value);
+	void Turn(const float Value);
+
+	void Client_LookUp(const float Value);
+	UFUNCTION(Server, Reliable)
+	void Server_LookUp(const float Value);
+	void LookUp(const float Value);
+
+	void Client_HandleJumpPressed();
+	UFUNCTION(Server, Reliable)
+	void Server_HandleJumpPressed();
+	void HandleJumpPressed();
+
+	void Client_HandleRunPressed();
+	UFUNCTION(Server, Reliable)
+	void Server_HandleRunPressed();
+	void HandleRunPressed();
+
+	void Client_HandleRunReleased();
+	UFUNCTION(Server, Reliable)
+	void Server_HandleRunReleased();
+	void HandleRunReleased();
+
+	void Client_HandleCrouchPressed();
+	UFUNCTION(Server, Reliable)
+	void Server_HandleCrouchPressed();
+	void HandleCrouchPressed();
+
+	void Client_HandleCrouchReleased();
+	UFUNCTION(Server, Reliable)
+	void Server_HandleCrouchReleased();
+	void HandleCrouchReleased();
+
+	void Client_HandleFirePressed();
+	UFUNCTION(Server, Reliable)
+	void Server_HandleFirePressed();
+	void HandleFirePressed();
+
+	void Client_HandleFireReleased();
+	UFUNCTION(Server, Reliable)
+	void Server_HandleFireReleased();
+	void HandleFireReleased();
+
+	void Client_HandleAltFirePressed();
+	UFUNCTION(Server, Reliable)
+	void Server_HandleAltFirePressed();
 	void HandleAltFirePressed();
+
+	void Client_HandleAltFireReleased();
+	UFUNCTION(Server, Reliable)
+	void Server_HandleAltFireReleased();
 	void HandleAltFireReleased();
-	void HandleInteractPressed() const;
+
+	void Client_HandleInteractPressed();
+	UFUNCTION(Server, Reliable)
+	void Server_HandleInteractPressed();
+	void HandleInteractPressed();
+
+	void Client_HandleInteractReleased();
+	UFUNCTION(Server, Reliable)
+	void Server_HandleInteractReleased();
 	void HandleInteractReleased();
+
+	void Client_HandleMeleeSelected();
+	UFUNCTION(Server, Reliable)
+	void Server_HandleMeleeSelected();
 	void HandleMeleeSelected();
+
+	void Client_HandlePrimarySelected();
+	UFUNCTION(Server, Reliable)
+	void Server_HandlePrimarySelected();
 	void HandlePrimarySelected();
+
+	void Client_HandleSecondarySelected();
+	UFUNCTION(Server, Reliable)
+	void Server_HandleSecondarySelected();
 	void HandleSecondarySelected();
-	void CheckAndDropWeapon();
-	void HandlePlayerPinged() const;
+
+	void Client_HandleCheckAndDropWeapon();
+	UFUNCTION(Server, Reliable)
+	void Server_HandleCheckAndDropWeapon();
+	void HandleCheckAndDropWeapons();
+
+	void Client_HandlePlayerPinged();
+	UFUNCTION(Server, Reliable)
+	void Server_HandlePlayerPinged();
 
 #pragma endregion
 
 	UFUNCTION(Category = "Debug", BlueprintImplementableEvent)
-	void MovementStatePushed(EPlayerMovementState playerMovementState);
+	void MovementStatePushed(EPlayerMovementState PlayerMovementState);
 	UFUNCTION(Category = "Player|MovementState", BlueprintImplementableEvent)
 	void PlayerJumped();
 	UFUNCTION(Category = "Player|MovementState", BlueprintImplementableEvent)
@@ -302,13 +374,13 @@ public:
 	void DisplayWeaponNotify(UTexture2D* WeaponTexture, int MagAmmo, int TotalAmmo, const FString& WeaponName, bool IsPrimary);
 
 	UFUNCTION(Category = "Player|IK", BlueprintCallable)
-	void IKFootTrace(FName socketName, float distance, FVector& outHitLocation, float& footTraceOffset);
+	void IKFootTrace(FName SocketName, float Distance, FVector& OutHitLocation, float& FootTraceOffset);
 
 	UFUNCTION(Category = "Player|Weapons", BlueprintCallable, BlueprintPure)
 	EPlayerWeapon GetCurrentWeapon();
 	UFUNCTION(Category = "Player|Weapons", BlueprintCallable, BlueprintPure)
 	ABaseWeapon* GetPrimaryWeapon();
-	void PickupPrimaryWeapon(ABaseWeapon* primaryWeapon);
+	void PickupPrimaryWeapon(ABaseWeapon* PrimaryWeapon);
 	ABaseWeapon* DropPrimaryWeapon();
 	UFUNCTION(Category = "Player|Weapons", BlueprintCallable, BlueprintPure)
 	bool HasPrimaryWeapon();
@@ -316,13 +388,13 @@ public:
 	ABaseWeapon* GetSecondaryWeapon();
 	UFUNCTION(Category = "Player|Weapons", BlueprintCallable, BlueprintPure)
 	bool HasSecondaryWeapon();
-	void PickupSecondaryWeapon(ABaseWeapon* secondaryWeapon);
+	void PickupSecondaryWeapon(ABaseWeapon* SecondaryWeapon);
 	ABaseWeapon* DropSecondaryWeapon();
 	UFUNCTION(Category = "Player|Weapons", BlueprintCallable, BlueprintPure)
 	ABaseWeapon* GetMeleeWeapon();
 	UFUNCTION(Category = "Player|Weapons", BlueprintCallable, BlueprintPure)
 	bool HasMeleeWeapon();
-	void PickupMeleeWeapon(ABaseWeapon* meleeWeapon);
+	void PickupMeleeWeapon(ABaseWeapon* i_MeleeWeapon);
 
 	UFUNCTION(Category = "Player|Input", BlueprintCallable, BlueprintPure)
 	float GetVerticalInput();
