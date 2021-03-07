@@ -23,4 +23,10 @@ public:
 	
 	UPROPERTY(Category = "References", BlueprintReadWrite)
 		class ATD_CurrencyManager* CurrencyManagerRef;
+
+	//UPROPERTY(VisibleAnywhere, Category = "References", BlueprintReadWrite)
+	//	class UUserWidget* InventoryBPRef;
+
+	UPROPERTY(Category = "References", BlueprintReadWrite)
+		class ATD_WaveController* WaveControllerRef;
 };

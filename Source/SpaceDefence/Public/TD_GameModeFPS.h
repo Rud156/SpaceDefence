@@ -12,15 +12,7 @@ class ATD_GameModeFPS : public AGameModeBase
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(VisibleAnywhere, Category = "References", BlueprintReadWrite)
-		class UUserWidget* InventoryBPRef;
+	
 
-	UPROPERTY(Category = "References", BlueprintReadWrite)
-		class UTD_MainHUD* MainHUDRef;
-
-	/*UPROPERTY(Category = "References", BlueprintReadWrite)
-		class ATD_CurrencyManager* CurrencyManagerRef;*/
-
-	UPROPERTY(Category = "References", BlueprintReadWrite)
-		class ATD_WaveController* WaveControllerRef;
+	
 };
