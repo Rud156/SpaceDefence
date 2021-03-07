@@ -35,7 +35,6 @@ void ATD_PlaceablesActors::BeginPlay()
 	GameMode = GetWorld()->GetAuthGameMode();
 	GameSate = Cast<ATD_GameStateBase>(GetWorld()->GetGameState());
 	//CurrencyManager = Cast<ATD_GameModeFPS>(GameMode)->CurrencyManagerRef;
-	CurrencyManager = (GameSate)->CurrencyManagerRef;
 	if (Model->GetStaticMesh())
 	{
 
@@ -96,10 +95,11 @@ void ATD_PlaceablesActors::RemoveActor(AActor* Actor)
 	if (GameMode)
 	{
 		bIsAlive = false;
-		if (CurrencyManager)
+		//TODO fix here
+		/*if (CurrencyManager)
 		{
 			CurrencyManager->AddCurrency(GetDestructionCost());
-		}
+		}*/
 
 	}
 	this->Destroy();

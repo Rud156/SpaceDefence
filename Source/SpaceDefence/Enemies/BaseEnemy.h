@@ -75,7 +75,6 @@ public:
 	UPROPERTY(Category = "Enemy|AI Settings", VisibleAnywhere, BlueprintReadWrite)
 		TArray<AFPPlayer*> ListOfCurrentTargetAblePlayers;
 
-	ATD_CurrencyManager* CurrencyManagerRef = nullptr;
 
 	UFUNCTION(BlueprintCallable)
 		void RemoveCurrentAttackItem() { if (CurrentAttackingItem)CurrentAttackingItem->RemoveMaxEnemiesAttackingCount(); CurrentAttackingItem = nullptr; }

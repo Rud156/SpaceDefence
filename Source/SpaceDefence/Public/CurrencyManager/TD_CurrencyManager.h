@@ -6,14 +6,14 @@
 #include "GameFramework/Actor.h"
 #include "TD_CurrencyManager.generated.h"
 
-UCLASS()
-class SPACEDEFENCE_API ATD_CurrencyManager : public AActor
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
+class SPACEDEFENCE_API UTD_CurrencyManager : public UActorComponent
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	ATD_CurrencyManager();
+	UTD_CurrencyManager();
 
 protected:
 	// Called when the game starts or when spawned
@@ -21,7 +21,7 @@ protected:
 
 public:	
 	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 
 	//Game Play variables.

@@ -4,28 +4,28 @@
 #include "SpaceDefence/Public/CurrencyManager/TD_CurrencyManager.h"
 
 // Sets default values
-ATD_CurrencyManager::ATD_CurrencyManager()
+UTD_CurrencyManager::UTD_CurrencyManager()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = true;
 
 }
 
 // Called when the game starts or when spawned
-void ATD_CurrencyManager::BeginPlay()
+void UTD_CurrencyManager::BeginPlay()
 {
 	Super::BeginPlay();
 	
 }
 
-// Called every frame
-void ATD_CurrencyManager::Tick(float DeltaTime)
+void UTD_CurrencyManager::TickComponent(float DeltaTime, ELevelTick TickType,
+	FActorComponentTickFunction* ThisTickFunction)
 {
-	Super::Tick(DeltaTime);
-
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
-bool ATD_CurrencyManager::HasCurrency(const int PlaceAbleActorCurrency)
+
+bool UTD_CurrencyManager::HasCurrency(const int PlaceAbleActorCurrency)
 {
 	if(PlaceAbleActorCurrency>0)
 	{
@@ -35,7 +35,7 @@ bool ATD_CurrencyManager::HasCurrency(const int PlaceAbleActorCurrency)
 	return false;
 }
 
-void ATD_CurrencyManager::AddCurrency(int Amount)
+void UTD_CurrencyManager::AddCurrency(int Amount)
 {
 	if(Amount>0)
 	{
@@ -43,7 +43,7 @@ void ATD_CurrencyManager::AddCurrency(int Amount)
 	}
 }
 
-void ATD_CurrencyManager::RemoveCurrency(int PlaceAbleActorCurrency)
+void UTD_CurrencyManager::RemoveCurrency(int PlaceAbleActorCurrency)
 {
 	if(HasCurrency(PlaceAbleActorCurrency))
 	{

@@ -60,7 +60,6 @@ void ABaseEnemy::BeginPlay()
 
 	float InitalTime = FMath::RandRange(1.0f, 10.0f);
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ABaseEnemy::PlayRandomSoundWhenMoving, InitalTime, false);
-	CurrencyManagerRef = Cast<ATD_GameStateBase>(GetWorld()->GetGameState())->CurrencyManagerRef;
 	//CurrencyManagerRef = Cast<ATD_GameModeFPS>(GetWorld()->GetAuthGameMode())->CurrencyManagerRef;
 }
 

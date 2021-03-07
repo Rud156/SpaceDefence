@@ -109,7 +109,7 @@ public:
 
 
 private:
-	ATD_CurrencyManager* CurrencyRef;
+
 	ATD_GameStateBase* GameState = nullptr;
 	int GetCostFromID(int PlaceAbleID);
 };

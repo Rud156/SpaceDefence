@@ -77,7 +77,8 @@ void ATD_CreepyEnemy::Death(AActor* Actor)
 {
 	CurrentAnimationState = ECreepyAnimState::Dead;
 	bIsAlive = false;
-	CurrencyManagerRef->AddCurrency(AmountToGive);
+	////TODO fix here
+	//CurrencyManagerRef->AddCurrency(AmountToGive);
 	GetWorld()->GetTimerManager().SetTimer(DeathTimerHandle, this, &ATD_CreepyEnemy::RemoveDeadBody, DeadBodyTimer, false, -1);
 }
 

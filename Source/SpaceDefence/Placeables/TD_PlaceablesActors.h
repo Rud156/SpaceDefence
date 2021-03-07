@@ -68,7 +68,6 @@ private:
 	bool bIsAlive = true;
 	AGameModeBase* GameMode = nullptr;
 	ATD_GameStateBase* GameSate = nullptr;
-	ATD_CurrencyManager* CurrencyManager = nullptr;
 	float CurrentEnemiesAttackingCount = 0;
 	
 	void CheckIfAlive();
